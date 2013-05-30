@@ -6,11 +6,11 @@
 
 ;; Scheme implementation for the ai-array intermediate language output.
 
-(define (ai-array/scheme expr)
+(define (ai-array/scheme program)
+  (void))
 
 ;; Compiler driver.
 (define (ai-array-scheme program
                          #:nsi (nsi 0))   ;; Default: no inputs are streams
   (ai-array/scheme
-   (ai-array program
-             #:out-base Float)))
+   (ai-array program)))

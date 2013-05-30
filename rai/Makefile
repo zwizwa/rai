@@ -1,6 +1,7 @@
 .DELETE_ON_ERROR:
 
 ALL := \
+	ai-array-scheme.rkt.run \
 	test-delay.rkt.run \
 	test-map.rkt.run \
 	test-type.rkt.run \

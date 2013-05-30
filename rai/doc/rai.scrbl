@@ -12,6 +12,8 @@ in Scheme.
 
 @verbatim{
 
+raco pkg install github://github.com/zwizwa/rai/master
+
 NOTE:
 
 This project is still fairly experimental.  The package isn't uploaded
