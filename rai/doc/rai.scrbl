@@ -118,6 +118,7 @@ that of @hyperlink["http://faust.grame.fr" "Faust"].
 @$[values]
 ...
 }
+@item{Conditional Choice: @$[<]}
 @item{Standard Scheme forms for @emph{unrolled} Metaprogramming}
 ]
 
@@ -158,6 +159,12 @@ computes the accumulated array.
 }|
 
 
+
+@subsection{Conditional Choice}
+
+There is currently no support for conditional code paths, only
+conditional data selection.  This means the language semantics can be
+lifted in a straightforward way over SIMD vectors.
 
 @section{Causal Stream Operations}
 
@@ -237,6 +244,31 @@ construction of an updated delay state to the shift operation.
              to-delay)))            ;; output
 }|
 
+@subsection{Control-rate operators}
+
+The @$[hold] and @$[setup] operators implement a limited form of
+subsampling, addressing very specific need in the target domain of
+audio DSP.  In the future subsampling could be implemented in a more
+general way.
+
+The subsampling factor is determined by the @emph{block rate} of the
+system, meaning the number of audio samples processed in a single
+block for the VST, Pd and Jack interfaces.
+
+The @$[hold] operator is a @emph{sample and hold} operator.  It will
+sample a value at the first time instance of a sample block and hold
+it for subsequent samples.  The @$[setup] operator is similar, in that
+it will pass through its first argument at the first time instance,
+and its second argument at any other.
+
+The combination of both allows the implementation of per-block
+computations, e.g. the computation of an expensive function evaluation
+running at control rate, driving a cheaper interpolation scheme
+running at audio rate.  A good example of this is the computation of
+@emph{log scale} control parameters in a sound synthesizer or effect,
+such as frequency or volume controls.  These controls are expensive to
+compute compared to e.g. digital filters, but they do not need very
+high bandwidth so can run at a lower rate.
 
 
 @section{Unrolled Metaprogramming}
