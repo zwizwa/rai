@@ -9,21 +9,11 @@
 RAI makes it possible to write VST/VSTi, Pd, and Jack Audio DSP code
 in Scheme.
 
-
+To install, run the following command.  See the Racket
+@hyperlink["http://docs.racket-lang.org/pkg/" "package manager"]
+documentation for more information.
 @verbatim{
-
 raco pkg install github://github.com/zwizwa/rai/master
-
-NOTE:
-
-This project is still fairly experimental.  The package isn't uploaded
-to PLaneT yet.  On Linux, to make the planet references work, do the
-following:
-
-darcs get http://zwizwa.be/darcs/meta
-cd meta/rai
-make planet-link
-
 }
 
 
@@ -36,7 +26,7 @@ generation system built around a domain specific language (DSL).
 The DSL is a purely functional dataflow language aimed at
 describing digital signal processing (DSP) algorithms, and is embedded
 in the @hyperlink["http://racket-lang.org" "Racket"] programming
-language as @codeblock|{#lang s-exp (planet zwizwa/rai/stream)}|
+language as @codeblock|{#lang s-exp rai/stream}|
 
 The system allows for multiple abstract interpretations (AI) of
 programs expressed in the DSL.  Some interpretations included are
@@ -135,7 +125,7 @@ that of @hyperlink["http://faust.grame.fr" "Faust"].
 
 Composing functions is the same as in Scheme:
 @codeblock|{
-#lang s-exp (planet zwizwa/rai/stream)
+#lang s-exp rai/stream
 (define (square x)
   (* x x))
 (define (cube x)
@@ -153,7 +143,7 @@ As an illustration consider a program that takes an input array and
 computes the accumulated array.
 
 @codeblock|{
-#lang s-exp (planet zwizwa/rai/stream)
+#lang s-exp rai/stream
 (define (sum xs)
   (let-values*
      (((accu-out array-out)  ;; accumulators and output arrays
@@ -193,7 +183,7 @@ Here is how to express a discrete integrator using the special
 @$[define] form.
 
 @codeblock|{
-#lang s-exp (planet zwizwa/rai/stream)
+#lang s-exp rai/stream
 (define (integrator (s) (x))
   (let ((sum (+ s x)))
      (values sum     ;; state update
@@ -218,7 +208,7 @@ In music DSP applications, a frequently used form of output feedback
 system is the @emph{delay line}.  An example of such a system would be
 
 @codeblock|{
-#lang s-exp (planet zwizwa/rai/stream)
+#lang s-exp rai/stream
 (define (delay (s0 s1 s2 s3) (x))
   (let* ((from-delay s3)
          (to-delay (+ x (* 1/2 from-delay))))
@@ -239,7 +229,7 @@ abstract the delay line state as an indexable array, and to limit the
 construction of an updated delay state to the shift operation.
 
 @codeblock|{
-#lang s-exp (planet zwizwa/rai/stream)
+#lang s-exp rai/stream
 (define (delay (s) (x))
   (let* ((from-delay (dl-ref s 3))  ;; delay state vector indexed read
          (to-delay (+ x (* 1/2 from-delay))))
@@ -300,10 +290,9 @@ produces a C syntax file containing a C function, structure
 definitions for input, output and state, and preprocessor macros that
 abstract meta data to facilitate integration in a C host framework.
 
-@;defmodule[(planet zwizwa/rai/demo)]
 
 @interaction[
-(module test (planet zwizwa/rai/stream)
+(module test rai/stream
   (provide svf integrator)
   (define (integrator (s) (x))
     (let ((s (+ s x)))
@@ -318,7 +307,7 @@ abstract meta data to facilitate integration in a C host framework.
 
 (require 'test)
 
-(require (planet zwizwa/rai/ai-freq))
+(require rai/ai-freq)
 (require plot)
 (define (plot-filter f)
   (parameterize
@@ -333,7 +322,7 @@ abstract meta data to facilitate integration in a C host framework.
 (plot-filter integrator)
 (plot-filter svf)
 
-(require (planet zwizwa/rai/ai-array-c))
+(require rai/ai-array-c)
 (display (ai-array-c svf #:nsi 1))
 ]
 
