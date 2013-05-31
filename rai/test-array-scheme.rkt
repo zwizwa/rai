@@ -10,10 +10,5 @@
   "stream-lib.rkt"
   "test-lang.rkt"))
 
-(define (test)
-  (define-values
-    (loop si so i p o)
-    (ai-array-scheme nphasor))
-  loop)
 
     
