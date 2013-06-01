@@ -170,12 +170,21 @@ computes the accumulated array.
 
 
 
-@subsection{Conditionals}
+@subsection{Conditional}
 
-There is no support for conditional code paths.  Choice is limited to
-conditional data selection.  This allows the language semantics to be
-mapped to data-parallel processing such as CPU SIMD instructions or
-GPU shaders.
+Since the language is pure, the @$[if] operator is a function, and
+there is a lot of freedom on how to implement it.
+
+In the low-level implementation used in C code generation, the
+computations in both branches are executed.  Only the resulting value
+is selected based on the condition.  This approach allows the language
+semantics to be mapped to data-parallel processing such as CPU SIMD
+instructions or GPU shaders.
+
+Note that this choice prevents the use of direct recursion in the DSL.
+Recursion is currently not prevented, and will cause infinite loops.
+For the application domain, the need for recursion is mostly
+eliminated by the presence of the @$[loop] construct.
 
 @section{Causal Stream Operations}
 
