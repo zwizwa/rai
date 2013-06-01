@@ -8,7 +8,7 @@ ALL := \
 	test-type.rkt.run \
 	test-ai-array.rkt.run \
 	test-ai-stream.rkt.run \
-	main_sp_host.elf \
+	sp_host.elf \
 	test-ai-taylor.rkt.run \
 	test-series.rkt.run \
 	test-ai-autodiff.rkt.run \

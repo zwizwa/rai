@@ -371,6 +371,31 @@ abstract meta data to facilitate integration in a C host framework.
 ]
 
 
+@section{Integrating C code}
+
+See the included @filepath{Makefile} and @filepath{rules.mk} files for
+an example of how to integrate generated C code in a host environment.
+
+The following C/C++ files are combined with a generated header
+identfied by a @filepath{.g.h} extension to produce a binary output.
+
+@verbatim{
+main_vst.cpp     Steinberg VST API v2.4
+main_pd.c        Pure Data external
+main_jack.c      Standalone Jack Audio (Linux) application
+main_sp.c        SP binary module (see also sp.ld)
+main_test.c      Stand-alone (Linux) test application
+}
+
+These files use the C preprocessor info and enumeration macros in the
+generated C file to construct data or code representations containing
+metadata for the target platform.
+
+The SP module format is an ad-hoc run-time loadable binary format
+replacing the native dynamic library format.  It is intended mainly
+for testing purposes. 
+
+
 @section{TODO / Known Issues}
 @itemize[
 

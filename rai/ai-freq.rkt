@@ -46,7 +46,6 @@
 (define (!z x)
   (not (ai-z? x)))
 
-
 (define (ai-freq program)
         
 
@@ -242,14 +241,21 @@
     (define (nonlinear tag args)
       (error 'ai-freq:nonlinear (format "~a ~a" tag args)))
 
+    ;; For add/sub/compare, non-signal parameters need to be lifted to
+    ;; 0-amplitude offset signals.
+    (define (offset->signal o)
+      (ai-freq-make-signal #:offset o #:amplitude 0))
+    
     (define (f-add/sub op)
       (match-lambda*
        ((list _ (struct ai-z (a0 a)) (struct ai-z (b0 b)))
         (make-ai-z (op a0 b0) (lambda (z) (op (a z) (b z)))))
        ((list _ (? !z a) (? !z b))
         (op a b))
-       (args
-        (nonlinear 'add/sub args))))
+       ((list sem a (? !z b)) ((f-add/sub op) sem a (offset->signal b)))
+       ((list sem (? !z a) b) ((f-add/sub op) sem (offset->signal a) b))
+       ))
+
     (define f-add (f-add/sub +))
     (define f-sub (f-add/sub -))
     
@@ -301,24 +307,20 @@
              ;; params or ai-z parent just passes value
              a b))))
 
-    ;; Comparisons are special in that they do not have a small-signal
-    ;; meaning.  This used to be worked around by combining it with
-    ;; choice.  FIXME: Check if below implementation is meaningful.
-    
+  
     (define f-lt
       (match-lambda*
-       ;; 2 signals -> map to 1 signal and 0.
+       ;; 2 signals: output is an offset zero-amplitude signal.
        ((list sem (? ai-z? a) (? ai-z? b))
-        (f-lt sem (f-sub sem a b) (lit 0)))
+        (offset->signal (lt (offset a) (offset b))))
 
        ;; 2 parameters -> just compute
-       ((list _ (? !z a) (? !z b))
-        (lt a b))
-
-       ;; FIXME: probably not correct.
-       ((list _ a b)
-        (lt (offset a) (offset b)))))
-
+       ((list _ (? !z a) (? !z b)) (lt a b))
+       
+       ;; If one is a signal, lift the other to signal and retry.
+       ((list sem a (? ai-z? b)) (f-lt sem a (offset->signal b)))
+       ((list sem (? ai-z? a) b) (f-lt sem (offset->signal a) b))
+       ))
     
        
     ;; Feedback is special, all the rest inherits from other semantics.

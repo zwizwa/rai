@@ -27,7 +27,10 @@
 
 /* RAI */
 
-#define restrict // FIXME: ?? problem in C++ ?
+/* C++ doesn't define the restrict keyword.  Instead of ignoring it,
+   iIt's probably best to compile the code body as a C file, and link
+   it with the main C++ file. */
+#define restrict
 
 extern "C" {
 #include "prim.h"
@@ -209,9 +212,11 @@ void Plugin :: processReplacing  (float **in0, float **out0, VstInt32 total) {
     int event  = 0;  // index into event array
 
 
-    /* Run processor internal loop at fixed control rate to keep it
-       simpler.  Before running, process all events related to next
-       control block. */
+    /* Run processor internal loop at fixed control rate.  Before
+       running, process all events related to next control block.
+
+       A fixed inner block size reduces event time resolution, but
+       improves code as there is more room for optimization. */
 
     // LOG("loop %d\n", total);
     while (offset < total) {

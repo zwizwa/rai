@@ -13,6 +13,26 @@
  "test_pd.rkt"
  )
 
+(module test-progs "stream.rkt"
+ (require "stream-lib.rkt"
+          "stream-meta.rkt")
+ (provide (all-defined-out))
+ 
+ (define (test-if< x)
+   (let* ((x (z^-1 x))
+          (x (+ 1 x)))
+     (if (< x (+ x 1))
+         (* 2 x)
+         (* 3 x))))
+
+ (define (test-id x)
+   x)
+ )
+
+(require 'test-progs)
+ 
+
+
 ;; (define L (make-ai-z (lambda (z) z)))
 
 (define z.1 (make-polar 1 .1))
@@ -36,6 +56,10 @@ zzo
 
 ((ai-spectrum test-svf) .1)
 
+;;((ai-ztx test-id) z.1)
+
+(display "***\n")
+((ai-ztx test-if<) z.1)
 
 ;; (ai-freq z)
 
