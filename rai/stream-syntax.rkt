@@ -281,6 +281,8 @@
     (and 2)
     (or  2)
     (xor 2)
+    (not 1)
+    
     (mod 2)
     (floor 1)        ;; integer s.t. 0 <= x - floor(x) <= 1  (not "< 1" !!!)
     (sin 1)

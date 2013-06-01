@@ -101,11 +101,22 @@ that of @hyperlink["http://faust.grame.fr" "Faust"].
 @$[-]
 @$[*]
 @$[/]
+@$[mod]
+@$[^]
+@$[floor]
 @$[sin]
 @$[cos]
 @$[exp]
 @$[log]
-...
+@$[atan]
+}
+@item{Bitwize logic operations
+@$[and]
+@$[or]
+@$[xor]
+@$[not]
+}
+@item{Predicates: @$[<]
 }
 @item{Finite array traversal with accumulator and array output: @$[loop]}
 @item{Scheme language forms:
@@ -116,9 +127,8 @@ that of @hyperlink["http://faust.grame.fr" "Faust"].
 @$[let-values]
 @$[let*-values]
 @$[values]
-...
 }
-@item{Conditional Choice: @$[<]}
+@item{Conditional: @$[?]}
 @item{Standard Scheme forms for @emph{unrolled} Metaprogramming}
 ]
 
@@ -160,11 +170,12 @@ computes the accumulated array.
 
 
 
-@subsection{Conditional Choice}
+@subsection{Conditionals}
 
-There is no support for conditional code paths.  All choice is limited
-to conditional data selection.  This means the language semantics can
-be lifted in a straightforward way over SIMD vectors.
+There is no support for conditional code paths.  Choice is limited to
+conditional data selection.  This allows the language semantics to be
+mapped to data-parallel processing such as CPU SIMD instructions or
+GPU shaders.
 
 @section{Causal Stream Operations}
 
@@ -266,9 +277,8 @@ computations, e.g. the computation of an expensive function evaluation
 running at control rate, driving a cheaper interpolation scheme
 running at audio rate.  A good example of this is the computation of
 @emph{log scale} control parameters in a sound synthesizer or effect,
-such as frequency or volume controls.  These controls are expensive to
-compute compared to e.g. digital filters, but they do not need very
-high bandwidth so can run at a lower rate.
+such as frequency or volume controls.
+
 
 
 @section{Unrolled Metaprogramming}
@@ -285,12 +295,13 @@ over arrays.  A good example of this is the way in which loop fusion
 is performed in the
 @hyperlink["http://dsl4dsp.inf.elte.hu/feldspar/index.html"
 "Feldspar"] language.  Such an approach requires a certain amount of
-trickery to be implemented.
+trickery to be implemented.  This is not yet possible in RAI.
 
-There is another way to perform powerful code generation when one
-drops to manipulation of scalar values, which relate to variable nodes
-in a generated program.  This approach could be called the generation
-of @emph{flat} or @emph{unrolled} code.
+Meanwhile, there is a simpler way to perform powerful code generation
+when one drops to manipulation of scalar values.  This uses a
+correspondence between values at the meta level and individual
+(scalar) variable nodes at the target program level. This approach
+could be called the generation of @emph{flat} or @emph{unrolled} code.
 
 The RAI language contains primitives for array construction and
 deconstruction that allows this form of flexible code generation to be
@@ -300,10 +311,11 @@ array unpacking is performed in the @$[map] operator.
 
 Keep in mind that while this can lead to efficient implementations if
 the unrolling exposes optimization opportunities, in general the
-unrolling can be quite inefficient concerning code size if it is
-applied to large collections of data.
-
-
+unrolling can introduce a lot of code duplication if it is applied to
+large collections of compile-time data.  When possible, it's probably
+good to stick to consecutive applications of the @$[loop] construct to
+implement multi-pass array algorithms, as this translates to
+target-side loops over arrays.
 
 
 @section{Examples}
@@ -362,17 +374,18 @@ abstract meta data to facilitate integration in a C host framework.
 @section{TODO / Known Issues}
 @itemize[
 
-@item{Boolean operators should be split into computation of condition
-as integer bitmasks, following the way it is implemented on most SIMD
-architectures.}
+@item{This project is in an experimental stage.  There are many holes
+in the implementation.  Also, the C code generator has gotten a bit
+quirky and needs a refactoring pass.  That said, RAI is being used for
+real work.}
 
-@item{State threading for delay lines do does not mix with the
-@$[loop] construct.  Fixing this requires a better understanding of
-how to mix constants appearing on two levels: in type
-parameterizations and code. }
+@item{State threading for delay lines does not mix with the @$[loop]
+construct.  Fixing this requires a better understanding of how to mix
+constants appearing on two levels: in type parameterizations and
+code. }
 
-@item{Clean up support for subsampling and block processing in the
-time dimension.}
+@item{Subsampling and block processing in the time dimension needs to
+be cleaned up and generalized.}
 
 ]
 
