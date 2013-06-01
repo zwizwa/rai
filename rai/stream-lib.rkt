@@ -45,8 +45,8 @@
 ;; These still operate on streams, but they can be projected down to
 ;; scalars ops and lifted back to streams without loosing information.
 
-(define (clipl x min)     (< x min min x))
-(define (clipu x max)     (< x max x max))
+(define (clipl x min)     (if< x min min x))
+(define (clipu x max)     (if< x max x max))
 (define (clip  x min max) (clipu (clipl x min) max))
 
 

@@ -53,7 +53,7 @@
   (ai-atan  atan)
   (ai-floor floor)
 
-  (ai-iflt  <)
+  (ai-iflt  if<)
   (ai-if    if)
   
   (ai-setup setup)
