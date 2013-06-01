@@ -52,7 +52,10 @@
   (ai-log   log)
   (ai-atan  atan)
   (ai-floor floor)
-  (ai-lt    <)
+
+  (ai-iflt  <)
+  (ai-if    if)
+  
   (ai-setup setup)
   (ai-hold  hold)
 

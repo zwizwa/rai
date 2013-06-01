@@ -217,7 +217,9 @@
              #:pow        (prim p_pow)
 
              #:floor      (prim p_floor)
-             #:lt         (prim p_lt)))
+             #:if         (prim p_if)
+             #:iflt       (prim p_iflt)
+             ))
   (lambda in
     (apply (ai-function-proc program)
            semantics in)))

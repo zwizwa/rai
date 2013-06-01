@@ -26,7 +26,9 @@
 
 (define (p_floor x) (floor x))
 
-(define (p_lt a b c d) (if (< a b) c d))
+(define (p_iflt a b c d) (if (< a b) c d))
+
+(define (p_if c a b) (if c a b))
 
 
 (define (p_exp x) (exp x))

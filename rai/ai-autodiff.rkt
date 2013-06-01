@@ -47,7 +47,8 @@
     (define cos (@ ai-cos))
     (define log (@ ai-log))
     (define pow (@ ai-pow))
-    (define lt  (@ ai-lt))
+    (define iflt(@ ai-iflt))
+    (define if_ (@ ai-if))       ;; don't override `if' here.
     (define lit (@ ai-literal))
 
     (define (lift-constant x)
@@ -76,12 +77,18 @@
                     (+ (* db e (pow b (- e 1)))
                        (* de (log b) b^e de))))))
 
-    (define d-lt
+    (define d-iflt
       (op
        ((a da) (b db) (x dx) (y dy))
-       (lt a b x y)
-       (lt a b dx dy)))
+       (iflt a b x  y)
+       (iflt a b dx dy)))
 
+    (define d-if
+      (op
+       ((c dc) (a da) (b db))
+       (if_ c a  b)
+       (if_ c da db)))
+    
     (define ai-dual-semantics
       ;;             Given value, deriv   compute value, deriv
       (make-ai #:add (op ((a da) (b db))  (+ a b)   (+ da db))
@@ -93,7 +100,9 @@
                #:cos (op ((x dx))         (cos x)   (* -1 (sin x) dx))
                #:log (op ((x dx))         (log x)   (pow x -1))
                #:pow d-pow
-               #:lt  d-lt
+
+               #:iflt    d-iflt
+               #:if      d-if
 
                #:literal (op ((x dx)) x dx)
                ))

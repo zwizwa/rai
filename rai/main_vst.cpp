@@ -20,9 +20,9 @@
 #include <string.h>
 #include <stdio.h>
 
-/* Software licence check */
-#ifdef   LICENCE
-#include LICENCE
+/* Software license check */
+#ifdef   LICENSE
+#include LICENSE
 #endif
 
 /* RAI */
@@ -156,7 +156,7 @@ Plugin :: Plugin(audioMasterCallback audioMaster, VstInt32 numPrograms, VstInt32
 #define VST_PARAM_INIT(_param, ...) state->param._param = 0.5;
     proc_for_control(VST_PARAM_INIT)
 
-#if defined(LICENCE)
+#if defined(LICENSE)
     int lic_ok = check_license();
 #if defined(proc_param_license)
     state->param.license = lic_ok;

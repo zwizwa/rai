@@ -82,8 +82,8 @@ CXXFLAGS := $(CFLAGS_BASE) $(CFLAGS_OPTI)
 CFLAGS_DLL  := $(CXXFLAGS) -I$(VST_DIR) -I$(VST_DIR)/public.sdk/source/vst2.x -mfpmath=sse -msse2
 LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 
-%.dll: %.g.h $(RAI)/main_vst.cpp $(LICENCE_DEPS) $(RAI)/win_debug.h
-	$(MINGW)g++ $(CFLAGS_DLL) $(LICENCE_CFLAGS) -DPROC_FILE=\"$<\" $(RAI)/main_vst.cpp $(LDFLAGS_DLL) -shared -o $@
+%.dll: %.g.h $(RAI)/main_vst.cpp $(LICENSE_DEPS) $(RAI)/win_debug.h
+	$(MINGW)g++ $(CFLAGS_DLL) $(LICENSE_CFLAGS) -DPROC_FILE=\"$<\" $(RAI)/main_vst.cpp $(LDFLAGS_DLL) -shared -o $@
 	$(MINGW)strip $@
 
 %.exe: %.c

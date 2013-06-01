@@ -162,9 +162,9 @@ computes the accumulated array.
 
 @subsection{Conditional Choice}
 
-There is currently no support for conditional code paths, only
-conditional data selection.  This means the language semantics can be
-lifted in a straightforward way over SIMD vectors.
+There is no support for conditional code paths.  All choice is limited
+to conditional data selection.  This means the language semantics can
+be lifted in a straightforward way over SIMD vectors.
 
 @section{Causal Stream Operations}
 
@@ -358,6 +358,23 @@ abstract meta data to facilitate integration in a C host framework.
 (display (ai-array-c svf #:nsi 1))
 ]
 
+
+@section{TODO / Known Issues}
+@itemize[
+
+@item{Boolean operators should be split into computation of condition
+as integer bitmasks, following the way it is implemented on most SIMD
+architectures.}
+
+@item{State threading for delay lines do does not mix with the
+@$[loop] construct.  Fixing this requires a better understanding of
+how to mix constants appearing on two levels: in type
+parameterizations and code. }
+
+@item{Clean up support for subsampling and block processing in the
+time dimension.}
+
+]
 
 
 @;References: Faust, FeldSpar, final-tagless

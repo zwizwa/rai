@@ -24,6 +24,12 @@
 ;;     - apply transfer function
 
 
+
+;; FIXME: Typical use is to compute the transfer function once and
+;; then evaluate it for different frequencies.  Currently, a matrix
+;; inversion is performed at each frequency.  It will be cheaper to
+;; compute the transfer function as a rational function coefficients.
+
 (define-struct ai-z (offset signal) #:transparent)
 
 ;; Fixed phase input signal.
@@ -64,7 +70,7 @@
     (define -     (p_op ai-sub))
     (define *     (p_op ai-mul))
     (define /     (p_op ai-div))
-    (define lt    (p_op ai-lt))
+    (define iflt  (p_op ai-iflt))
     (define lit   (p_op ai-literal))
     
     ;; Delegate matrix operations.
@@ -281,22 +287,22 @@
           ;; FIXME: Small-signal approximation
           (nonlinear 'pow `(,a ,n)))))))
     
-    (define f-lt
+    (define f-iflt
       (match-lambda*
        ;; 2 signals -> map to 1 signal and 0.
        ((list sem (? ai-z? a) (? ai-z? b) y n)
-        (f-lt sem (f-sub sem a b) (lit 0) y n))
+        (f-iflt sem (f-sub sem a b) (lit 0) y n))
        ;; 2 parameters -> just compute
        ((list sem (? !z a) (? !z b) y n)
-        (lt a b y n))
+        (iflt a b y n))
        
        ;; Small signal approximation: set the signal amplitude to 0
        ;; for signals occuring in the comparison.  Because of previous
        ;; clause we know that either a or b is a signal.
        ((list _ a b y n)
-        (lt (offset a) (offset b)
-             ;; params or ai-z parent just passes value
-             y n))))
+        (iflt (offset a) (offset b)
+              ;; params or ai-z parent just passes value
+              y n))))
     
        
     ;; Feedback is special, all the rest inherits from other semantics.
@@ -307,7 +313,7 @@
                #:sub        f-sub
                #:mul        f-mul
                #:div        f-div
-               #:lt         f-lt
+               #:iflt       f-iflt
                #:pow        f-pow
                #:default    (lambda (sym fn)
                               (lambda args

@@ -587,7 +587,8 @@
              #:atan       (e-prim 'p_atan  p_atan)
 
              #:floor      (e-prim 'p_floor p_floor)
-             #:lt         (e-prim 'p_lt    p_lt)
+             #:iflt       (e-prim 'p_iflt  p_iflt)
+             #:if         (e-prim 'p_if    p_if)
 
              #:debug      (e-prim 'p_debug p_debug)
 
