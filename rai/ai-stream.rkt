@@ -218,7 +218,7 @@
 
              #:floor      (prim p_floor)
              #:if         (prim p_if)
-             #:iflt       (prim p_iflt)
+             #:lt         (prim p_lt)
              ))
   (lambda in
     (apply (ai-function-proc program)

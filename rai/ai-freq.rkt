@@ -70,7 +70,8 @@
     (define -     (p_op ai-sub))
     (define *     (p_op ai-mul))
     (define /     (p_op ai-div))
-    (define iflt  (p_op ai-iflt))
+    (define lt    (p_op ai-lt))
+    (define if_   (p_op ai-if))  ;; Don't override Scheme `if' with DSL primitive.
     (define lit   (p_op ai-literal))
     
     ;; Delegate matrix operations.
@@ -286,23 +287,38 @@
          (else
           ;; FIXME: Small-signal approximation
           (nonlinear 'pow `(,a ,n)))))))
+
+
+    (define f-if ;; (c a b)
+      (match-lambda*
+       ;; condition is parameter -> just compute
+       ((list sem (? !z c) a b)
+        (if_ c a b))
+
+       ;; condition is signal: small-signal approx
+       ((list _ c a b)
+        (if_ (offset c) 
+             ;; params or ai-z parent just passes value
+             a b))))
+
+    ;; Comparisons are special in that they do not have a small-signal
+    ;; meaning.  This used to be worked around by combining it with
+    ;; choice.  FIXME: Check if below implementation is meaningful.
     
-    (define f-iflt
+    (define f-lt
       (match-lambda*
        ;; 2 signals -> map to 1 signal and 0.
-       ((list sem (? ai-z? a) (? ai-z? b) y n)
-        (f-iflt sem (f-sub sem a b) (lit 0) y n))
+       ((list sem (? ai-z? a) (? ai-z? b))
+        (f-lt sem (f-sub sem a b) (lit 0)))
+
        ;; 2 parameters -> just compute
-       ((list sem (? !z a) (? !z b) y n)
-        (iflt a b y n))
-       
-       ;; Small signal approximation: set the signal amplitude to 0
-       ;; for signals occuring in the comparison.  Because of previous
-       ;; clause we know that either a or b is a signal.
-       ((list _ a b y n)
-        (iflt (offset a) (offset b)
-              ;; params or ai-z parent just passes value
-              y n))))
+       ((list _ (? !z a) (? !z b))
+        (lt a b))
+
+       ;; FIXME: probably not correct.
+       ((list _ a b)
+        (lt (offset a) (offset b)))))
+
     
        
     ;; Feedback is special, all the rest inherits from other semantics.
@@ -313,8 +329,9 @@
                #:sub        f-sub
                #:mul        f-mul
                #:div        f-div
-               #:iflt       f-iflt
                #:pow        f-pow
+               #:lt         f-lt
+               #:if         f-if
                #:default    (lambda (sym fn)
                               (lambda args
                                 (nonlinear sym args)))

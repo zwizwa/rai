@@ -283,7 +283,6 @@
     (xor 2)
     (mod 2)
     (floor 1)        ;; integer s.t. 0 <= x - floor(x) <= 1  (not "< 1" !!!)
-    (iflt 4)         ;; a < b ? c : d
     (sin 1)
     (cos 1)
     (exp 1)
@@ -291,7 +290,10 @@
     (atan 1)
     (cast/n 2)       ;; type casting
 
-    (if 3)           ;; conditional
+    (lt 2)           ;; a < b
+
+    ;; CONDITIONAL
+    (if 3)
     
     ;; AD-HOC EXTENSIONS
     (dl-shift 2)     ;; shift delay line state vector

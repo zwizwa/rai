@@ -9,6 +9,19 @@
          "test_pd.rkt"
          "test-lang.rkt")
 
+
+(module test-progs "stream.rkt"
+ (require "stream-lib.rkt"
+          "stream-meta.rkt")
+ (provide (all-defined-out))
+ (define (test-if< a b)  (if (< a b) b a))
+ (define (test-if c a b) (if c a b))
+ (define (test-< a b)    (< a b))
+ )
+
+(require 'test-progs)
+  
+
 (define (test program #:tc [tc '()] #:nsi [nsi 0])
   (display
    (ai-array-c
@@ -50,10 +63,15 @@
 
 ;; (test test-delay)
 
+(test test-tag)
 
 (display "**********************************\n")
 
-(test test-tag)
+
+;; (test test-<)
+
+(test test-if)
+(test test-if<)
 
 
 ;; Type error.

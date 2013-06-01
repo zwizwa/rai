@@ -47,7 +47,7 @@
     (define cos (@ ai-cos))
     (define log (@ ai-log))
     (define pow (@ ai-pow))
-    (define iflt(@ ai-iflt))
+    (define lt  (@ ai-lt))
     (define if_ (@ ai-if))       ;; don't override `if' here.
     (define lit (@ ai-literal))
 
@@ -77,12 +77,6 @@
                     (+ (* db e (pow b (- e 1)))
                        (* de (log b) b^e de))))))
 
-    (define d-iflt
-      (op
-       ((a da) (b db) (x dx) (y dy))
-       (iflt a b x  y)
-       (iflt a b dx dy)))
-
     (define d-if
       (op
        ((c dc) (a da) (b db))
@@ -101,8 +95,9 @@
                #:log (op ((x dx))         (log x)   (pow x -1))
                #:pow d-pow
 
-               #:iflt    d-iflt
-               #:if      d-if
+               #:lt  (op ((a da) (b db))  (lt a b)  (lt da db))
+
+               #:if  d-if
 
                #:literal (op ((x dx)) x dx)
                ))

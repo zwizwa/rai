@@ -539,6 +539,23 @@
 
   (define (e-literal sem val) val)
 
+
+  (define (e-prim-pred sym op)
+    (lambda (sem . args)
+      (let ((b (apply (e-prim sym op #:unify? #f) sem args)))
+        (unify-expr! args)
+        (unify! (node-type b) Int)  ;; Booleans are integer bitmasks
+        b)))
+
+  (define e-lt (e-prim-pred 'p_lt p_lt))
+  
+  (define (e-if sem c a b)
+    (let ((r ((e-prim 'p_if p_if #:unify? #f) sem c a b)))
+      (unify-expr! (list a b r))
+      (unify! (node-type c) Int)  ;; Booleans are integer bitmasks
+      r))
+    
+
   (define (tag sem node record)
     ;; (pp record)
     (save units (cons node record))
@@ -587,8 +604,10 @@
              #:atan       (e-prim 'p_atan  p_atan)
 
              #:floor      (e-prim 'p_floor p_floor)
-             #:iflt       (e-prim 'p_iflt  p_iflt)
-             #:if         (e-prim 'p_if    p_if)
+             
+             #:lt         e-lt
+             
+             #:if         e-if
 
              #:debug      (e-prim 'p_debug p_debug)
 

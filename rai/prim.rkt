@@ -26,9 +26,10 @@
 
 (define (p_floor x) (floor x))
 
-(define (p_iflt a b c d) (if (< a b) c d))
+;; DSL truth values are bitmasks.
+(define (p_lt a b)   (if (< a b) -1 0))
 
-(define (p_if c a b) (if c a b))
+(define (p_if c a b) (if (zero? c) b a))
 
 
 (define (p_exp x) (exp x))

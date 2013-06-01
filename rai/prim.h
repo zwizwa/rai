@@ -43,9 +43,9 @@
 #define p_xor(a,b) ((a) ^ (b))
 #define p_mod(a,b) ((a) % (b))
 
-#define p_iflt(val,thresh,a,b) ((val) < (thresh) ? (a) : (b))
+#define p_lt(a,b)  ((a) < (b))
 
-#define p_if(c,a,b) ((cond) ? (a) : (b))
+#define p_if(c,a,b) ((c) ? (a) : (b))
 
 
 /* Simple move.  Sometimes necessary to bridge type boundaries or

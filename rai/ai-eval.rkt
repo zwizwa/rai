@@ -19,7 +19,7 @@
            #:div     (prim p_div)
            #:pow     (prim p_pow)
            #:floor   (prim p_floor)
-           #:iflt    (prim p_iflt)
+           #:lt      (prim p_lt)
            #:if      (prim p_if)
            #:exp     (prim p_exp)
            #:sin     (prim p_sin)
