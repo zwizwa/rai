@@ -1,0 +1,46 @@
+RAI - Racket Abstract Interpretation
+
+
+Entry: Move to git / github / racket package
+Date: Sun Jun  2 19:13:02 EDT 2013
+
+Starting on a fresh repo.
+
+http://zwizwa.be/rai
+
+raco pkg install github://github.com/zwizwa/rai/master
+
+
+
+Entry: TODO
+Date: Sun Jun  2 19:14:08 EDT 2013
+
+
+Maybe good to make a list of the small things that need to be done.
+
+- FIXES:
+
+  - ai-stream.rkt   (write in terms of ai-array.rkt output?)
+
+  - delay line allocation: phase 1 -> phase 2.
+
+  - make time block explicit (subsampling) and fixed size
+
+  - proper feedback operator
+
+  - compute transfer function as ratfunc.
+
+
+- FEATURES:
+
+  - constant arrays.
+
+  - presets
+
+  - state initialization
+
+  - generate GUI from description
+
+  - loop fusion?
+
+

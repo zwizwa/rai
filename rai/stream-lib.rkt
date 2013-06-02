@@ -145,3 +145,11 @@
 ;; of constructors.  Currently, `cast' will just decouple the
 ;; unification completely.
 (define-syntax-rule (::Float x) (cast 'ignored x))
+
+
+
+;; TO DECIDE:
+;; There is a lot of useful closed code in the Kmook project.
+;; Some of that might be opened up.
+;; Drop me a line if you're interested.
+;; - Tom
