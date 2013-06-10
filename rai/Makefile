@@ -44,12 +44,14 @@ include rules.mk
 
 
 %.html: %.scrbl
-	cd $(dir $<) ; scribble --html $(notdir $<)
+	cd $(dir $<) ; scribble --htmls $(notdir $<)
 
-zwizwa: ~/www/zwizwa.be/rai/rai.html
+zwizwa: ~/www/zwizwa.be/rai/index.html
 
-~/www/zwizwa.be/rai/rai.html: doc/rai.html
-	cp -av $(dir $<)/*.png $(dir $@)
-	cp -a $< $@
+~/www/zwizwa.be/rai/index.html: doc/rai.scrbl
+	cd doc ; scribble --htmls $(notdir $<)
+	cp -av doc/rai/* ~/www/zwizwa.be/rai/
+
+
 
 

@@ -44,3 +44,58 @@ Maybe good to make a list of the small things that need to be done.
   - loop fusion?
 
 
+
+
+Entry: Add a `where' form?
+Date: Sun Jun  2 19:27:46 EDT 2013
+
+This would allow specification of inputs/outputs in a more
+straightforward way, such that output arity is visible at the syntax
+level.
+
+E.g.
+
+(proc (in ...)
+      (out ...)
+  (where
+     ((a ...)
+      (b ...)
+      ...)))
+
+
+
+Entry: Run generated C code from Scheme
+Date: Mon Jun  3 19:48:43 EDT 2013
+
+3 ways to run code in Scheme:
+
+- provide separate interpretation, like ai-stream.rkt (reference implementation)
+- compile the pre-C imperative intermediate language to Scheme
+- load a compiled C module
+
+
+
+
+Entry: John Clements Course
+Date: Mon Jun 10 07:57:55 EDT 2013
+
+
+http://www.brinckerhoff.org/JBCsite/index.html
+http://www.brinckerhoff.org/clements/
+http://www.brinckerhoff.org/clements/csc123-fa12/index.html
+
+
+
+
+Entry: Next
+Date: Mon Jun 10 08:08:37 EDT 2013
+
+Low on time and energy.  What needs to happen next?
+
+
+- LLVM C/C++ bindings
+
+- Load C code in Scheme
+
+- Scheme semantics based on ai-array form output
+

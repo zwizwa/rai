@@ -9,12 +9,17 @@
 RAI makes it possible to write VST/VSTi, Pd, and Jack Audio DSP code
 in Scheme.
 
-To install, run the following command.  See the Racket
-@hyperlink["http://docs.racket-lang.org/pkg/" "package manager"]
-documentation for more information.
+The project is hosted on @hyperlink["http://github.com/zwizwa/rai"
+"Github"].  To install, install @hyperlink["http://racket-lang.org"
+"Racket"] and run the following command.
+
 @verbatim{
 raco pkg install github://github.com/zwizwa/rai/master
 }
+
+See the Racket @hyperlink["http://docs.racket-lang.org/pkg/" "package
+manager"] documentation for more information.
+
 
 
 
