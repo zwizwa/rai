@@ -1,5 +1,17 @@
 RAI - Racket Abstract Interpretation
 
+Development log for the RAI project.
+
+The goal of this project is to explore code generation and validation
+using techniques based on Abstract Interpretation, implemented in
+Racket.
+
+For more information, visit http://zwizwa.be/rai
+
+This log was forked from:
+http://zwizwa.be/-/meta
+which contains more information about the Haskell leg of the project.
+
 
 Entry: Move to git / github / racket package
 Date: Sun Jun  2 19:13:02 EDT 2013
@@ -10,6 +22,8 @@ http://zwizwa.be/rai
 
 raco pkg install github://github.com/zwizwa/rai/master
 
+parent dev log:     http://zwizwa.be/-/meta
+parent darcs repo:  http://zwizwa.be/darcs/meta
 
 
 Entry: TODO
@@ -128,6 +142,153 @@ Cheers
 Tom
 
 
+Entry: Pd-dev, music-dsp, racket list post
+Date: Wed Jun 12 11:28:54 EDT 2013
+
+
+
+Hi List,
+
+I've been cleaning it up a bit. Still quite raw in the details, but it basically works.
+
+added synth-lib.rkt basic synth kit and synth.rkt example synthesizer:
+
+- envelopes
+- parameter control dezippers
+- parameter control scales (exponential, "squashed" exponential, ...)
+- SVF filter
+- supersaw osc
+- anti-aliased saw osc
+- saturation functions
+- FDN reverb tail
+
+How I use it at this time, Linux + Pd:
+
+make sp_host.pd_linux # build binary Pd wrapper
+pd sp_test.pd & # run Pd patch built around sp_host
+make livecode # continuously compile synth.rkt -> synth.sp binary module
+
+then edit synth.rkt or any of its dependencies and the binary code running in Pd will be updated, leaving state intact if the type didn't change.
+
+some docs at http://zwizwa.be/rai
+
+
+For headless Windows VST plugin:  "make synth.dll"
+This needs a Linux->Windows cross compiler; follow the error messages.
+
+Cheers
+Tom
+
+
+
+Entry: LLVM?
+Date: Wed Jun 12 13:28:34 EDT 2013
+
+Maybe an LLVM target would be a nice addition.  Running code in-image
+without external C compiler dependencies is attractive, though is it
+worth the trouble?
+
+
+
+Entry: Industry integration: validated, bottom-up design
+Date: Wed Jun 12 13:46:55 EDT 2013
+
+I'd like to be able to integrate what I've learned up to now (the
+knowledge that lead to RAI) and steer it more into a direction that is
+usable in an industrial setting.
+
+At this point it is usable for designing music DSP software on PCs or
+mobile devices, but not yet so usable for machine mapping as would be
+encountered in a typical embedded development settings, i.e. the
+projects that pay the bills.
+
+One important element is target dependency.  It might make more sense
+to construct a tool that helps manual machine mapping of an existing
+algorithm, than to attempt to work top-down as I'm doing for the synth
+work.
+
+At least for code running on a quirky DSP chip there is going to be a
+significant amount of squeezing involved to map to a particular
+target.  It doesn't seem that the trend of quirky hardware is not
+going to change much in the near future, as power consumption and
+device cost constraints will keep much of the manual design approach
+alive.
+
+For the big guys, there are plenty of expensive tools available.  Have
+a look at the MathWorks product range.  More, bigger tools can be
+found in the ASIC industry.  For the small guys doing one-off jobs,
+these tools just too expensive.  What I've been wondering for 10 years
+is how far can one get with open tools to make the lone wolf embedded
+developer more productive?
+
+I want to stress this: none of the ideas here are new.
+What is new is to keep it simple, small and malleable.
+
+A large constraint in reality is the introduction of exotic tool
+chains.  My conclusion is that people hate it: it's too big a risk to
+use yet another quirky code generator whenever a new person joins the
+team.  A big constraint for designing tools is to make sure they can
+get out of the way, i.e. that you can switch them OFF and drop down to
+writing straight ASM or C code.
+
+In a nutshell: VALIDATION of a low-level implementation is more
+important than GENERATION from high to low level.
+
+In practice, in the RAI framework, this would boil down to finding a
+set of primitives, probably based on the machine's primitive, AND a
+set of machine constraints and resource management annotations.
+
+This is not a simple problem.  To keep it simple, a most
+straightforward approach is to start with a reduced assembler
+language, and see how to put a functional semantics on top of that.
+
+
+So what about this for future direction:
+
+  - Aiming at validation, use the abstract interpretation trick to
+    approximate the semantics of a real device.
+
+  - Pick a target to test this: dsPIC or ARM DSP / Cortex M4
+
+
+
+Entry: What target to pick?
+Date: Wed Jun 12 13:57:31 EDT 2013
+
+dsPIC:
+
++ combined with PIC18 support in Staapl, I could aim at 1 vendor
+  (Microchip) / 1 tool (Racket) approach.
+
++ DIP available, good for grassroots electronics projects
+
+- typical quirky DSP arch with lots of constraints
+
+- no free optimizing C compiler for both PIC18 and dsPIC.
+
+
+
+ARM Cortex M4 [1]
+
++ industry standard, multiple vendors: TI Stellaris, STM32 F3,F4
+
++ good open tooling support
+
++ plenty of boards
+
+- no DIP available
+
+
+
+[1] http://en.wikipedia.org/wiki/ARM_Cortex-M#Cortex-M4
+
+
+
+Entry: Idiomatic C
+Date: Wed Jun 12 14:50:53 EDT 2013
+
+It would be interesting to find the subset of C that can accomodate
+the basic stream language's semantics.
 
 
 
