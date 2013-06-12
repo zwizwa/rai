@@ -42,6 +42,7 @@ RACO := raco
 	gcc -DPROC_FILE=\"$<\" -DEXTERN_SETUP=$*_setup -DEXTERN_NAME=\"$*\" $(CFLAGS) $(RAI)/main_pd.c rai.o $(LDFLAGS) -rdynamic -shared -o $@
 
 # Dynamic Pd wrapper, supports re-loading of .sp files
+# See also sp_test.pd
 sp_host.pd_linux: $(RAI)/prim.h $(RAI)/main_pd.c $(RAI)/rai.h rai.o
 	gcc -DEXTERN_SETUP=sp_host_setup -DEXTERN_NAME=\"sp_host\" $(CFLAGS) $(RAI)/main_pd.c rai.o $(LDFLAGS) -rdynamic -shared -o $@
 

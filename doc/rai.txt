@@ -99,3 +99,35 @@ Low on time and energy.  What needs to happen next?
 
 - Scheme semantics based on ai-array form output
 
+
+
+Entry: KVR post
+Date: Tue Jun 11 08:43:08 EDT 2013
+
+http://www.kvraudio.com/forum/viewtopic.php?p=5385673#5385673
+
+Hi Frank,
+
+What I find most interesting in language design is the basic
+principles or "axioms", being
+1) primitive operations, and
+2) composition/abstraction mechanisms to build new operations
+
+IIUC, your patch language is functional, except for the primitives,
+which have state.  Some questions about the composition mechanism:
+
+- How do you differentiate between "class" and "instance" for the
+  primitives?  I.e. there is Osc1 and Osc2.  Are these fixed
+  instances of a shared oscillator class?
+
+- Is there an abstraction mechanism?  I.e. is there a way to take a
+  couple of modules and create a new black box to be used in another
+  patch?
+
+Cheers
+Tom
+
+
+
+
+

@@ -53,5 +53,7 @@ zwizwa: ~/www/zwizwa.be/rai/index.html
 	cp -av doc/rai/* ~/www/zwizwa.be/rai/
 
 
+livecode:
+	while sleep 1; do $(RACKET) livecode-synth.rkt; done
 
 
