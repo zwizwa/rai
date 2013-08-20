@@ -55,7 +55,7 @@ Maybe good to make a list of the small things that need to be done.
 
   - generate GUI from description
 
-  - loop fusion?
+  - loop fusion? (check out Feldspar)
 
 
 
@@ -291,4 +291,142 @@ It would be interesting to find the subset of C that can accomodate
 the basic stream language's semantics.
 
 
+
+Entry: Merging ideas: Staapl and RAI
+Date: Wed Jun 12 16:53:54 EDT 2013
+
+Both have an element of bottom-up design, but for RAI, the bottom is a
+small, well-defined language, while for Staapl, bottom is the machine
+language.
+
+Making this work for Staapl was one of the goals, but has not been
+reached yet.
+
+I wonder where the middle ground is here: design a machine abstraction
+close enough to the real machine to allow for hand-tuned allocation,
+and high level enough to have a decent semantics.
+
+Another thing is to properly gauge the importance of resource
+efficiency vs. safety/correctness.  If resource efficiency is not a
+main driver, code gen might be a better option.
+
+
+
+Entry: Project management: future of RAI
+Date: Thu Jun 13 09:53:11 EDT 2013
+
+After about 5 months the goals are reached.  RAI is good enough for
+its initial intended purpose.  The rest seems to be "long tail"
+maintenance, refinement, cleanup and gaining more insight through
+concrete use cases.
+
+I find myself in a bit of an impasse at this point, as the strongly
+mobilizing curiosity is no longer there.
+
+Maybe it is important at this point to realize that, and keep what
+there is now as a stable core.  I.e. build extensions as external
+projects.
+
+
+
+
+Entry: A simplified simulator
+Date: Thu Jun 13 14:36:57 EDT 2013
+
+Problem: find a good approximation to a chip's instruction set that
+can be embedded in a functional language.
+
+This attempts to connect two worlds:
+  - Easy translation to "real" device semantics
+  - Easy translation from pure functional constructs
+
+The problem here is resource management.
+
+For the particular problem of simplifying the dsPIC, this would be to
+abstract X/Y data memory, accumulator and addressing modes.
+
+
+
+
+
+
+Entry: Composing state machines
+Date: Fri Jun 14 10:06:26 EDT 2013
+
+
+Note these are synchronous state machines, which are a bit simpler
+than event-based ones.  The basic model I use for the audio DSP work
+is the state space model (SSM) or state space representation, which
+has nice properties if it is linear:
+
+http://en.wikipedia.org/wiki/State_space_representation
+
+Goal: represent a stream operator in Haskell in an abstract way, but
+allow for C code generation from the description.
+
+A stream operator consists of an initial state value and update
+function with types:
+
+s
+(s,i) -> (s,o)
+
+Ignoring the explicit state, the straightforward way to represent a
+stream operator as a pure function is something like this:
+
+    data S a = S a (S a)
+    S i -> S o
+
+However, the state info is lost here.  So the SSM rep can be mapped to
+the stream rep, but not vice versa.
+
+
+When composing two SSMs (ignoring the initial state) you get something
+like:
+
+   ( (s1,a) -> (s1,b) ) ->
+   ( (s1,b) -> (s1,c) ) ->
+
+   ((s1,s2),a) -> ((s1,s2), c)
+
+This is troublesome, because the state "grows".
+
+The whole thing is here:
+http://zwizwa.be/darcs/meta/dspm/SSM.hs
+
+
+The composition would fit neatly in the Arrow abstraction except for
+that dangling state vector.
+
+It is possible to use existential types to hide the states.
+The trouble with that is they become quite inaccessible.
+
+In the end, after composition, I really want a type (s,i) -> (s,o)
+where s is a large composition of per-SSM state vectors, because that
+information is used to generate C code.  I also want this to fit in
+the Arrow abstraction, so it integrates better into Haskell.
+
+For code generation, the SSM idea is combined with the "final tagless"
+representation trick to perform abstract interpretation.  See:
+
+http://zwizwa.be/darcs/meta/dspm/Control.hs
+http://zwizwa.be/darcs/meta/dspm/Data.hs
+http://zwizwa.be/darcs/meta/dspm/Struct.hs
+
+All this +- works.  To work out how exactly to use the existential
+types, I did some type directed programming to just see where the
+types lead me, but in the end I got confused.  It all seems a bit
+clumsy.
+
+I took that idea and went back to Scheme (Racket) to do what I wanted
+to do in the first place; to build a tool that I can use effectively
+to write audio DSP code (*).  This is the result up to now:
+http://zwizwa.be/rai/
+
+Doing it in Scheme allowed me to "emulate" types and type classes.  An
+interesting exercise in itself, but still, in Haskell it would be a
+lot simpler.
+
+Now that I know that the basic idea works, I'd like find a good way to
+port it back to Haskell, probably on top of Feldspar.
+http://hackage.haskell.org/package/feldspar-language
 
