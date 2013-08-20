@@ -384,8 +384,7 @@ When composing two SSMs (ignoring the initial state) you get something
 like:
 
    ( (s1,a) -> (s1,b) ) ->
-   ( (s1,b) -> (s1,c) ) ->
-
+   ( (s2,b) -> (s2,c) ) ->
    ((s1,s2),a) -> ((s1,s2), c)
 
 This is troublesome, because the state "grows".
@@ -429,4 +428,91 @@ lot simpler.
 Now that I know that the basic idea works, I'd like find a good way to
 port it back to Haskell, probably on top of Feldspar.
 http://hackage.haskell.org/package/feldspar-language
+
+
+
+Entry: Fluxus / LLVM / Pd
+Date: Mon Jun 17 10:53:31 EDT 2013
+
+So, what's next?  A big fork in the road:
+
+- Target "real" DSPs, i.e. TI C2000, MicroChip dsPIC, ...
+
+- Integrate into host tools like Pd, Fluxus, ...
+
+Former seems a bit far off at this point.  It would be great to have a
+real project drive this.  Hybrid analog synth based on dsPIC?  
+I ordered a C2000 eval board, which might lead to an interesting avenue.
+
+
+For the latter, it would still be possible to use an external .c to
+.so compilation step, but it is really awkward.  It might be a lot
+better to bite the bullet and go for a JITtable LLVM approach.
+
+The question is where to make the Scheme <-> C bridge for the LLVM
+bindings.  As I understand, C++ isn't so easy from Racket FFI[1].
+
+
+
+
+[1] https://groups.google.com/forum/?fromgroups#!topic/racket-users/GFrGBbczTc0
+
+
+
+Entry: Fluxus install
+Date: Mon Jun 17 11:11:12 EDT 2013
+
+Probably best to just follow instructions and install to /usr/local
+
+* Racket from git
+
+git clone git://git.racket-lang.org/plt
+cd plt
+./configure --enable-shared --prefix=/usr/local
+make
+sudo make install
+
+
+* Fluxus from git
+
+git clone git://git.savannah.nongnu.org/fluxus.git
+cd fluxus
+scons
+
+NOTE: I could not get this to work without symlinking bin & lib &
+include from the git-racket tree into /usr/local
+
+
+
+Entry: Live coding
+Date: Mon Jun 17 16:49:40 EDT 2013
+
+Back to the life coding idea.  I want to stick to the Scheme approach:
+language works better than graphical programming, but I also want Bret
+Victor's number boxes[1], essentially Pd's number boxes in code.
+
+I wonder if this is possible in Fluxus.
+
+[1] http://worrydream.com/#!/InventingOnPrinciple
+
+
+Entry: Fluxus question
+Date: Mon Jun 17 16:56:07 EDT 2013
+
+
+fluxus@lists.pawfal.org
+
+
+Hi List,
+
+I recently saw Brent Victor's "Inventing On Principle"
+http://worrydream.com/#!/InventingOnPrinciple
+
+How hard would it be to make those "number sliders" work in Fluxus?
+That is, if it's not already possible..
+
+Basically, hover over a number in the editor and allow the mouse to change its range.
+
+Cheers
+Tom
 
