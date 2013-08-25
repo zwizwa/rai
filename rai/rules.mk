@@ -83,7 +83,7 @@ LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 
 %.dll: %.g.h $(RAI)/main_vst.cpp $(LICENSE_DEPS) $(RAI)/win_debug.h
 	$(MINGW)g++ $(CFLAGS_DLL) $(LICENSE_CFLAGS) -DPROC_FILE=\"$<\" $(RAI)/main_vst.cpp $(LDFLAGS_DLL) -shared -o $@
-	$(MINGW)strip $@
+	$(MINGW)strip $@ ; ls -l $@
 
 %.exe: %.c
 	$(MINGW)g++ $< -lwsock32 -o $@
