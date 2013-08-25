@@ -516,3 +516,39 @@ Basically, hover over a number in the editor and allow the mouse to change its r
 Cheers
 Tom
 
+
+
+Entry: Cortex-M4F
+Date: Sat Aug 24 15:40:51 EDT 2013
+
+Got the Tiva Launchpad[1] with a TM4C123GH6PMI[2].
+
+Goal: write DSP library code for the Cortex-M4 DSP and/or FP.
+
+It would be nice to be able to attach it to some audio codec, though
+for now it seems simplest to just use a USB audio interface to patch
+it into a test system.
+
+TI Tivaware can be used for dev dependency, since I won't need to
+redistribute anything.  People that need to reproduce the dev env can
+just download SW-TM4C-1.1.exe themselves.  This probably also means I
+can use
+
+
+Roadmap:
+- toolset setup
+- get bare-bones DSP code running in RAM / Flash
+- USB audio interface for testing (using tivaware)
+- Some HW codec? Old soundcard patch? Sparkfun[3]? PWM? software S/D?
+
+
+[1] http://www.ti.com/tool/ek-tm4c123gxl
+[2] http://www.ti.com/product/tm4c123gh6pm
+[3] https://www.sparkfun.com/products/9365
+
+
+Entry: MinGW
+Date: Sun Aug 25 00:19:11 EDT 2013
+
+So it builds on cygwin using cygwin-hosted MinGW, and stand-alone
+MinGW.  However, the build scripts use shell commands.
