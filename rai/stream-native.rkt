@@ -1,9 +1,13 @@
-#lang racket
+#lang racket/base
+(require racket/system)
 (provide (all-defined-out))
 
 ;; FIXME: auto config
-(define g++ "/usr/bin/i586-mingw32msvc-g++")
-(define vst "/home/tom/kmook/vst/vstsdk2.4")
+;(define g++ "/usr/bin/i586-mingw32msvc-g++")
+;(define vst "/home/tom/kmook/vst/vstsdk2.4")
+
+(define g++ "C:/MinGW/bin/mingw32-g++")
+(define vst "/home/tom/vstsdk2.4")
 
 ;; Instantiate module in an isolated namespace to produce C code.
 ;; The module should export `main' and `main-nsi' identifiers.
@@ -23,9 +27,15 @@
   (stream-eval-module `(file ,infile) outport)
   (close-output-port outport))
 
+(define (system_ . as)
+  (system
+    (apply string-append
+      (for/list ((a as)) (format "~a " a)))))
+
 ;; Combine vst template with .g.h to form executable .dll
 (define (stream-gen-vst-dll cfile dllfile)
-  (system* g++
+  (system_ "echo"
+           g++
            "-g" "-Wall" "-Wno-unused-variable"  
            "-ffast-math"  "-O3" "-mfpmath=sse" "-msse2"
            "-I." "-I../copy"
@@ -36,18 +46,19 @@
            "-luser32" "-lgdi32" "-lwsock32" "-shared"
            "-o" dllfile))
 
+
 ;; High level compile
 (define (stream-build-vst basename)
   (define module-filename (format "~a.rkt" basename))
   (define dll-filename    (format "~a.dll" basename))
   (define gen-c-filename  (format "~a.g.h" basename))
   (stream-gen-c module-filename gen-c-filename)
-  (or (stream-gen-vst-dll gen-c-filename dll-filename)
-      (raise 'error-compile-vst)))
+  (stream-gen-vst-dll gen-c-filename dll-filename))
+
 
 
 ;; TEST
-;; (stream-build-vst 'synth)
+(stream-build-vst 'synth)
 
 
 
