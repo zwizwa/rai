@@ -66,8 +66,6 @@ sp_host.pd_linux: $(RAI)/prim.h $(RAI)/main_pd.c $(RAI)/rai.h rai.o
 
 
 
-# Windows DLL/EXE through mingw32msvc
-MINGW := i586-mingw32msvc-
 
 
 CFLAGS_OPTI  := -ffast-math -O3
