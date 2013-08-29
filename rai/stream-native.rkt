@@ -3,11 +3,11 @@
 (provide (all-defined-out))
 
 ;; FIXME: auto config
-;(define g++ "/usr/bin/i586-mingw32msvc-g++")
-;(define vst "/home/tom/kmook/vst/vstsdk2.4")
+(define g++ "/usr/bin/i586-mingw32msvc-g++")
+(define vst "/home/tom/kmook/vst/vstsdk2.4")
 
-(define g++ "C:/MinGW/bin/mingw32-g++")
-(define vst "/home/tom/vstsdk2.4")
+;(define g++ "C:/MinGW/bin/mingw32-g++")
+;(define vst "/home/tom/vstsdk2.4")
 
 ;; Instantiate module in an isolated namespace to produce C code.
 ;; The module should export `main' and `main-nsi' identifiers.
