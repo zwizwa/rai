@@ -552,3 +552,58 @@ Date: Sun Aug 25 00:19:11 EDT 2013
 
 So it builds on cygwin using cygwin-hosted MinGW, and stand-alone
 MinGW.  However, the build scripts use shell commands.
+
+
+
+Entry: Live coding
+Date: Mon Sep  2 12:50:07 EDT 2013
+
+Time to think about user interfaces.  I'd like to implement a feature
+from Bret Victor's talk[1], where constants embedded in code can have
+a pop-up slider to change the value, with the result changing
+immediately.
+
+While this slider thing is neat, what is really important is a fast
+update between editor save and audible effect., i.e. a very fast
+compilation cycle for tick() methods.  The C compiler probably needs
+to be removed from the loop, and possibly, all optimization could be
+switched off: code could run interpreted at first.
+
+The bottleneck is the speed at wich the partial evaluation runs.
+Let's try to benchmark this first.  After that, an interpreted
+mechanism could be built for the C-like language.
+
+For (time (reload)) in this I get about 1.0 - 1.3 seconds:
+
+  #lang racket/base
+  (require "ai-array-c.rkt")
+
+  (provide (all-defined-out))
+
+  (define (reload)
+    (define ns (make-base-namespace))
+    (eval `(begin
+             (require "ai-array-c.rkt")
+             (require (file "synth.rkt"))
+             (display (ai-array-c main #:nsi main-nsi)))
+          ns))
+
+About half the time is spent in the Scheme compilation phase.
+Re-running the AI interpretation step gives:
+
+(time (void (ai-array-c main #:nsi main-nsi))) ;; => 0.7 sec
+
+
+This seems like a lot.  Trouble might be in the symbol lookup.  Hashes
+could make things faster, maybe.  But improving the Scheme compilation
+time isn't something I see happening, so it might nog be worth the
+bother.
+
+Adding the C compiler to this is fast if optimizations are turned off.
+
+To get better performance, the problem should be tackled somewhere
+else: compile to a more dynamic structure, and modify that stucture's
+parameters instead of recompiling everything.
+
+
+[1] http://www.youtube.com/watch?v=PUv66718DII#t=496
