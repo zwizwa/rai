@@ -9,7 +9,12 @@
 
 
 (define (read-tag)
-  (let loop ((tag '()))
+  (let ((c (peek-char)))
+    (when (or (eof-object? c)
+              (memq c '(#\} #\] #\, #\=)))
+      (unexpected c)))
+  
+  (let loop ((tag (list (read-char))))
     (let ((c (peek-char)))
       (if (or (eof-object? c)
               (memq c '(#\= #\{ #\} #\[ #\] #\,)))
