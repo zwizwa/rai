@@ -37,13 +37,13 @@
 ;; Handle mi protocol
 ;; https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Output-Syntax.html#GDB_002fMI-Output-Syntax
 
-(define (mi-result-record data)
+(define (mi-log-data tag data)
   (let* ((result (gdb-read-expr-list
                   (open-input-string data)))
          (port (open-output-string)))
-    (pretty-print result port)
-    (gdb-log
-     (get-output-string port))))
+    (pretty-print (cons (string->symbol (list->string (list tag)))
+                        result) port)
+    (gdb-log (get-output-string port))))
 
 (define *data* #f)
 (define (mi-handle line)
@@ -52,11 +52,8 @@
     (case tag
       ((#\() (void)) ;; "(gdb)" = ready for next command
       ((#\~ #\@ #\&) (gdb-log (read (open-input-string data))))
-      ((#\^) (mi-result-record data)) ;; (set! *data* data) (gdb-log "result-record ~a\n" data))
-      ((#\=) (gdb-log "result: ~a\n" data))
-      ((#\*) (gdb-log "exec-async-output: ~a\n" data))
-      ((#\+) (gdb-log "status-async-output: ~a\n" data))
-      (else  (gdb-log "untagged: ~a\n" line)))))
+      ((#\^ #\= #\* #\+) (mi-log-data tag data))
+      (else (gdb-log "untagged: ~a\n" line)))))
 
 ;; Execute GDB MI command
 (define (mi> cmd)
