@@ -607,3 +607,73 @@ parameters instead of recompiling everything.
 
 
 [1] http://www.youtube.com/watch?v=PUv66718DII#t=496
+
+
+Entry: gdb & gcc/as
+Date: Sun Sep 15 17:12:50 EDT 2013
+
+Got basics for gcc/as compilation and gdb interaction working.  The
+idea is to make some kind of "console" where asm code can be tested
+interactively, either on real hardware or in the qemu emulator.
+
+I started getting into brainless hack mode trying to parse the gdb
+output.  Looks like some emacs code uses a regexp massager to
+translate the format to json, and then uses a json parser[1].
+
+I do wonder, for a syntax as simple as that, there has to be a nice
+racket tool that can do it.  E.g. a packrat parser..
+
+[1] https://github.com/dov/dov-env/blob/master/emacs/gdb-mi.el
+
+
+
+Entry: qemu emulator
+Date: Sun Sep 15 17:13:42 EDT 2013
+
+apt-get install qemu-sysem
+
+Got this error:
+tom@zoo:~$ qemu-system-arm -cpu cortex-m4 -nographic -monitor null -serial null -semihosting
+qemu-system-arm: symbol lookup error: qemu-system-arm: undefined symbol: libusb_get_port_numbers
+
+
+Probably due to this.  Removing..
+
+tom@zoo:/usr/local/lib$ ls -al *usb*
+lrwxrwxrwx 1 root root 76 Aug 11  2012 libmchpusb-1.0.so -> /opt/xc/microchip/mplabx/mplab_ide/mplablibs/modules/lib/libusb-1.0.so.0.0.0
+lrwxrwxrwx 1 root root 17 May 21  2012 libusb-1.0.so.0 -> libmchpusb-1.0.so
+
+
+Looks like cortex-m4 is not supported.  Works with cortex-m3 though.
+Next is memory regions:
+
+$ qemu-system-arm -cpu cortex-m3 -nographic -monitor null -serial null -semihosting -kernel console.axf -gdb tcp::1234
+
+qemu: fatal: Trying to execute code outside RAM or ROM at 0x20000100
+
+R00=20000100 R01=20000100 R02=ffffffff R03=00000000
+R04=01000078 R05=00000000 R06=00000000 R07=00000000
+R08=00000000 R09=00000000 R10=00000000 R11=00000000
+R12=00000000 R13=200000e8 R14=0000037f R15=20000100
+PSR=60000153 -ZC- A svc32
+FPSCR: 00000000
+Aborted
+
+My guess is that it just has 128MB RAM at 0.  So to make this work, it
+needs an elf that starts at 0?
+
+So yes, that works, but apparently a simple .bin also works.
+
+
+
+[1] http://dr.barik.net/kb/Assembly
+[2] http://balau82.wordpress.com/2010/11/04/qemu-arm-semihosting/
+[3] http://cgi.cs.indiana.edu/~geobrown/stm32/Main/Simulation
+
+
+Entry: gdb trickery
+Date: Sun Sep 15 18:54:50 EDT 2013
+
+- parsing gdb data structures
+
+- uploading code to ram

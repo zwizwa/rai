@@ -1,6 +1,8 @@
 #lang scheme/base
 (require scheme/file
-         scheme/system)
+         scheme/system
+         scheme/pretty
+         "gdb-parse.rkt")
 
 ;; Experimenting with GDB's MI
 
@@ -34,13 +36,23 @@
 
 ;; Handle mi protocol
 ;; https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Output-Syntax.html#GDB_002fMI-Output-Syntax
+
+(define (mi-result-record data)
+  (let* ((result (gdb-read-expr-list
+                  (open-input-string data)))
+         (port (open-output-string)))
+    (pretty-print result port)
+    (gdb-log
+     (get-output-string port))))
+
+(define *data* #f)
 (define (mi-handle line)
   (let ((tag  (string-ref line 0))
         (data (substring  line 1)))
     (case tag
       ((#\() (void)) ;; "(gdb)" = ready for next command
       ((#\~ #\@ #\&) (gdb-log (read (open-input-string data))))
-      ((#\^) (gdb-log "result-record: ~a\n" data))
+      ((#\^) (mi-result-record data)) ;; (set! *data* data) (gdb-log "result-record ~a\n" data))
       ((#\=) (gdb-log "result: ~a\n" data))
       ((#\*) (gdb-log "exec-async-output: ~a\n" data))
       ((#\+) (gdb-log "status-async-output: ~a\n" data))
@@ -73,13 +85,54 @@
   (gdb> "set $sp = *(void**)0")
   (gdb> "set $pc = *(void**)4"))
 
+(define (dasm [n 5])
+  (mi> (format "-data-disassemble -s $pc -e \"$pc + ~s\" -- 0"
+               (* 2 n))))
+       
 
+
+
+
+;; (define parse-abort-fn (make-parameter (lambda () (raise 'parse-error))))
+;; (define (parse-abort) ((parse-abort-fn)))
+
+;; (define parse-seq (make-parameter #f))
+
+
+;; (require scheme/sequence)
+;; (define (port->stream p)   (sequence->stream (in-input-port-chars p)))
+;; (define (string->stream s) (port->stream (open-input-string s)))
+
+;; (define parse-in (make-parameter '()))
+;; (define (parse-peek) (stream-car (parse-in)))
+
+
+;; (define (tok str)
+;;   (l
+  
+;;   (string->str
+;;   (let loop ()
+;;     (unless (eql
+;;   (for ((t str) (i (parse-in)))
+;;     (unless (equal? t i)
+;;       (parse-abort))))
+;; (define (upto chars)
+;;   (let* ((char-list (
+
+;; (define (test-parse str fn)
+;;   (parameterize ((current-input-port (open-input-string str)))
+;;     (fn)))
+
+;; (require scheme/pregexp)
+    
 
 ;(define (test)
 ;  (start-gdb)
 ;  (connect))
 
 
-;(start-gdb)
-;(connect)
+; (start-gdb)
+; (connect)
+; (dasm)
+
 
