@@ -623,6 +623,10 @@ translate the format to json, and then uses a json parser[1].
 I do wonder, for a syntax as simple as that, there has to be a nice
 racket tool that can do it.  E.g. a packrat parser..
 
+EDIT: It wasn't so hard to write a recursive descent parser using
+`peek-char' and `read-char'.
+
+
 [1] https://github.com/dov/dov-env/blob/master/emacs/gdb-mi.el
 
 

@@ -8,13 +8,11 @@
 
 
 
-(define tag-term (string->list "={}[],"))
-
 (define (read-tag)
   (let loop ((tag '()))
     (let ((c (peek-char)))
       (if (or (eof-object? c)
-              (memq c tag-term))
+              (memq c '(#\= #\{ #\} #\[ #\] #\,)))
           (string->symbol (list->string (reverse tag)))
           (begin (read-char)
                  (loop (cons c tag)))))))
