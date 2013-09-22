@@ -9,20 +9,39 @@
 (provide (all-defined-out))
 
 (define gdb-instance (make-parameter #f))
-(define-struct gdb (stdout stdin pid stderr control) #:transparent)
+(define-struct gdb (stdout stdin pid stderr control thread-stdout thread-stderr) #:transparent)
+
+(define (close-gdb)
+  (let ((g (gdb-instance)))
+    ((gdb-control g) 'kill)
+    (close-input-port  (gdb-stdout g))
+    (close-input-port  (gdb-stderr g))
+    (close-output-port (gdb-stdin  g))
+    (thread-wait (gdb-thread-stdout g))
+    (thread-wait (gdb-thread-stderr g)))
+  (gdb-instance #f))
 
 (define (start-gdb #:cmdline (cmdline "arm-eabi-gdb-7.6.1 -i=mi"))
   (unless (gdb-instance)
-    (let* ((gdb (apply make-gdb (process cmdline))))
-      (thread (lambda () (line-dispatch (gdb-stderr gdb) stderr-handle)))
-      (thread (lambda () (line-dispatch (gdb-stdout gdb) mi-handle)))
-      (gdb-instance gdb))))
+    (let* ((process-info (process cmdline))
+           (stderr (list-ref process-info 3))
+           (stdout (list-ref process-info 0))
+           (t-stderr (thread (lambda () (line-dispatch stderr stderr-handle))))
+           (t-stdout (thread (lambda () (line-dispatch stdout mi-handle)))))
+      (gdb-instance
+       (apply make-gdb
+              (append process-info
+                      (list t-stderr t-stdout)))))))
 
+;; Dispatcher task body.  Abort
 (define (line-dispatch port handle)
-  (let loop ()
-    (let ((line (read-line port)))
-      (handle line))
-    (loop)))
+  (with-handlers
+      ((void void)) ;; just abort.  geiser doesn't like async printing..
+    (let loop ()
+      (let ((line (read-line port)))
+        (unless (eof-object? line)
+          (handle line)
+          (loop))))))
 
 ;; Geiser gets confused when async i/o hits stdout, so log things to file instead.
 (define (gdb-log . args)
@@ -56,22 +75,31 @@
       (else (gdb-log "untagged: ~a\n" line)))))
 
 ;; Execute GDB MI command
-(define (mi> cmd)
-  (let ((p (gdb-stdin (gdb-instance))))
-    (display cmd p)
-    (newline p)
-    (flush-output p)))
+(define (mi> cmd . args)
+  (with-handlers
+      (((lambda (ex)
+          (and (exn:fail:filesystem:errno? ex)
+               (= 32 (exn:fail:filesystem:errno-errno ex)))) ;; broken pipe
+        (lambda (ex)
+          (pretty-print ex)
+          (close-gdb)
+          (start-gdb))))
+    (let ((p (gdb-stdin (gdb-instance))))
+      (display (apply format cmd args) p)
+      (newline p)
+      (flush-output p))))
 
 ;; Execute regular GDB command
 (define (gdb> cmd)
-  (mi> (format "-interpreter-exec console ~s" cmd)))
+  (mi> "-interpreter-exec console ~s" cmd))
 
 (define (disconnect)
   (mi> "-target-disconnect"))
-(define (connect)
+(define (connect [port 3333])
+  (start-gdb) ;; start if necessary
   (disconnect)
   (mi> "-gdb-set target-async 1")
-  (mi> "-target-select remote :3333")
+  (mi> "-target-select remote :~s" port)
   (gdb> "monitor reset init"))
 
 (define (continue)  (mi> "-exec-continue"))
