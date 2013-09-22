@@ -152,10 +152,22 @@
                       (* 2 n)))))
     result))
     
-       
+(define (register-values)
+  (mi> "-data-list-register-values d"))
+(define (register-names)
+ (mi> "-data-list-register-names"))
+
+(define (var-assign var val)
+  (mi> "-var-assign ~s ~s" var val))
+(define (var-evaluate-expression expr)
+  (mi> "-var-evaluate-expression -f d ~s" expr))
 
 
+(define (create-register-vars)
+  (for ((n (in-range 16)))
+    (mi> "-var-create r~s * $r~s" n n)))
 
+;; (mi> "-var-create r1 * $r1")
 
 ;; (define parse-abort-fn (make-parameter (lambda () (raise 'parse-error))))
 ;; (define (parse-abort) ((parse-abort-fn)))

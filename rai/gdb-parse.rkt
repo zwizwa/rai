@@ -26,8 +26,9 @@
   (let* ((tag (read-tag))
          (val (if (eq? #\= (peek-char))
                   (begin (read-char) (read-expr))
-                  #f)))
+                  '())))
     (cons tag val)))
+
 
 (define (unexpected c)
   (error (format "unexpected: ~a" c)))
