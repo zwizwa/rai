@@ -160,9 +160,12 @@
 
 (define (var-assign var val)
   (mi> "-var-assign ~s ~s" var val))
-(define (var-evaluate-expression expr)
-  (mi> "-var-evaluate-expression -f d ~s" expr))
 
+(define (var-evaluate-expression expr)
+  (read (open-input-string
+         (unpack
+          (mi> "-var-evaluate-expression -f d ~s" expr)
+          '(value)))))
 
 (define (create-register-vars)
   (for ((n (in-range 16)))
@@ -175,11 +178,22 @@
 (define (write-memory addr bytes)
   (mi> "-data-write-memory-bytes ~s ~a" addr (hex bytes)))
 
+;; ref a list of tags or unpack procedures
+(define (unpack data ref)
+  (if (null? ref) data
+   (let ((tag (car ref))
+         (ref (cdr ref)))
+     (unpack
+      (if (procedure? tag)
+          (tag data)
+          (dict-ref data tag))
+      ref))))
+
 (define (read-memory addr nb-bytes)
-  (let* ((d (mi> "-data-read-memory-bytes ~s ~s" addr nb-bytes))
-         (d (dict-ref d 'memory))
-         (hex (dict-ref (car d) 'contents)))
-    (unhex hex)))
+  (unhex
+   (unpack
+    (mi> "-data-read-memory-bytes ~s ~s" addr nb-bytes)
+    `(memory ,car contents))))
 
 
 
