@@ -5,6 +5,7 @@
          racket/async-channel
          racket/match
          racket/dict
+         "hex.rkt"
          "gdb-parse.rkt")
 
 ;; Experimenting with GDB's MI
@@ -168,6 +169,21 @@
     (mi> "-var-create r~s * $r~s" n n)))
 
 ;; (mi> "-var-create r1 * $r1")
+
+
+
+(define (write-memory addr bytes)
+  (mi> "-data-write-memory-bytes ~s ~a" addr (hex bytes)))
+
+(define (read-memory addr nb-bytes)
+  (let* ((d (mi> "-data-read-memory-bytes ~s ~s" addr nb-bytes))
+         (d (dict-ref d 'memory))
+         (hex (dict-ref (car d) 'contents)))
+    (unhex hex)))
+
+
+
+
 
 ;; (define parse-abort-fn (make-parameter (lambda () (raise 'parse-error))))
 ;; (define (parse-abort) ((parse-abort-fn)))
