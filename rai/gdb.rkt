@@ -10,9 +10,6 @@
 
 ;; Experimenting with GDB's MI
 
-;; TODO: everything is async right now.  How to implement synchronous
-;; commands on top of this?  What reply to look for? '^'?
-
 
 (provide (all-defined-out))
 
@@ -20,7 +17,7 @@
 (define-struct gdb (stdout stdin pid stderr control
                     thread-stdout thread-stderr channel) #:transparent)
 
-(define (close-gdb)
+(define (gdb-kill)
   (let ((g (gdb-instance)))
     ((gdb-control g) 'kill)
     (close-input-port  (gdb-stdout g))
@@ -30,7 +27,7 @@
     (thread-wait (gdb-thread-stderr g)))
   (gdb-instance #f))
 
-(define (start-gdb #:cmdline (cmdline "arm-eabi-gdb-7.6.1 -i=mi"))
+(define (gdb-start #:cmdline (cmdline "arm-eabi-gdb-7.6.1 -i=mi"))
   (unless (gdb-instance)
     (let* ((process-info (process cmdline))
            (stderr (list-ref process-info 3))
@@ -90,7 +87,7 @@
 
 (define (autoconnect)
   (unless (gdb-instance)
-    (start-gdb)
+    (gdb-start)
     (connect)))
 
 (define (gdb-reply)
@@ -103,8 +100,8 @@
                (= 32 (exn:fail:filesystem:errno-errno ex)))) ;; broken pipe
         (lambda (ex)
           (pretty-print ex)
-          (close-gdb)
-          (start-gdb))))
+          (gdb-kill)
+          (gdb-start))))
     (autoconnect)
     (let ((p (gdb-stdin (gdb-instance))))
       (display (apply format cmd args) p)
@@ -147,11 +144,14 @@
   (gdb> "set $sp = *(void**)0")
   (gdb> "set $pc = *(void**)4"))
 
-(define (dasm [n 5])
-  (let ((result
-         (mi> (format "-data-disassemble -s $pc -e \"$pc + ~s\" -- 0"
-                      (* 2 n)))))
-    result))
+(define (disassemble [at "$pc"] [nb-bytes 10])
+  (for/list
+      ((d (dict-ref
+           (mi> "-data-disassemble -s ~a -e \"~a + ~s\" -- 0"
+                at at nb-bytes)
+           'asm_insns)))
+    (list (dict-ref d 'address)
+          (dict-ref d 'inst))))
     
 (define (register-values)
   (mi> "-data-list-register-values d"))
@@ -194,51 +194,5 @@
    (unpack
     (mi> "-data-read-memory-bytes ~s ~s" addr nb-bytes)
     `(memory ,car contents))))
-
-
-
-
-
-;; (define parse-abort-fn (make-parameter (lambda () (raise 'parse-error))))
-;; (define (parse-abort) ((parse-abort-fn)))
-
-;; (define parse-seq (make-parameter #f))
-
-
-;; (require racket/sequence)
-;; (define (port->stream p)   (sequence->stream (in-input-port-chars p)))
-;; (define (string->stream s) (port->stream (open-input-string s)))
-
-;; (define parse-in (make-parameter '()))
-;; (define (parse-peek) (stream-car (parse-in)))
-
-
-;; (define (tok str)
-;;   (l
-  
-;;   (string->str
-;;   (let loop ()
-;;     (unless (eql
-;;   (for ((t str) (i (parse-in)))
-;;     (unless (equal? t i)
-;;       (parse-abort))))
-;; (define (upto chars)
-;;   (let* ((char-list (
-
-;; (define (test-parse str fn)
-;;   (parameterize ((current-input-port (open-input-string str)))
-;;     (fn)))
-
-;; (require racket/pregexp)
-    
-
-;(define (test)
-;  (start-gdb)
-;  (connect))
-
-
-; (start-gdb)
-; (connect)
-; (dasm)
 
 
