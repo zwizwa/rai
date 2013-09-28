@@ -43,8 +43,8 @@
 
     
 (define (test)
-  (start-gdb)
-  (connect)
+  ;(start-gdb)
+  ;(connect)
   ;; (mi> "-target-select remote :3333")
   (assembler
    (qadd r1 r2 r3)

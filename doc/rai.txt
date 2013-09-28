@@ -678,6 +678,21 @@ So yes, that works, but apparently a simple .bin also works.
 Entry: gdb trickery
 Date: Sun Sep 15 18:54:50 EDT 2013
 
-- parsing gdb data structures
+- parsing gdb data structures (OK)
 
-- uploading code to ram
+- uploading code to ram (OK, arbitrary bytes)
+
+- set temp breakpoint + run
+
+
+
+Entry: State machine transformer
+Date: Sat Sep 28 09:17:49 EDT 2013
+
+The basic tasks:
+  - environment capture for all yield points.
+  - liveness analysis: does life-time cross yield points?
+
+
+How much of this can be done with abstract interpretation?
+Probably a lot.
