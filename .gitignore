@@ -1,0 +1,15 @@
+*.run
+*.elf
+*.g.h
+*.sp
+*.o.*
+*.pd_linux
+compiled
+*.so
+*~
+rai/doc/rai
+*.dll
+*.o
+*.jack
+a.out
+rai/bcr2000

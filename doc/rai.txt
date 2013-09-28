@@ -693,6 +693,12 @@ The basic tasks:
   - environment capture for all yield points.
   - liveness analysis: does life-time cross yield points?
 
+How much of this can be done with abstract interpretation?  Probably a
+lot.  The interesting part is going to be how to do loops.
 
-How much of this can be done with abstract interpretation?
-Probably a lot.
+Analysis phases:
+ - identify all variables (e.g. flatten)
+ - identify all control paths
+
+It doesn't fit in the standard rai template since it needs to capture
+variable bindings.  Or does it?  Let's just give it a try.

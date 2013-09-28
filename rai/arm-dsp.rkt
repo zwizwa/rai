@@ -1,7 +1,6 @@
 #lang scheme/base
 (require scheme/file
-         scheme/system
-         "gdb.rkt")
+         scheme/system)
 
 ;; ARM Cortex-M4 Assembler
 
