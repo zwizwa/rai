@@ -782,4 +782,6 @@ space.  optimize later for accessibility
 
 * implement next in terms of set! and goto
 
+This seems really simple and solves the whole problem.  The rest is
+optimization.
 
