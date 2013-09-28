@@ -1,6 +1,7 @@
 #lang racket/base
 (require racket/match
-         racket/dict)
+         racket/dict
+         racket/pretty)
 
 ;; Stand-alone exploration of flat coroutine to FSM compiler.
 
@@ -42,13 +43,16 @@
       ((list var expr)
        (extend env var (compile expr env))))))
 
+(define (print-yield env)
+  (pretty-print env))
+
 
 (define (compile p [env (init-env)])
   (match p
     ((list 'let name bindings body)
      (compile body (compile* bindings env)))
     ((list 'let* bindings body)     (compile body (compile* bindings env)))
-    ((list 'yield  var)  0)  ;; FIXME: capture continuation
+    ((list 'yield  var)  (print-yield env) (void)) ;;
     ((list 'add1   var)  (add1 (ref env var)))
     ((list 'lit    l) l)
     ((list-rest 'app fn args)

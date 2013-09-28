@@ -766,8 +766,20 @@ yield into:
 -> reconstruct the environment = main problem
 
 
-For this it's simpler to leave out let* and just do a single-variable
-let1
+So this is the same as "representing the continuation".  The context
+needs to be restored.   This includes control context.
 
+Waiting for that flash to happen... 
+Where is the difficulty?
+Not thinking properly about the control structures.
+Reconstructing the environment is easy.
+The difficulty is in implementing the "variable update" behind the tail-recursive call.
+
+So what about doing this all in a dumb way:
+
+* rename each variable to a unique name and store them in a flat name
+space.  optimize later for accessibility
+
+* implement next in terms of set! and goto
 
 
