@@ -702,3 +702,72 @@ Analysis phases:
 
 It doesn't fit in the standard rai template since it needs to capture
 variable bindings.  Or does it?  Let's just give it a try.
+
+
+It seems that this is really not so hard to do once the right
+representation has been found.  What about avoiding control structures
+in a first iteration and just concentrating on the idea of
+continuation?
+
+The existing SSA transformer can be used to build nested environments.
+However, it's not really in an abstract reusable form, and it doesn't
+directly abstract `let' forms, only as side effects..
+
+It might be best to solve the problem in isolation first: build a
+minimalistic scheme interpreter / compiler.
+
+A simple example program: with 
+- named let
+- ordinary let*
+- primitive invocation
+- yield
+- tail call
+
+without:
+- non-tail calls
+
+(let next ((a 0))
+  (let* ((a (inc a)))
+    (yield a)
+    (next a)))
+
+
+It seems best to focus on let* instead of let, as it allows sequential
+operation, which maps better to low-level code.
+
+Named let is a bit annoying, but it's the only way to make loops
+without explicit loop statements and explicit lambdas.  The language
+is not supposed to be higher-order.
+
+
+Interesting is that `yield' is the only non-tail position call in a
+body.  ( let* rhs could have a proper non-tail call, which we ignore
+for now )
+
+From this it might make sense to make `yield' into function semantics,
+i.e. always returning a value.  This leads to the program:
+
+(define program
+  '(let next ((a 0))
+     (let* ((a (inc a))
+            (_ (yield a)))
+       (next a))))
+
+Where we currently ignore yield's rv.
+
+
+Now, a compilation would involve walking the tree and splitting each
+yield into:
+
+- what came before
+-> treat yield as the inner expression / break off
+
+- what comes after
+-> reconstruct the environment = main problem
+
+
+For this it's simpler to leave out let* and just do a single-variable
+let1
+
+
+
