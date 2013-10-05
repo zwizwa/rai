@@ -4,10 +4,15 @@
 ;; LV2 uses TTL files in Turtle RDF format to encode a nesting of
 ;; lists, dictionaries and atomic values.
 ;;
+;; http://www.w3.org/TeamSubmission/turtle/
 ;; http://wikitravel.org/en/Wikitravel:Turtle_RDF
 ;;
+;; ( FIXME: It might be best to use 3rd party code instead:
+;; http://nxg.me.uk/dist/racket-librdf/docs/rdf.html )
+;;
+;;
 ;; The basic format is simple:
-;; <subject> <relationship> <object>
+;; {subject} {relationship} {object}
 ;;
 ;; The first two are URLs pointing to an XML document describing the
 ;; meaning and attributes.  URLs can be shortened using a prefix
@@ -16,27 +21,27 @@
 ;; What makes the format hard is the arcane ways of making a file
 ;; "human readable" through context-sensitive concatenation.
 ;;
-;; ';' reuses <subject>
-;; ',' reuses <subject> <relationship>
+;; ';' reuses {subject}
+;; ',' reuses {subject} {relationship}
 ;;
 ;; '[' ']' defines an anonymous object, which can appear in object
-;; position, and contains a one or more <relationship> <object>
+;; position, and contains a one or more {relationship} {object}
 ;; clauses.
 
 
 
 ;; Practically, the main distinction is between these two forms:
-;;   <rel> <obj1> , <obj2> , <obj3>
-;;   <rel> [ <rel1> <obj1> ; <rel2> <obj2> ]
+;;   {rel} {obj1} , {obj2} , {obj3}
+;;   {rel} [ {rel1} {obj1} ; {rel2} {obj2} ]
 ;;
-;; At the LV2 level this seems to be used to define a (top <rel>) list
+;; At the LV2 level this seems to be used to define a (top {rel}) list
 ;; of objects, or as a structured object.  The first is shorthand for:
-;;   <rel> <obj1>
-;;   <rel> <obj2>
-;;   <rel> <obj3>
+;;   {rel} {obj1}
+;;   {rel} {obj2}
+;;   {rel} {obj3}
 ;;
-;; The second is actually <rel> <obj> where <obj> is an anonymous
-;; object defined by [ <rel1> <obj1> ; <rel2> <obj2> ... ]
+;; The second is actually {rel} {obj} where {obj} is an anonymous
+;; object defined by [ {rel1} {obj1} ; {rel2} {obj2} ... ]
 ;;
 ;; To map this to a simple scheme coding we can use scheme lists and
 ;; scheme assoc lists to represent lists and structs.  This requires
@@ -84,17 +89,17 @@
   (apply
    string-append
    `(,left
-     " " ,(format-el (car lst))
+     ,(format-el (car lst))
      ,@(for/list ((el (cdr lst)))
-         (string-append " " sep " " (format-el el)))
+         (string-append sep (format-el el)))
      ,right)))
 
-(define (rdf-dict d) (rdf-composite d rdf-pair  "[" ";\n" "]\n"))
-(define (rdf-list l) (rdf-composite l rdf-value ""  "," ""))
+(define (rdf-dict d) (rdf-composite d rdf-pair  "[ " " ;\n" " ]\n"))
+(define (rdf-list l) (rdf-composite l rdf-value ""  " , " ""))
 (define (rdf-global name v)
   (string-append
    (rdf-atom name) "\n"
-   (rdf-composite v rdf-pair "" ";\n" ".\n")))
+   (rdf-composite v rdf-pair "" " ;\n" " .\n")))
 
 (define (test)
   (display
@@ -103,9 +108,9 @@
                  (doap:name "Simple Amplifier")
                  (doap:licence "<http://opensource.org/licenses/isc>")
                  (lv2:optionalFeature lv2:hardRTCapable)
+                 (lv2:project "<http://lv2plug.in/ns/lv2>")
                  (lv2:port
                   (a lv2:InputPort lv2:ControlPort)
-                  (lv2:project "<http://lv2plug.in/ns/lv2>")
                   (lv2:index 0)
                   (lv2:symbol "gain")
                   (lv2:name "Gain")
