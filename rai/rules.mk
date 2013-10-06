@@ -51,6 +51,11 @@ sp_host.pd_linux: $(RAI)/prim.h $(RAI)/main_pd.c $(RAI)/rai.h rai.o
 	gcc -DPROC_FILE=\"$<\" $(CFLAGS_DEBUG) $(RAI)/main_test.c $(LDFLAGS) -I$(RAI) -o $@
 
 
+# LV2 wrapper.
+%.lv2: %.g.h $(RAI)/prim.h $(RAI)/main_lv2.c $(RAI)/rai.h rai.o
+	gcc -DPROC_FILE=\"$<\" -DPROC_NAME=\"$*\" $(CFLAGS) $(RAI)/main_lv2.c rai.o $(LDFLAGS) -rdynamic -shared -o $@
+
+
 %.o: %.c $(RAI)/rai.h
 	gcc $(CFLAGS) $(LDFLAGS) -o $@ -c $<
 %.o: $(RAI)/%.c $(RAI)/rai.h

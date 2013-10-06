@@ -30,12 +30,15 @@
 
 
 
-;; Practically, the main distinction is between these two forms:
+;; For constructing nested (anonymous) objects, the main distinction
+;; is between these two forms:
+;;
 ;;   {rel} {obj1} , {obj2} , {obj3}
 ;;   {rel} [ {rel1} {obj1} ; {rel2} {obj2} ]
 ;;
-;; At the LV2 level this seems to be used to define a (top {rel}) list
-;; of objects, or as a structured object.  The first is shorthand for:
+;; This is used to define a (top {rel}) list of objects, or as a
+;; structured object.  The first is shorthand for:
+;;
 ;;   {rel} {obj1}
 ;;   {rel} {obj2}
 ;;   {rel} {obj3}
@@ -46,7 +49,7 @@
 ;; To map this to a simple scheme coding we can use scheme lists and
 ;; scheme assoc lists to represent lists and structs.  This requires
 ;; lists and dictionaries to be distinguished.  Since all relations
-;; are represented as symbols, the following should do the trick:
+;; are represented as atoms, the following should do the trick:
 
 ;; A structure object is an atom-indexed assoc list.
 (define (struct-obj? x)
@@ -93,6 +96,7 @@
      ,@(for/list ((el (cdr lst)))
          (string-append sep (format-el el)))
      ,right)))
+
 
 (define (rdf-dict d) (rdf-composite d rdf-pair  "[ " " ;\n" " ]\n"))
 (define (rdf-list l) (rdf-composite l rdf-value ""  " , " ""))

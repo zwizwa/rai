@@ -785,3 +785,29 @@ space.  optimize later for accessibility
 This seems really simple and solves the whole problem.  The rest is
 optimization.
 
+
+Entry: LV2: Turtle RDF
+Date: Sat Oct  5 15:23:22 EDT 2013
+
+So it took a bit of digging to figure out what this is all about, but
+at least it seems quite straightforward to generate Turtle RDF from a
+canonical nested list/assoc-list Scheme data structure.
+
+Next: the C part.
+
+
+
+Entry: Kernel in Rust?
+Date: Sun Oct  6 10:01:37 EDT 2013
+
+For the dynwav project, some core routines are not "just DSP".  It
+might be good to use Rust for this.
+
+I wonder if it's possible to write deterministic code in Rust,
+meaning: for a particular thread, no I/O and no memory allocation.
+
+Anyway, an important part to get right first is "streams", which
+should probably be implemented as chunked buffers.  Dynwav has a
+time->frequency tradeoff that reflects as a variable buffer size
+between FFT calls.
+
