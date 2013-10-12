@@ -46,9 +46,9 @@ static void connect_port(LV2_Handle handle,
                          uint32_t   port,
                          void*      data) {
     instance* x = (instance*)handle;
-    if (port < NB_IN)    { ((float**)(&x->in))[port]    = data; return; } port -= NB_IN;
-    if (port < NB_OUT)   { ((float**)(&x->out))[port]   = data; return; } port -= NB_OUT;
-    if (port < NB_PARAM) { ((float**)(&x->param))[port] = data; return; } port -= NB_PARAM;
+    if (port < NB_IN)    { ((float**)(&x->in))[port]    = data; return; }          port -= NB_IN;
+    if (port < NB_OUT)   { ((float**)(&x->out))[port]   = data; return; }          port -= NB_OUT;
+    if (port < NB_PARAM) { ((float**)(&x->param))[port] = *(float*)data; return; } port -= NB_PARAM;
 }
 
 static void activate(LV2_Handle handle) {
