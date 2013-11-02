@@ -1,7 +1,7 @@
 #lang racket/base
-(require (planet clements/rsound)
+#;(require rsound
          ffi/vector)
 
-(define snd-vec (s16vector -1000 1000))
+#;(define snd-vec (s16vector -1000 1000))
 
-(read)
+#;(read)
