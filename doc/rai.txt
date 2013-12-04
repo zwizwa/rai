@@ -811,3 +811,10 @@ should probably be implemented as chunked buffers.  Dynwav has a
 time->frequency tradeoff that reflects as a variable buffer size
 between FFT calls.
 
+
+
+Entry: Next?
+Date: Sun Dec  1 10:26:37 EST 2013
+
+Probably try LV2 in a simple host, and make this part of the build
+process.
