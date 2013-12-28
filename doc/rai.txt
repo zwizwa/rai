@@ -833,3 +833,20 @@ Date: Wed Dec 18 01:09:08 EST 2013
 Document sput, making a slideshow with bode diagrams.
 
 [1] http://docs.racket-lang.org/slideshow/
+
+
+Entry: Testing LV2
+Date: Fri Dec 27 21:57:32 EST 2013
+
+It might be interesting to have a LV2 host interface for testing
+authored plugins.
+
+sudo apt-get install libslv2-dev [2]
+
+EDIT: Working with [2] I'm not sure that I like it very much.  API is
+quite stateful and ad-hoc in the memory management.
+
+
+[1] http://lists.puredata.info/pipermail/pd-list/2013-07/103407.html
+[2] http://drobilla.net/software/slv2/
+
