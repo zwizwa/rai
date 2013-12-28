@@ -1,6 +1,7 @@
 #lang racket/base
 ;; Core LV2 independent of libslv2.
-(require ffi/unsafe)
+(require ffi/unsafe
+         ffi/vector)
 (provide (all-defined-out))
 
 
@@ -10,7 +11,7 @@
 ;; The type of this is defined in the metadata.
 ;; audio   : array of floats
 ;; control : single float
-(define _lv2_port_data  (_cpointer 'port_data))
+(define _lv2_port_data  _pointer)
 
 (define-cstruct _lv2_descriptor
   ([URI            _string/utf-8]

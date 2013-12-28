@@ -859,3 +859,20 @@ Date: Sat Dec 28 15:35:30 EST 2013
 
 Going forward, though slow..  Lot's of red tape.
 Next: pointers and arrays of floats.
+
+
+
+Entry: Float vectors
+Date: Sat Dec 28 16:34:02 EST 2013
+
+It seems that variable-size arrays are problematic due to the need to
+define a C type for each array size.  Is this so?  Yes, but doesn't
+look problematic: all just functions / no macros.
+
+It seems simplest to work like this:
+- once size is known => (define f10 (make-array-type float 10))
+- allocate memory using (malloc f10)
+
+Actually what is needed is ffi/vector and `make-f32vector`
+http://docs.racket-lang.org/foreign/homogeneous-vectors.html
+

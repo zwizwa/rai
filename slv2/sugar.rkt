@@ -1,5 +1,6 @@
 #lang racket
 (require
+ ffi/vector
  "main.rkt"
  "lv2.rkt")
          
@@ -73,6 +74,13 @@
   (map slv2_value_as_string
        (values->list (slv2_port_get_classes plugin port))))
 
+;; Serves as an example of how to pierce through the indirections.
+(define (plugin-instance-connect-port-f32vector instance index vector)
+  (let* ((descriptor (slv2_instance-lv2_descriptor instance))    ;; class
+         (handle     (slv2_instance-lv2_handle     instance))    ;; object
+         (connect    (lv2_descriptor-connect_port  descriptor))) ;; method
+    (connect handle index (f32vector->cpointer vector))))
+     
 ;; --------------------------------------------------------------------------------------
 
 (define (test)
@@ -80,7 +88,10 @@
 (define (test-plugin p)
   (let* ((i (plugin-instantiate p 44100.0))
          (d (slv2_instance-lv2_descriptor i))
-         (ports (plugin-ports p)))
+         (h (slv2_instance-lv2_handle i))
+         (ports (plugin-ports p))
+         (iobuf (make-f32vector 1)))
+    (plugin-instance-connect-port-f32vector i 0 iobuf)
     (pretty-print
      `(,(plugin-name p)
        ,(plugin-port-names p)
