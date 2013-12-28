@@ -842,11 +842,20 @@ It might be interesting to have a LV2 host interface for testing
 authored plugins.
 
 sudo apt-get install libslv2-dev [2]
+sudo apt-get install swh-lv2 invada-studio-plugins-lv2
 
 EDIT: Working with [2] I'm not sure that I like it very much.  API is
-quite stateful and ad-hoc in the memory management.
+quite stateful, ad-hoc in the memory management and uses complete
+types and inline functions like LV2 does too.
 
 
 [1] http://lists.puredata.info/pipermail/pd-list/2013-07/103407.html
 [2] http://drobilla.net/software/slv2/
 
+
+
+Entry: FFI for libslv2
+Date: Sat Dec 28 15:35:30 EST 2013
+
+Going forward, though slow..  Lot's of red tape.
+Next: pointers and arrays of floats.
