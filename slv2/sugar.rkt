@@ -11,18 +11,22 @@
          plugin-port-name
          plugin-instantiate)
 
-;; Sugar on top of the raw libslv2 C API.
-;; API is UNSTABLE.
+;; UNSTABLE sugar API on top of the stable, thin libslv2 C API.
 
 (define world (slv2_world_new))
 
 (slv2_world_load_all world)
 
-(define input   (slv2_value_new_string world "input"))
-(define output  (slv2_value_new_string world "output"))
-(define audio   (slv2_value_new_string world "audio"))
-(define control (slv2_value_new_string world "control"))
-(define midi    (slv2_value_new_string world "midi"))
+(define portclasses
+  `(("http://lv2plug.in/ns/lv2core#AudioPort"   . audio)
+    ("http://lv2plug.in/ns/lv2core#ControlPort" . control)
+    ("http://lv2plug.in/ns/lv2core#InputPort"   . input)
+    ("http://lv2plug.in/ns/lv2core#OutputPort"  . output)))
+
+(define (portclass str)
+  (dict-ref portclasses str #f))
+
+    
 
 
 ;; Avoid the iterator interface - just use Racket lists for collections.
@@ -75,11 +79,25 @@
        (values->list (slv2_port_get_classes plugin port))))
 
 ;; Serves as an example of how to pierce through the indirections.
-(define (plugin-instance-connect-port-f32vector instance index vector)
+(define (plugin-instance-connect-port-f32vector! instance index vector)
   (let* ((descriptor (slv2_instance-lv2_descriptor instance))    ;; class
          (handle     (slv2_instance-lv2_handle     instance))    ;; object
          (connect    (lv2_descriptor-connect_port  descriptor))) ;; method
     (connect handle index (f32vector->cpointer vector))))
+
+;; Create f32 i/o vectors and connect to control and audio ports.
+(define (plugin-instance-make/connect-ports plugin instance nb_samples)
+  (for/list ((port (plugin-ports plugin))
+             (index (in-naturals)))
+    (let* ((classes (map portclass (plugin-port-classes plugin port)))
+           (nb (cond
+                ((memq 'audio   classes) nb_samples)
+                ((memq 'control classes) 1)
+                (else (raise `(unsupported-class ,classes)))))
+           (vector (make-f32vector nb)))
+      (plugin-instance-connect-port-f32vector! instance index vector)
+      (cons vector classes))))
+      
      
 ;; --------------------------------------------------------------------------------------
 
@@ -91,14 +109,16 @@
          (h (slv2_instance-lv2_handle i))
          (ports (plugin-ports p))
          (iobuf (make-f32vector 1)))
-    (plugin-instance-connect-port-f32vector i 0 iobuf)
+    ;; (plugin-instance-connect-port-f32vector! i 0 iobuf)
     (pretty-print
      `(,(plugin-name p)
-       ,(plugin-port-names p)
        ,(lv2_descriptor-URI d)
        ,(for/list ((port ports))
-          (list (plugin-port-properties p port)
-                (plugin-port-classes p port)))))))
+          (list (plugin-port-name p port)
+                (map portclass (plugin-port-classes p port))
+                (plugin-port-properties p port)
+                ))))
+    (plugin-instance-make/connect-ports p i 64)))
 
 ;; Instantiation might fail, e.g. due to linking errors.     
 (define (instantiate-working-plugins [sr 48000.0])

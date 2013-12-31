@@ -848,6 +848,10 @@ EDIT: Working with [2] I'm not sure that I like it very much.  API is
 quite stateful, ad-hoc in the memory management and uses complete
 types and inline functions like LV2 does too.
 
+EDIT2: For later: find out if it is easier to use RDF directly.  I'm
+new to this world of "simple complex" abstractions so I don't feel in
+a good position to decide.  Maybe first get the job done, then look at
+elegance later?
 
 [1] http://lists.puredata.info/pipermail/pd-list/2013-07/103407.html
 [2] http://drobilla.net/software/slv2/
