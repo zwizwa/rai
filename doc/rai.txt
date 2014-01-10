@@ -880,3 +880,83 @@ It seems simplest to work like this:
 Actually what is needed is ffi/vector and `make-f32vector`
 http://docs.racket-lang.org/foreign/homogeneous-vectors.html
 
+
+
+Entry: Next: hard problems
+Date: Thu Jan  9 22:38:37 EST 2014
+
+- "extend from below" -> see also racket conference
+
+- how to have multiple low-level bases implement a shared functional
+  base?  e.g. 
+    approximation of x->exp(x) in different contexts
+    fixed point Cortex M4F.
+
+- hierarchy of modules?  this really smells like haskell type classes.
+  can it be formalized?  are racket modules sufficient?
+
+- formalize subsampling
+
+- formalize delay lines
+
+- fix transfer function computation (see DSP book?): separate
+  computatuion of polygon / poles (once)from evaluation of rational
+  function (many times, e.g. for plot).
+
+- plug visualization into fluxus
+
+- make the "code dial" work.  structured editor?  this probably
+  requires some kind of jit.  or compile to some VM where constants
+  are not inlined, or get "out-lined" whenever they are dialled.
+
+- solve the multi-layer mix -> distribute problem (only nonlinear!).
+  this requires representation of "map" as in Feldspar: essentially:
+  don't ever unpack lists.  once unpacked, they gain individual
+  identity and can no longer be represented as a separate array.  the
+  goal could be to undo gratuitous unpacking?
+
+
+Entry: Delay lines, commitation of implementation and structural transformation
+Date: Fri Jan 10 01:01:37 EST 2014
+
+Delay lines are structural shortcuts.  Meaning, they are intrinsically
+different.  Is there a way to generalize this concept, i.e. straighten
+it out, removing the loops?
+
+Commutation of structural transformations.
+
+Commutation is such an interesting crutch.  It is the embellishment of
+an implementation hack.  If you can abstract the thing that needs a
+hack in a clean transformation, you can get away with limiting the
+iteractions of the hack.
+
+Concretely:
+
+suppose s represents and ordinary feedback system, and s' is a
+specification of a delay line system.  The map
+ D : s' -> s
+
+Represents the _conceptual_ part: a delay line is a generator of a
+large system with pass-through delays.
+
+Then an interpretation / implementation of such a system is optimized
+if there is a commutation between the implementation map I and the
+delay map D.
+
+ I (D s') -> D' (I s)    or I D ~ D' I
+
+Note that D does not have to be equal to D'.
+
+
+Maybe it's time to switch back to Haskell for a while to flesh this
+out...
+
+EDIT: Conclusion:
+
+- don't ever perform unnecessary unpacking: keep high level operations
+  on the high level.
+
+- hack: re-abstract unnecessary unpacking?
+
+
+
