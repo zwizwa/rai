@@ -66,13 +66,13 @@ extern "C" {
 
 
 #define VST_PARAM(_param, _desc, _unit, _min, _max, _range, _curve) {   \
-            offsetof(struct proc_param,_param)/sizeof(float),           \
             _desc,                                                      \
             _unit,                                                      \
-            rai_scale_##_curve,                                         \
+            offsetof(struct proc_param,_param)/sizeof(float),           \
             _min,                                                       \
             _max,                                                       \
             _range,                                                     \
+            rai_scale_##_curve,                                         \
             },
 const struct rai_info_control param[] = {
     proc_for_control(VST_PARAM) 
