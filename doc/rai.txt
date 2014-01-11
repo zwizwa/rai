@@ -960,3 +960,12 @@ EDIT: Conclusion:
 
 
 
+Entry: Removing the scheme reference implementation?
+Date: Sat Jan 11 15:55:09 CET 2014
+
+Main reason is that it doesn't really work very well.  Let's stick to
+the C implementation as reference loaded into racket through FFI, and
+keep the other interpretations for analysis.
+
+See test-librai.txt
+

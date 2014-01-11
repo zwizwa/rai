@@ -26,13 +26,17 @@ typedef unsigned long word_t; // pointer-sized int
 
    rai_info is structured data, where all pointers (to strings and
    substructures) are represented by a u64 file offset.
+
+   Lists in rai.h are implemented using sentinel-terminated arrays,
+   where the sentinal is a 0-filled field the size of a pointer.
+
 */
 typedef void (*rai_info_run)(float *state,
                              float **in,
                              float *param,
                              float **out,
                              float *store,
-                             int nb_samples);
+                             unsigned int nb_samples);
 struct rai_info_param;
 struct rai_info_control;
 
@@ -65,17 +69,17 @@ enum rai_scale {
     rai_scale_slog = 2, // s2 * (v/(1-v)) ^ s2   "squeezed log / stretched exp"
 };
 struct rai_info_control {
-    int index;
     const char *desc;
     const char *unit;
-    enum rai_scale scale;
+    int index;
     float s0; // minimum | center
     float s1; // maximum | exponent
     float range;
+    enum rai_scale scale;
 } __attribute__((__packed__));
 
 struct rai_info_param {
-    char *name;
+    const char *name;
     u32 *dims;
 } __attribute__((__packed__));
 

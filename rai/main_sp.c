@@ -32,13 +32,13 @@ const struct rai_info_param info_state[] = { PROC(for_si)    (GEN_INFO) {} };
 const struct rai_info_param info_store[] = { PROC(for_store) (GEN_INFO) {} };
 
 #define GEN_CONTROL(_param, _desc, _unit, _min, _max, _range, _curve) { \
-            offsetof(struct proc_param,_param)/sizeof(float),           \
             _desc,                                                      \
             _unit,                                                      \
-            rai_scale_##_curve,                                         \
+            offsetof(struct proc_param,_param)/sizeof(float),           \
             _min,                                                       \
             _max,                                                       \
             _range,                                                     \
+            rai_scale_##_curve,                                         \
             },
 const struct rai_info_control info_control[] = { PROC(for_control)(GEN_CONTROL) {} };
 

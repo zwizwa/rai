@@ -6,6 +6,10 @@
 (provide ai-stream)
 
 
+;; DEPRICATED: Use C target as reference implementation until core
+;; language stabilizes.
+
+
 ;; High level reference implementation for Stream language.
 ;; Represented as operations on Racket sequences returning (lazy)
 ;; sequences.
