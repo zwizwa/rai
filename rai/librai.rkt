@@ -11,7 +11,7 @@
 (define _uintptr-pointer       (_cpointer _uintptr))
 
 (define _rai_info_run
-  (_fun _float-pointer          ;; state (double buffered)
+  (_fun _float-pointer          ;; state (two concatentated copies for double buffering)
         _float-pointer-pointer  ;; array of input arrays
         _float-pointer          ;; param array
         _float-pointer-pointer  ;; array of output arrays
@@ -30,9 +30,9 @@
    [s0    _float]
    [s1    _float]
    [range _float]
-   [scale (_enum '(rai_scale_lin  = 0
-                   rai_scale_log  = 1
-                   rai_scale_slog = 2))]
+   [scale (_enum '(lin  = 0
+                   log  = 1
+                   slog = 2))]
    ))
 
 (define-cstruct _rai_info
@@ -48,11 +48,6 @@
    [build_stamp  _uint32]
    [__reserved   _uint32]))
 
-  
-  
-
-
-
 (define-cstruct _rai_proc
   ([info  _rai_info-pointer]
    [state _float-pointer]
@@ -61,9 +56,7 @@
    ))
 
 
-
 (define-rai rai_load_bin (_fun _string -> _rai_info-pointer))
-
 
 (define-rai rai_proc_new (_fun _rai_info-pointer
                                (_or-null _rai_proc-pointer)
@@ -76,11 +69,6 @@
 ;; Lists in rai.h are implemented using sentinel-terminated arrays,
 ;; where the sentinal is a 0-filled field the size of a pointer.
 
-;; Might seem a bit annoying, but actually avoiding a separate size
-;; field makes data structures easer to read from Scheme, and easier
-;; to generate from C.
-
-
 ;; Unpack sentinel-terminated array into a list of pointers.
 (define (array0->list p0 ctype)
   (let loop ((ps '())
@@ -90,29 +78,60 @@
           (reverse ps)
           (loop (cons p ps) (add1 i))))))
 
-
 ;; Convert info to s-expression.
+(define (info-control i)
+  (for/list ((p (array0->list (rai_info-info_control i) _rai_info_control)))
+    `((desc  . ,(rai_info_control-desc p))
+      (unit  . ,(rai_info_control-unit p))
+      (index . ,(rai_info_control-index p))
+      (s0    . ,(rai_info_control-s0 p))
+      (s1    . ,(rai_info_control-s1 p))
+      (range . ,(rai_info_control-range p))
+      (scale . ,(rai_info_control-scale p)))))
+
+(define (info-io i info_param)
+  (let* ((s-offset 0)
+         (ips (array0->list (info_param i) _rai_info_param))
+         (pi
+          (for/list ((ip ips))
+            (let* ((dims (for/list ((dp (array0->list (rai_info_param-dims ip) _uintptr)))
+                           (ptr-ref dp _uintptr)))
+                   (offset s-offset))
+              (set! s-offset (+ s-offset (foldl * 1 dims)))
+              `((name . ,(rai_info_param-name ip))
+                (dims . ,dims)
+                (offset . ,offset))))))
+    `((total . ,s-offset)
+      (info . ,pi))))
+
+
+(define (info-ios i)
+  (for/list ((info_param (list rai_info-info_param
+                               rai_info-info_in
+                               rai_info-info_out
+                               rai_info-info_state
+                               rai_info-info_store))
+             (tag '(param in out state store)))
+    `(,tag . ,(info-io i info_param))))
+
 (define (info i)
   (append
-   `((control . ,(for/list ((p (array0->list (rai_info-info_control i) _rai_info_control)))
-                   `((desc  . ,(rai_info_control-desc p))
-                     (unit  . ,(rai_info_control-unit p))
-                     (index . ,(rai_info_control-index p))
-                     (s0    . ,(rai_info_control-s0 p))
-                     (s1    . ,(rai_info_control-s1 p))
-                     (range . ,(rai_info_control-range p))
-                     (scale . ,(rai_info_control-scale p))))))
-   
-   (for/list ((info_param (list rai_info-info_param
-                                rai_info-info_in
-                                rai_info-info_out
-                                rai_info-info_state
-                                rai_info-info_store))
-              (tag '(param in out state store)))
-     `(,tag .
-            ,(let* ((ips (array0->list (info_param i) _rai_info_param)))
-               (for/list ((ip ips))
-                 `((name . ,(rai_info_param-name ip))
-                   (dims . ,(for/list ((dp (array0->list (rai_info_param-dims ip) _uintptr)))
-                              (ptr-ref dp _uintptr))))))))))
+   `((control . ,(info-control i)))
+   (info-ios i)))
   
+
+;; Instantiate proc object.
+;; TODO
+
+;; How to find a good bridge between the special-cased param/buffer
+;; approach and a generic scheme approach?
+
+;; Concretely: what to do with the "param rate"?  Base "semantics"
+;; doesn't have this.
+
+;; Maybe it's best to keep this at C level?  Or maybe some duplication
+;; is unavoidable..
+
+(define (run i)
+  (let ((r (rai_info-entry i)))
+    r))
