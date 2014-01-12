@@ -17,7 +17,7 @@ static inline _ local_fmod(_ x, _ range) {
 
 
 
-#define GEN_DIM_ARRAY(name, kind, size, ...) static const u32 name##_dims[kind+1] = {__VA_ARGS__};
+#define GEN_DIM_ARRAY(name, kind, size, ...) static const uintptr name##_dims[kind+1] = {__VA_ARGS__};
 PROC(for_in)    (GEN_DIM_ARRAY)
 PROC(for_param) (GEN_DIM_ARRAY)
 PROC(for_out)   (GEN_DIM_ARRAY)

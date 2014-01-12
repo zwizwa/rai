@@ -11,6 +11,7 @@ typedef unsigned long long u64;
 typedef unsigned int u32;
 typedef unsigned char u8;
 typedef unsigned long word_t; // pointer-sized int
+typedef unsigned long uintptr;
 #define CT_ASSERT(name,expr) typedef int _assert_##name[-(!(expr))]
 
 // Used for run-time loading
@@ -80,7 +81,7 @@ struct rai_info_control {
 
 struct rai_info_param {
     const char *name;
-    u32 *dims;
+    uintptr *dims;
 } __attribute__((__packed__));
 
 struct rai_info_preset {
@@ -111,7 +112,7 @@ int rai_info_size(const struct rai_info_param *rp);
 
 /* Parameter offset and dimensions. */
 bool rai_info_find(const struct rai_info_param *pi,
-                   const char *name, int *offset, u32 **dims);
+                   const char *name, int *offset, uintptr **dims);
 
 /* Create proc instance. */
 struct rai_proc {

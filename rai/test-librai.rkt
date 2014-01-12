@@ -36,3 +36,5 @@ test_param
 
 param-names
 control-names
+
+(info test_sp_info)

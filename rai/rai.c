@@ -63,7 +63,7 @@ struct rai_info *rai_load_bin(const char *filename) {
 
 
 bool rai_info_find(const struct rai_info_param *pi,
-                   const char *name, int *offset, u32 **dims) {
+                   const char *name, int *offset, uintptr **dims) {
     *offset = 0;
     for (int i = 0; pi[i].name; i++) {
         *dims = pi[i].dims;
@@ -79,7 +79,7 @@ bool rai_info_find(const struct rai_info_param *pi,
 
 int rai_info_size(const struct rai_info_param *pi) {
     int size;
-    u32 *dims;
+    uintptr *dims;
     rai_info_find(pi, "", &size, &dims);
     return size;
 }
@@ -171,7 +171,7 @@ static void rai_print_info_param(const char *tag,
     log("%s %d:\n", tag, rai_info_size(pi));
     for (int i = 0; pi[i].name; i++) {
         log("\t%d %s", i, pi[i].name);
-        u32 *dims = pi[i].dims;
+        uintptr *dims = pi[i].dims;
         int size = 1;
         for (int d = 0; dims[d]; d++) {
             log(" %d", dims[d]);

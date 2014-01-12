@@ -8,6 +8,7 @@
 (define _float-pointer         (_cpointer _float))
 (define _float-pointer-pointer (_cpointer _float-pointer))
 (define _uint32-pointer        (_cpointer _uint32))
+(define _uintptr-pointer       (_cpointer _uintptr))
 
 (define _rai_info_run
   (_fun _float-pointer          ;; state (double buffered)
@@ -20,7 +21,7 @@
   
 (define-cstruct _rai_info_param
   ([name _string/utf-8]
-   [dims _uint32-pointer]))
+   [dims _uintptr-pointer]))
 
 (define-cstruct _rai_info_control
   ([desc  _string/utf-8]
@@ -88,4 +89,30 @@
       (if (= 0 (ptr-ref p _uintptr))
           (reverse ps)
           (loop (cons p ps) (add1 i))))))
+
+
+;; Convert info to s-expression.
+(define (info i)
+  (append
+   `((control . ,(for/list ((p (array0->list (rai_info-info_control i) _rai_info_control)))
+                   `((desc  . ,(rai_info_control-desc p))
+                     (unit  . ,(rai_info_control-unit p))
+                     (index . ,(rai_info_control-index p))
+                     (s0    . ,(rai_info_control-s0 p))
+                     (s1    . ,(rai_info_control-s1 p))
+                     (range . ,(rai_info_control-range p))
+                     (scale . ,(rai_info_control-scale p))))))
+   
+   (for/list ((info_param (list rai_info-info_param
+                                rai_info-info_in
+                                rai_info-info_out
+                                rai_info-info_state
+                                rai_info-info_store))
+              (tag '(param in out state store)))
+     `(,tag .
+            ,(let* ((ips (array0->list (info_param i) _rai_info_param)))
+               (for/list ((ip ips))
+                 `((name . ,(rai_info_param-name ip))
+                   (dims . ,(for/list ((dp (array0->list (rai_info_param-dims ip) _uintptr)))
+                              (ptr-ref dp _uintptr))))))))))
   

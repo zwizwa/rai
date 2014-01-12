@@ -149,7 +149,7 @@ static void rai_pd_load(struct rai_pd *x, t_symbol *filename) {
             /* Config synth voices */
             bzero(&x->voice, sizeof(x->voice));
             int gate_offset = 0, freq_offset = 0;
-            u32 *dims = NULL;
+            uintptr *dims = NULL;
             if (rai_info_find(ri->info_param, "voice_gate", &gate_offset, &dims) &&
                 rai_info_find(ri->info_param, "voice_freq", &freq_offset, &dims)) {
                 rai_voice_init(&x->voice,
@@ -262,7 +262,7 @@ static void rai_pd_param(struct rai_pd *x, t_symbol *name, t_float value) {
     proc_for_param(HANDLE_PARAM);
 #else
     int offset;
-    u32 *dims;
+    uintptr *dims;
     if (rai_info_find(x->rai_info->info_param, name->s_name, &offset, &dims)) {
         x->rai_proc->param[offset] = value;
     }
