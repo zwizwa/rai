@@ -40,4 +40,8 @@ control-names
 (info test_sp_info)
 
 
-(define i (instantiate test_sp_info))
+(define i (proc-instantiate test_sp_info
+                            '((samplerate . 1.0)
+                              (voice_gate . 1.0)
+                              (voice_freq . 0.2))))
+(map f32vector->list (proc-run i 10))

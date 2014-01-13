@@ -14,8 +14,7 @@
 (define _uint32-pointer        (_cpointer _uint32))
 (define _uintptr-pointer       (_cpointer _uintptr))
 
-;; Note that these are float* and float**, but it's easier to drop the type here  (see run.h)
-
+;; Note that these are float* and float**, but it's easier to drop the type here  (see rai.h)
 (define _rai_info_run
   (_fun (_or-null _pointer) ;; state (two concatentated copies for double buffering)
         (_or-null _pointer) ;; array of input arrays
@@ -104,9 +103,9 @@
                            (ptr-ref dp _uintptr)))
                    (offset s-offset))
               (set! s-offset (+ s-offset (foldl * 1 dims)))
-              `((name . ,(rai_info_param-name ip))
-                (dims . ,dims)
-                (offset . ,offset))))))
+              (list (string->symbol (rai_info_param-name ip))
+                    offset
+                    dims)))))
     `((total . ,s-offset)
       (info . ,pi))))
 
@@ -143,37 +142,49 @@
       d
       (rdict-ref (dict-ref d (car tags)) (cdr tags))))
 
-(define-struct proc (entry param state store nin pin nout pout) #:transparent)
+(define-struct proc (entry pinfo param state store nin pin nout pout) #:transparent)
 
-(define (make/init-f32vector n val)
+(define (make/init-f32vector n [val 0.0])
   (let ((vec (make-f32vector n)))
     (for ((i (in-range n))) (f32vector-set! vec i val))
     vec))
 
-(define (instantiate i)
+(define (proc-instantiate i [defaults '()])
   (let* ((info (info i))
          (total (lambda (tag) (rdict-ref info `(,tag total))))
          (nin  (total 'in))
          (nout (total 'out))
-         (param (make/init-f32vector (total 'param) 0.0))
-         (state (make/init-f32vector (* 2 (total 'state)) 0.0))
-         (store (make/init-f32vector (total 'store) 0.0)))
-    (make-proc
-     (rai_info-entry i)
-     param state store
-     nin  (malloc _float-pointer nin)
-     nout (malloc _float-pointer nout)
-     )))
+         (param (make/init-f32vector (total 'param)))
+         (state (make/init-f32vector (* 2 (total 'state))))
+         (store (make/init-f32vector (total 'store)))
+         (p
+          (make-proc
+           (rai_info-entry i)
+           (rdict-ref info '(param info))
+           param state store
+           nin  (malloc _float-pointer nin)
+           nout (malloc _float-pointer nout))))
+    (for (((k v) (in-dict defaults)))
+      (proc-param-set! p k v))
+    p))
+       
 
+         
+
+(define (proc-param-set! p param val)
+  (unless (number? param)
+    (set! param (car (dict-ref (proc-pinfo p) param))))
+  (when param
+    (f32vector-set! (proc-param p) param val)))
+  
 
 (define (ptr-set-f32vectors! arr vs)
   (for ((i (in-naturals)) (v vs))
     (ptr-set! arr _pointer i (f32vector->cpointer v))))
 
 
-;; FIXME: get/set param
 
-(define (run p ins/n [outs #f])
+(define (proc-run p ins/n [outs #f])
   (let-values
       (((n ins)
         (if (number? ins/n)
@@ -182,7 +193,7 @@
     (when (odd? n)
       (error 'odd-run-not-supported)) ;; need to copy state buffer!
     (match p
-      ((struct proc (entry param state store nin pin nout pout))
+      ((struct proc (entry pinfo param state store nin pin nout pout))
        (unless outs 
          (set! outs (for/list ((i nout)) (make-f32vector n))))
        (ptr-set-f32vectors! pin  ins)
