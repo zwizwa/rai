@@ -1,5 +1,9 @@
 #lang racket/base
-(require ffi/unsafe
+(require racket/dict
+         racket/match
+         racket/pretty
+         ffi/vector
+         ffi/unsafe
          ffi/unsafe/define)
 (provide (all-defined-out))
  
@@ -10,13 +14,15 @@
 (define _uint32-pointer        (_cpointer _uint32))
 (define _uintptr-pointer       (_cpointer _uintptr))
 
+;; Note that these are float* and float**, but it's easier to drop the type here  (see run.h)
+
 (define _rai_info_run
-  (_fun _float-pointer          ;; state (two concatentated copies for double buffering)
-        _float-pointer-pointer  ;; array of input arrays
-        _float-pointer          ;; param array
-        _float-pointer-pointer  ;; array of output arrays
-        _float-pointer          ;; store
-        _uint                   ;; nb_samples
+  (_fun (_or-null _pointer) ;; state (two concatentated copies for double buffering)
+        (_or-null _pointer) ;; array of input arrays
+        (_or-null _pointer) ;; param array
+        (_or-null _pointer) ;; array of output arrays
+        (_or-null _pointer) ;; store
+        _uint               ;; nb_samples
         -> _void)) 
   
 (define-cstruct _rai_info_param
@@ -132,6 +138,60 @@
 ;; Maybe it's best to keep this at C level?  Or maybe some duplication
 ;; is unavoidable..
 
-(define (run i)
-  (let ((r (rai_info-entry i)))
-    r))
+(define (rdict-ref d tags)
+  (if (null? tags)
+      d
+      (rdict-ref (dict-ref d (car tags)) (cdr tags))))
+
+(define-struct proc (entry param state store nin pin nout pout) #:transparent)
+
+(define (make/init-f32vector n val)
+  (let ((vec (make-f32vector n)))
+    (for ((i (in-range n))) (f32vector-set! vec i val))
+    vec))
+
+(define (instantiate i)
+  (let* ((info (info i))
+         (total (lambda (tag) (rdict-ref info `(,tag total))))
+         (nin  (total 'in))
+         (nout (total 'out))
+         (param (make/init-f32vector (total 'param) 0.0))
+         (state (make/init-f32vector (* 2 (total 'state)) 0.0))
+         (store (make/init-f32vector (total 'store) 0.0)))
+    (make-proc
+     (rai_info-entry i)
+     param state store
+     nin  (malloc _float-pointer nin)
+     nout (malloc _float-pointer nout)
+     )))
+
+
+(define (ptr-set-f32vectors! arr vs)
+  (for ((i (in-naturals)) (v vs))
+    (ptr-set! arr _pointer i (f32vector->cpointer v))))
+
+
+;; FIXME: get/set param
+
+(define (run p ins/n [outs #f])
+  (let-values
+      (((n ins)
+        (if (number? ins/n)
+            (values ins/n '())
+            (values (f32vector-length (car ins/n)) ins/n))))
+    (when (odd? n)
+      (error 'odd-run-not-supported)) ;; need to copy state buffer!
+    (match p
+      ((struct proc (entry param state store nin pin nout pout))
+       (unless outs 
+         (set! outs (for/list ((i nout)) (make-f32vector n))))
+       (ptr-set-f32vectors! pin  ins)
+       (ptr-set-f32vectors! pout outs)
+       (entry (f32vector->cpointer state) pin
+              (f32vector->cpointer param) pout
+              (f32vector->cpointer store) n)
+       outs))))
+
+       
+     
+

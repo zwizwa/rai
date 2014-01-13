@@ -38,3 +38,6 @@ param-names
 control-names
 
 (info test_sp_info)
+
+
+(define i (instantiate test_sp_info))
