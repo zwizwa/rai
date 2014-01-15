@@ -39,6 +39,7 @@
 #include "rai.h"
 
 #include "m_pd.h"
+#include "g_canvas.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -51,6 +52,7 @@ t_class *rai_pd_class;
 struct rai_pd {
     t_object x_obj;
     t_float x_f;
+    t_canvas *x_canvas;
 #if HAVE_STATIC
     struct proc_si state[2];
     struct proc_param param;
@@ -79,28 +81,82 @@ t_int *rai_pd_perform(t_int *w) {
     return w+3;
 }
 
+#define F(f)     {.a_type = A_FLOAT,  .a_w = {.w_float  = f}}
+#define S(s)     {.a_type = A_SYMBOL, .a_w = {.w_symbol = s}}
+#define nb_el(x) (sizeof(x)/sizeof(x[0]))
+
+
+
 
 #if !HAVE_STATIC
+
+static t_symbol *gensym_n(const char *name, int n) {
+    char sname[strlen(name)+10];
+    snprintf(sname, sizeof(sname), "%s%d", name, n);
+    sname[sizeof(sname)-1] = 0;
+    return gensym(sname);
+}
+
+static t_symbol *slider_label(struct rai_info_control *p) {
+    int buflen = 2 + strlen(p->desc) + strlen(p->unit);
+    char buf[buflen];
+    strcpy(buf, p->desc);
+    strcat(buf, "/");
+    strcat(buf, p->unit);
+    /* Symbols can't have whitespace. */
+    for (int j=0; j<buflen; j++) {
+        if (isspace(buf[j])) buf[j] = '_';
+    }
+    return gensym(buf);
+}
+
+static void rai_pd_create_gui(struct rai_pd *x, float x_coord, float y_coord) {
+
+    /* Adding new objects to the canvas has to wait until after the
+       patch is finished loading.  Otherwise it will mess up the
+       numbering of objects. */
+    t_canvas *canvas = glist_getcanvas(x->x_canvas);
+
+    /* Create slider on current canvas if there is no receiver. */
+    struct rai_info_control *p = x->rai_info->info_control;
+    t_symbol *obj = gensym("obj");
+    t_symbol *hsl = gensym("hsl");
+    for (int i = 0; p[i].desc; i++) {
+        t_symbol *slider = gensym_n("slider", i);
+        if (!slider->s_thing) {
+            t_symbol *param  = gensym_n("param", i);
+            t_atom args[] = {
+                S(obj), F(x_coord), F(y_coord + 30 * i), S(hsl),
+                /*w*/ F(128),
+                /*h*/ F(15),
+                /*min*/F(0),
+                /*max*/F(1),
+                /*lilo*/F(0),
+                /*isa*/F(0),
+                S(param), S(slider),
+                S(slider_label(&p[i])),
+                /*ldx*/F(-2),
+                /*ldy*/F(-8),
+                /*fsf*/F(0),
+                /*fs*/
+                /*bflcol[0]*/F(-262144),
+                /*bflcol[1]*/F(0),
+                /*bflcol[2]*/F(0),
+                /*val*/F(0),
+            };
+            pd_forwardmess((t_pd*)canvas, nb_el(args), args);
+        }
+    }
+    canvas_redraw(canvas);
+}
+
 static void rai_send_meta(struct rai_pd *x) {
+
     struct rai_info_control *p = x->rai_info->info_control;
     for (int i = 0; p[i].desc; i++) {
-        char sname[32];
-        snprintf(sname, sizeof(sname), "slider%d", i);
-        sname[sizeof(sname)-1] = 0;
-        t_symbol *s = gensym(sname);
+        t_symbol *s = gensym_n("slider",i);
         if (s->s_thing) {
-            /* Strip whitespace from name. */
-            int buflen = 2 + strlen(p[i].desc) + strlen(p[i].unit);
-            char buf[buflen];
-            strcpy(buf, p[i].desc);
-            strcat(buf, "/");
-            strcat(buf, p[i].unit);
-            for (int j=0; j<buflen; j++) {
-                if (isspace(buf[j])) {
-                    buf[j] = '_';
-                }
-            }
-            t_atom s_desc = {A_SYMBOL, (union word)gensym(buf)};
+            t_atom s_desc = {A_SYMBOL, (union word)slider_label(p)};
             typedmess(s->s_thing, gensym("label"), 1, &s_desc);
         }
     }
@@ -220,6 +276,7 @@ static void rai_pd_note(struct rai_pd *x, t_float freq, t_float gain) {
 static void *rai_pd_new(t_symbol *filename) {
 
     struct rai_pd *x = (void*)pd_new(rai_pd_class);
+    x->x_canvas = canvas_getcurrent();
 
 #if HAVE_STATIC
     /* Create I/O */
@@ -241,6 +298,7 @@ static void *rai_pd_new(t_symbol *filename) {
     /* Init state and input param vectors. */
     rai_pd_reset_state(x);
     rai_pd_reset_param(x);
+
 
     return x;
 }
@@ -297,6 +355,7 @@ void EXTERN_SETUP (void) {
     class_addmethod(rai_pd_class, (t_method)rai_pd_note, gensym("note"), A_FLOAT, A_FLOAT, A_NULL);
 #if !HAVE_STATIC
     class_addmethod(rai_pd_class, (t_method)rai_pd_load, gensym("load"), A_SYMBOL, A_NULL);
+    class_addmethod(rai_pd_class, (t_method)rai_pd_create_gui, gensym("create_gui"), A_DEFFLOAT, A_DEFFLOAT, A_NULL);
 #endif
     CLASS_MAINSIGNALIN(rai_pd_class, struct rai_pd, x_f);
 }
