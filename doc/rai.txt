@@ -893,7 +893,7 @@ Date: Thu Jan  9 22:38:37 EST 2014
     fixed point Cortex M4F.
 
 - hierarchy of modules?  this really smells like haskell type classes.
-  can it be formalized?  are racket modules sufficient?
+  can it be formalized?  are racket modules sufficient? [1]
 
 - formalize subsampling
 
@@ -915,6 +915,7 @@ Date: Thu Jan  9 22:38:37 EST 2014
   identity and can no longer be represented as a separate array.  the
   goal could be to undo gratuitous unpacking?
 
+[1] http://repository.readscheme.org/ftp/papers/sw2005/garcia.pdf
 
 Entry: Delay lines, commitation of implementation and structural transformation
 Date: Fri Jan 10 01:01:37 EST 2014
@@ -969,3 +970,105 @@ keep the other interpretations for analysis.
 
 See test-librai.txt
 
+
+
+Entry: Evolve or rewrite?
+Date: Tue Jan 14 02:18:05 CET 2014
+
+It is not clear if some of the bad abstractions need a rewrite or if
+they can evolve.
+
+An essential point to keep in mind is to not trash the code that is
+written in the language.  If a parallel implementation should arise at
+some point, it should be able to use the DSP code written in the
+current system, be it with some translation step.
+
+Most of the design is complicated by hacks that are currently bolted
+on top: delay lines, control-rate subsampling.
+
+
+
+Entry: Write an executable tutorial
+Date: Tue Jan 14 02:26:40 CET 2014
+
+Executable so it doesn't get out of date.  Sput could be that.
+
+
+
+Entry: What is important?
+Date: Tue Jan 14 14:20:04 CET 2014
+
+Theory: solve subsampling, delays through model transformation.  This
+should be kept out of the Scheme core for now, and probably best be
+done in Haskell.
+
+Practice:
+
+- integrate loop transformations.
+- syntax cleanup
+- generated synth gui in PD
+
+
+
+Entry: Cleanups
+Date: Tue Jan 14 15:04:14 CET 2014
+
+- Turn everything into call by name?
+
+- The autolifting is still quite weird.  The reason for this is the
+  way state threading is implemented.  (see next post)
+
+
+Entry: About implicit indexing
+Date: Tue Jan 14 16:04:05 CET 2014
+
+
+The type annotation mechanism is a bit unorthodox.  It supports a
+mechanism of implicit indexing.  The reason for using implicit
+indexing is that it solves the behind-the-scenes state threading
+in a very elegant way.
+
+Causal stream operators may appear inside spatial loops.  For
+each iteration, a separate "instance" of a causal stream operator
+needs to be allocated.  Shifting from the scalar to the grid view
+makes it trivial to solve this problem.
+
+Abstracting such state management is a major feature of the
+language: it makes the language purely functional at the stream
+level, instead of object-oriented at the scalar level.
+
+I accidentally bumped into this approach as originally making every
+operation auto-lifted seemed like a good idea.  It is not.  Currently
+the loop contstruct is relatively orthodox, but internally the
+auto-lifting is still used to track grid indexing.
+
+
+
+Entry: Loop transformations
+Date: Wed Jan 15 10:45:16 CET 2014
+
+How to specify algorithms that require temporary array storage?
+Something is missing in the idea.  Something can't be expessed..
+
+It seems best to try to tackle this when the problem arises again in
+practice.
+
+
+
+Entry: Fixed point math
+Date: Wed Jan 15 11:50:19 CET 2014
+
+Why is this interesting?
+Phasors and saturated add.
+
+
+Entry: pd: find all sliders in current canvas
+Date: Wed Jan 15 15:02:31 CET 2014
+
+    t_gobj *o;
+    for (o=c->gl_list; o; o=o->g_next) {
+        const char *name = class_getname(o->g_pd);
+        if (!strcmp("hsl", name)) {
+            printf("slider %p\n", o);
+        }
+    }
