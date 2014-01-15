@@ -14,13 +14,10 @@
 
 ;;; Compile to imperative program (i.e. C) operating on arrays.
 
-;; This code is the result of a couple of months of evolution, and has
-;; gotten a bit complex.  I do not have the time at this point to
-;; disentangle it, so here is a summary of what happens:
 
 ;; PASS 1:
-;;  - type inference
-;;  - convert stream semantics to causal update semantics (state alloc)
+;;  - type annotation for variable nodes (base types and grid dimensions)
+;;  - convert stream semantics to causal update semantics (feedback state alloc)
 ;;  - delay line allocation
 ;;  - phase annotation (block setup t=0 / block body t>0)
 ;;  - primitive partial evaluation
@@ -28,35 +25,52 @@
 
 
 ;; PASS 2:
-;;  - type-driven array index generation (auto-lifting)
+;;  - type-driven array index generation (for nodes not explicitly indexed in PASS 1)
 ;;  - low-level scalar type annotation (for C, LLVM)
-;;  - stream and parameter separation
-;;  - array dimension specification
+;;  - stream input / scalar parameter input separation
+;;  - i/o and state array dimension specification
 ;;  - generate imperative program with outer temporal loop and inner spatial loops
+
+;; ( PASS 3: trivially convert to C: see ai-array-c.rkt )
+
 
 
 ;; Additional notes
 ;;
+;; * This code is the result of a couple of months of incremental
+;;   ad-hoc changes and needs cleanup.
+;;
 ;; * Making evaluation lazy allows the implementation of dead code
-;;   elimination.  The trouble here is to properly implement local
-;;   context.  Basically, dynamic parameters are not very compatible
-;;   with lazy eval.
-
-
-
-
-;; The different passes perform a significant amount of work.  At this
-;; point it seems hard to separate this out into passes that are
-;; neatly decoupled by intermediate languages.
-
-;; Since most of the work involves the creation of global context in a
-;; first pass, and the interpretation of this context in a second, we
-;; leave all info in dictionaries implemented as dynamic parameters.
-;; This also facilitates debugging.
-
-;; If at any time it is nessary to provide a clean, pure functional
-;; interface, just fish the relevant data from the dynamic
-;; dictionaries.
+;;   elimination.  The trouble here is to properly implement dynamic
+;;   context.  Basically, dynamic parameters are not compatible with
+;;   lazy eval.
+;;
+;; * Most of the work involves the creation of global context in a
+;;   first pass, and the interpretation of this context in a second.
+;;   All info is left in dictionaries implemented as dynamic
+;;   parameters.  This also facilitates debugging.  If at any time it
+;;   is nessary to provide a clean, pure functional interface, just
+;;   fish the relevant data from the dynamic dictionaries.
+;;
+;; * The type annotation mechanism is a bit unorthodox.  It supports a
+;;   mechanism of implicit indexing.  The reason for using implicit
+;;   indexing is that it solves the behind-the-scenes state threading
+;;   in a very elegant way.
+;;
+;;   Causal stream operators may appear inside spatial loops.  For
+;;   each iteration, a separate "instance" of a causal stream operator
+;;   needs to be allocated.  Shifting from the scalar to the grid view
+;;   makes it trivial to solve this problem.
+;;
+;;   Abstracting such state management is a major feature of the
+;;   language: it makes the language purely functional at the stream
+;;   level, instead of object-oriented at the scalar level.
+;;
+;;   ( I accidentally bumped into this approach as originally making
+;;   every operation auto-lifted seemed like a good idea.  It is not.
+;;   Currently the loop contstruct is relatively orthodox, but
+;;   internally the auto-lifting is still used to track grid
+;;   indexing. )
 
 (define debug #f)
 

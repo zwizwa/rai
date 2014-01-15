@@ -6,7 +6,7 @@
 (provide ai-stream)
 
 
-;; DEPRICATED: Use C target as reference implementation until core
+;; DEPRECATED: Use C target as reference implementation until core
 ;; language stabilizes.
 
 

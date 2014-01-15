@@ -1,33 +1,29 @@
 #lang racket/base
 
 ;; Stream processing DSL surface syntax.
-
-;; See stream.rkt for #lang interface, i.e. renames and limited exports.
-
-;; To avoid (or announce ;) further confusion, the word "syntax" is
-;; used rather loosely in this project, and can refer to two distinct
-;; parts:
+;; See stream.rkt for Racket #lang interface
 ;;
-;; - Scheme macros and their output (Scheme syntax objects), used
-;;   mostly for slight syntactic sugaring
-;;   (e.g. ai-lambda). A.k.a. surface syntax.
+;; The word "syntax" is context dependent and can refer to:
 ;;
-;; - DSL syntax, represented as lambda expressions parameterized by
-;;   semantics, which is the DSL meaning in terms of a collection of
-;;   primitive interpretation functions.  A.k.a. abstact syntax,
-;;   higher order syntax.
+;; - DSL syntax : abstract syntax (AS) implemented as lambda
+;;   expressions parameterized by semantics.
 ;;
-;; Scheme macros are just for convenience, while DSL syntax is the
-;; real beef.  The basic feature of the parameterized semantics is the
-;; ability to give multiple interpretations to the same syntax, while
-;; reusing much of Scheme's language features.
-
-;; The core language represented is a simple data-flow language
-;; operating on streams.  The stream factor is added through the
-;; `feedback' primitive, which implements an output feedback
-;; mechanism.  ( Without `feedback' or `ai-lambda-feedback', the
-;; language is just a scalar dataflow language. )
-
+;; - Surface syntax: Scheme macros used for syntactic sugaring.
+;;
+;; The Scheme macros implement embedding of the stream language in
+;; Racket, while the abstract syntax is used to endow code
+;; representations with distinct interpretations.
+;;
+;; While interpretation of DSL syntax is arbitrary, interpretation
+;; makes most sense when several distinct interpretations are related,
+;; where one interpretation can shed light on properties of another.
+;;
+;; This is the theory of Abstract Interpretation
+;; http://en.wikipedia.org/wiki/Abstract_interpretation
+;;
+;; The canonical interpretation of the language is in terms of
+;; arithmetic primitives lifted over causal streams.
+;;
 
 (require racket/stxparam
          "tools.rkt"
@@ -41,7 +37,7 @@
 ;;; *** Scheme surface syntax ***
 
 ;; DSL syntax is represented as lambda abstractions written in terms
-;; primitive (or named composite) functions The meaning of the
+;; primitive (or named composite) functions. The meaning of the
 ;; primitive functions is represented as a struct `ai' present as the
 ;; first argument in any abstraction `ai-lambda' or application
 ;; `ai-app'.  These two macros perform the implicit lexical threading
@@ -370,18 +366,6 @@
      (list (list expr ...) ...))))
 
 
-;; stream syntax submodule
-;; FIXME: planet modules doesn't work well with geiser's auto reload.
-;; (define-syntax (begin-stream stx)
-;;   (syntax-case stx ()
-;;     ((begin-stream form ...)
-;;      #`(begin
-;;          (module stream-forms (planet zwizwa/rai/stream)
-;;            (provide (all-defined-out))
-;;            form ...)
-;;          ;; non-hygienic, since it inserts bindings.
-;;          #,(datum->syntax
-;;             stx '(require 'stream-forms))))))
 
 ;; General remarks.
 
@@ -390,3 +374,6 @@
 ;; allows embedding processor code in scheme directly (locally)
 ;; instead of requiring global bindings.
 
+;; The idea is inspired by the implementation of Haskell type classes.
+;; A more general approach is described in this paper:
+;; http://repository.readscheme.org/ftp/papers/sw2005/garcia.pdf
