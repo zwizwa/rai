@@ -124,27 +124,35 @@ static void rai_pd_create_gui(struct rai_pd *x, float x_coord, float y_coord) {
     for (int i = 0; p[i].desc; i++) {
         t_symbol *slider = gensym_n("slider", i);
         if (!slider->s_thing) {
+            /* Examples of the format can be found in .pd files, e.g.:
+               #X obj 55 54 hsl 128 15 0 127 0 0 empty empty empty -2 -8 0 10 -262144 -1 -1 0 1;
+               see also hslider_new() */
+
             t_symbol *param  = gensym_n("param", i);
-            t_atom args[] = {
-                S(obj), F(x_coord), F(y_coord + 30 * i), S(hsl),
-                /*w*/ F(128),
-                /*h*/ F(15),
-                /*min*/F(0),
-                /*max*/F(1),
-                /*lilo*/F(0),
-                /*isa*/F(0),
-                S(param), S(slider),
-                S(slider_label(&p[i])),
-                /*ldx*/F(-2),
-                /*ldy*/F(-8),
-                /*fsf*/F(0),
-                /*fs*/
-                /*bflcol[0]*/F(-262144),
-                /*bflcol[1]*/F(0),
-                /*bflcol[2]*/F(0),
-                /*val*/F(0),
-            };
-            pd_forwardmess((t_pd*)canvas, nb_el(args), args);
+            {
+                t_atom args[] = {
+                    S(obj), F(x_coord), F(y_coord + 30 * i), S(hsl),
+                    /*w*/ F(128),
+                    /*h*/ F(15),
+                    /*min*/F(0),
+                    /*max*/F(1),
+                    /*lilo*/F(0),
+                    /*isa*/F(0),
+                    /*snd*/S(param),
+                    /*rcv*/S(slider),
+                    /*lab*/S(slider_label(&p[i])),
+                    /*ldx*/F(-2),
+                    /*ldy*/F(-8),
+                    /*fsf*/F(0),
+                    /*fs*/F(10),
+                    /*bflcol[0]*/F(-262144),
+                    /*bflcol[1]*/F(-1),
+                    /*bflcol[2]*/F(-1),
+                    /*val*/F(0),
+                    /*steady*/F(1),
+                };
+                pd_forwardmess((t_pd*)canvas, nb_el(args), args);
+            }
         }
     }
     canvas_redraw(canvas);

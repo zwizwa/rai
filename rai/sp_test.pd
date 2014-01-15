@@ -1,4 +1,4 @@
-#N canvas 480 479 478 419 10;
+#N canvas 360 479 358 419 10;
 #X obj 80 256 dac~;
 #X floatatom 112 190 5 0 0 0 - - -;
 #X obj 128 7 loadbang;
@@ -124,11 +124,31 @@
 #X msg 19 87 load synth.sp;
 #X msg 166 166 80;
 #X obj 79 225 vols~;
-#N canvas 0 479 478 419 sp 1;
+#N canvas 0 479 358 419 sp 1;
 #X obj 286 33 inlet;
 #X obj 286 82 outlet~;
 #X obj 286 56 sp_host synth.sp;
 #X msg 349 33 create_gui;
+#X obj 0 0 hsl 128 15 0 1 0 0 param0 slider0 Attack/ms -2 -8 0 10 -262144
+-1 -1 0 1;
+#X obj 0 30 hsl 128 15 0 1 0 0 param1 slider1 Decay/ms -2 -8 0 10 -262144
+-1 -1 0 1;
+#X obj 0 60 hsl 128 15 0 1 0 0 param2 slider2 Sustain/dB -2 -8 0 10
+-262144 -1 -1 0 1;
+#X obj 0 90 hsl 128 15 0 1 0 0 param3 slider3 Release/ms -2 -8 0 10
+-262144 -1 -1 0 1;
+#X obj 0 120 hsl 128 15 0 1 0 0 param4 slider4 Cutoff/Hz -2 -8 0 10
+-262144 -1 -1 0 1;
+#X obj 0 150 hsl 128 15 0 1 0 0 param5 slider5 Filter_Attack/ms -2
+-8 0 10 -262144 -1 -1 0 1;
+#X obj 0 180 hsl 128 15 0 1 0 0 param6 slider6 Filter_Release/ms -2
+-8 0 10 -262144 -1 -1 0 1;
+#X obj 0 210 hsl 128 15 0 1 0 0 param7 slider7 Filter_Env/Hz -2 -8
+0 10 -262144 -1 -1 0 1;
+#X obj 0 240 hsl 128 15 0 1 0 0 param8 slider8 Filter_Q/dB -2 -8 0
+10 -262144 -1 -1 0 1;
+#X obj 0 270 hsl 128 15 0 1 0 0 param9 slider9 Osc_Spread/% -2 -8 0
+10 -262144 -1 -1 0 1;
 #X connect 0 0 2 0;
 #X connect 2 0 1 0;
 #X connect 3 0 2 0;
