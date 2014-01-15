@@ -22,7 +22,9 @@ ALL := \
 	compalg.rkt.run \
 	test_jack.g.h test_jack.jack \
 	sp_host.pd_linux \
-	test_pd.dll
+	test_pd.dll \
+	test-librai.rkt.run \
+	synth.sp
 
 #	test-librai.rkt.run \
 #	test_pd1.sp test_pd1.g.run \
