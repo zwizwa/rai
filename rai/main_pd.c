@@ -137,11 +137,11 @@ static void rai_pd_update_gui(struct rai_pd *x) {
 }
 
 
+/* Note that adding new objects to the canvas has to wait until after
+   the patch is finished loading.  Otherwise it will mess up the
+   numbering of objects recorded in the .pd file. */
 static void rai_pd_create_gui(struct rai_pd *x, float x_coord, float y_coord) {
 
-    /* Adding new objects to the canvas has to wait until after the
-       patch is finished loading.  Otherwise it will mess up the
-       numbering of objects. */
     t_canvas *canvas = glist_getcanvas(x->x_canvas);
 
 
@@ -149,6 +149,7 @@ static void rai_pd_create_gui(struct rai_pd *x, float x_coord, float y_coord) {
     struct rai_info_control *p = x->rai_info->info_control;
     t_symbol *obj = gensym("obj");
     t_symbol *hsl = gensym("hsl");
+    t_symbol *empty  = gensym("empty");
     t_symbol *msg = gensym("msg");
     t_symbol *control = gensym("control");
     t_symbol *dollar_one = gensym("$1");
@@ -162,7 +163,6 @@ static void rai_pd_create_gui(struct rai_pd *x, float x_coord, float y_coord) {
             /* Examples of the format can be found in .pd files, e.g.:
                #X obj 55 54 hsl 128 15 0 127 0 0 empty empty empty -2 -8 0 10 -262144 -1 -1 0 1;
                see also hslider_new() */
-            t_symbol *param  = gensym_n("param", i);
             {
                 t_atom args[] = {
                     /** create object at location **/
@@ -177,7 +177,7 @@ static void rai_pd_create_gui(struct rai_pd *x, float x_coord, float y_coord) {
                     /* max */  FLOAT(1),
                     /* lilo */ FLOAT(0),
                     /* isa */  FLOAT(1),
-                    /* snd */  SYMBOL(param),
+                    /* snd */  SYMBOL(empty),
                     /* rcv */  SYMBOL(slider),
                     /* lab */  SYMBOL(slider_label(&p[i])),
                     /* ldx */  FLOAT(-2),
