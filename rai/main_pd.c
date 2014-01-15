@@ -68,6 +68,7 @@ struct rai_pd {
     int nb_controls;
 #endif
     struct rai_voice voice;
+    int cc_map[128];
 };
 
 t_int *rai_pd_perform(t_int *w) {
@@ -81,8 +82,8 @@ t_int *rai_pd_perform(t_int *w) {
     return w+3;
 }
 
-#define F(f)     {.a_type = A_FLOAT,  .a_w = {.w_float  = f}}
-#define S(s)     {.a_type = A_SYMBOL, .a_w = {.w_symbol = s}}
+#define FLOAT(f)      {.a_type = A_FLOAT,  .a_w = {.w_float  = (f)}}
+#define SYMBOL(s)     {.a_type = A_SYMBOL, .a_w = {.w_symbol = (s)}}
 #define nb_el(x) (sizeof(x)/sizeof(x[0]))
 
 
@@ -91,7 +92,7 @@ t_int *rai_pd_perform(t_int *w) {
 #if !HAVE_STATIC
 
 static t_symbol *gensym_n(const char *name, int n) {
-    char sname[strlen(name)+10];
+    char sname[strlen(name)+20];
     snprintf(sname, sizeof(sname), "%s%d", name, n);
     sname[sizeof(sname)-1] = 0;
     return gensym(sname);
@@ -110,6 +111,32 @@ static t_symbol *slider_label(struct rai_info_control *p) {
     return gensym(buf);
 }
 
+static void update_gui_labels(struct rai_pd *x) {
+    struct rai_info_control *p = x->rai_info->info_control;
+    for (int i = 0; p[i].desc; i++) {
+        t_symbol *s = gensym_n("slider",i);
+        if (s->s_thing) {
+            t_atom s_desc = {A_SYMBOL, (union word)slider_label(&p[i])};
+            typedmess(s->s_thing, gensym("label"), 1, &s_desc);
+        }
+    }
+}
+static void update_gui(struct rai_pd *x, int control_index, float value) {
+    struct rai_info_control *p = x->rai_info->info_control;
+    t_symbol *s = gensym_n("slider",control_index);
+    if (s->s_thing) {
+        t_atom s_desc = FLOAT(value);
+        typedmess(s->s_thing, gensym("set"), 1, &s_desc);
+    }
+}
+static void rai_pd_update_gui(struct rai_pd *x) {
+    for(int i=0; i<x->nb_controls; i++) {
+        int param_index = x->rai_info->info_control[i].index;
+        update_gui(x, i, x->rai_proc->param[param_index]);
+    }
+}
+
+
 static void rai_pd_create_gui(struct rai_pd *x, float x_coord, float y_coord) {
 
     /* Adding new objects to the canvas has to wait until after the
@@ -117,58 +144,94 @@ static void rai_pd_create_gui(struct rai_pd *x, float x_coord, float y_coord) {
        numbering of objects. */
     t_canvas *canvas = glist_getcanvas(x->x_canvas);
 
+
     /* Create slider on current canvas if there is no receiver. */
     struct rai_info_control *p = x->rai_info->info_control;
     t_symbol *obj = gensym("obj");
     t_symbol *hsl = gensym("hsl");
+    t_symbol *msg = gensym("msg");
+    t_symbol *control = gensym("control");
+    t_symbol *dollar_one = gensym("$1");
+    t_symbol *connect = gensym("connect");
+    int synth_obj_no = canvas_getindex(canvas, (void*)x);
     for (int i = 0; p[i].desc; i++) {
         t_symbol *slider = gensym_n("slider", i);
         if (!slider->s_thing) {
+            int obj_no = canvas_getindex(canvas, NULL);
+
             /* Examples of the format can be found in .pd files, e.g.:
                #X obj 55 54 hsl 128 15 0 127 0 0 empty empty empty -2 -8 0 10 -262144 -1 -1 0 1;
                see also hslider_new() */
-
             t_symbol *param  = gensym_n("param", i);
             {
                 t_atom args[] = {
-                    S(obj), F(x_coord), F(y_coord + 30 * i), S(hsl),
-                    /*w*/ F(128),
-                    /*h*/ F(15),
-                    /*min*/F(0),
-                    /*max*/F(1),
-                    /*lilo*/F(0),
-                    /*isa*/F(0),
-                    /*snd*/S(param),
-                    /*rcv*/S(slider),
-                    /*lab*/S(slider_label(&p[i])),
-                    /*ldx*/F(-2),
-                    /*ldy*/F(-8),
-                    /*fsf*/F(0),
-                    /*fs*/F(10),
-                    /*bflcol[0]*/F(-262144),
-                    /*bflcol[1]*/F(-1),
-                    /*bflcol[2]*/F(-1),
-                    /*val*/F(0),
-                    /*steady*/F(1),
+                    /** create object at location **/
+                    SYMBOL(obj),
+                    FLOAT(x_coord),
+                    FLOAT(y_coord + 30 * i),
+                    SYMBOL(hsl),
+                    /** arguments passed to hslider_new() */
+                    /* w */    FLOAT(128),
+                    /* h */    FLOAT(15),
+                    /* min */  FLOAT(0),
+                    /* max */  FLOAT(1),
+                    /* lilo */ FLOAT(0),
+                    /* isa */  FLOAT(1),
+                    /* snd */  SYMBOL(param),
+                    /* rcv */  SYMBOL(slider),
+                    /* lab */  SYMBOL(slider_label(&p[i])),
+                    /* ldx */  FLOAT(-2),
+                    /* ldy */  FLOAT(-8),
+                    /* fsf */  FLOAT(0),
+                    /* fs */   FLOAT(10),
+                    /* bflcol[0] */ FLOAT(-262144),
+                    /* bflcol[1] */ FLOAT(-1),
+                    /* bflcol[2] */ FLOAT(-1),
+                    /* val */       FLOAT(0),
+                    /* steady */    FLOAT(1),
+                };
+                pd_forwardmess((t_pd*)canvas, nb_el(args), args);
+            }
+            {
+                t_atom args[] = {
+                    /** create message object.  it converts slider output to tagged message **/
+                    SYMBOL(msg),
+                    FLOAT(x_coord + 200),
+                    FLOAT(y_coord + 30 * i + 15),
+                    SYMBOL(control),
+                    FLOAT(i),
+                    SYMBOL(dollar_one),
+                };
+                pd_forwardmess((t_pd*)canvas, nb_el(args), args);
+            }
+            {
+                t_atom args[] = {
+                    /** connect slider to message object. **/
+                    SYMBOL(connect),
+                    FLOAT(obj_no), FLOAT(0),
+                    FLOAT(obj_no+1), FLOAT(0)
+                };
+                pd_forwardmess((t_pd*)canvas, nb_el(args), args);
+            }
+            {
+                t_atom args[] = {
+                    /** connect message object to sp_host object. **/
+                    SYMBOL(connect),
+                    FLOAT(obj_no+1), FLOAT(0),
+                    FLOAT(synth_obj_no), FLOAT(0)
                 };
                 pd_forwardmess((t_pd*)canvas, nb_el(args), args);
             }
         }
     }
-    canvas_redraw(canvas);
+    rai_pd_update_gui(x);
 }
 
-static void rai_send_meta(struct rai_pd *x) {
 
-    struct rai_info_control *p = x->rai_info->info_control;
-    for (int i = 0; p[i].desc; i++) {
-        t_symbol *s = gensym_n("slider",i);
-        if (s->s_thing) {
-            t_atom s_desc = {A_SYMBOL, (union word)slider_label(p)};
-            typedmess(s->s_thing, gensym("label"), 1, &s_desc);
-        }
-    }
-}
+
+
+
+
 /* Force code reload by loading stand-alone binary fPIC code.
    Note that libdl won't reload a library if it is opened somewhere else. */
 static void rai_pd_load(struct rai_pd *x, t_symbol *filename) {
@@ -227,7 +290,7 @@ static void rai_pd_load(struct rai_pd *x, t_symbol *filename) {
                  filename->s_name, nb_in, nb_out, ri->build_stamp, ri->version);
 
             rai_print_info(ri, startpost);
-            rai_send_meta(x);
+            update_gui_labels(x);
         }
     }
     else {
@@ -285,6 +348,7 @@ static void *rai_pd_new(t_symbol *filename) {
 
     struct rai_pd *x = (void*)pd_new(rai_pd_class);
     x->x_canvas = canvas_getcurrent();
+    for(int i=0; i<128; i++) x->cc_map[i] = -1;
 
 #if HAVE_STATIC
     /* Create I/O */
@@ -350,6 +414,39 @@ static void rai_pd_control(struct rai_pd *x, t_float f_index, t_float value) {
 #endif
 }
 
+// FIXME: map to gui param index first, then send out update symbol to slider
+static void rai_pd_cc_map(struct rai_pd *x, t_symbol *s, int argc, t_atom *argv) {
+#if !HAVE_STATIC
+    int i;
+    for (int control_index=0;
+         control_index < argc && control_index < x->nb_controls;
+         control_index++) {
+        float f = atom_getfloat(&argv[control_index]);
+        if ((f > 0) && (f < 128)) {
+            x->cc_map[(int)f] = control_index;
+        }
+    }
+#endif
+}
+static void rai_pd_cc(struct rai_pd *x, t_float cc_f, t_float val) {
+#if !HAVE_STATIC
+    if ((cc_f >= 0) && (cc_f <= 127)) {
+        int cc = cc_f;
+        int control_index = x->cc_map[(int)cc];
+        if (control_index >= 0) { // -1 means not mapped
+            struct rai_info_control *p = x->rai_info->info_control;
+            int param_index = x->rai_info->info_control[control_index].index;
+            float range_val = val * (1.0f / 127.0f);
+            x->rai_proc->param[param_index] = range_val;
+            // FIXME: should we really do this from here??
+            update_gui(x, control_index, range_val);
+        }
+        else {
+            post("cc %d not mapped", cc);
+        }
+    }
+#endif
+}
 
 
 
@@ -361,6 +458,8 @@ void EXTERN_SETUP (void) {
     class_addmethod(rai_pd_class, (t_method)rai_pd_param, gensym("param"), A_SYMBOL, A_FLOAT, A_NULL);
     class_addmethod(rai_pd_class, (t_method)rai_pd_control, gensym("control"), A_FLOAT, A_FLOAT, A_NULL);
     class_addmethod(rai_pd_class, (t_method)rai_pd_note, gensym("note"), A_FLOAT, A_FLOAT, A_NULL);
+    class_addmethod(rai_pd_class, (t_method)rai_pd_cc_map, gensym("cc_map"), A_GIMME, A_NULL);
+    class_addmethod(rai_pd_class, (t_method)rai_pd_cc, gensym("cc"), A_FLOAT, A_FLOAT, A_NULL);
 #if !HAVE_STATIC
     class_addmethod(rai_pd_class, (t_method)rai_pd_load, gensym("load"), A_SYMBOL, A_NULL);
     class_addmethod(rai_pd_class, (t_method)rai_pd_create_gui, gensym("create_gui"), A_DEFFLOAT, A_DEFFLOAT, A_NULL);
