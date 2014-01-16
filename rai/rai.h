@@ -7,6 +7,8 @@
 
 #define PROC_CMD_INFO -1
 
+typedef float float32;
+typedef int int32;
 typedef unsigned long long u64;
 typedef unsigned int u32;
 typedef unsigned char u8;
@@ -64,7 +66,7 @@ struct rai_info {
     u32 build_stamp;
     u32 __reserved;
 
-} __attribute__((__packed__));
+};
 
 
 /* param meta info */
@@ -81,10 +83,10 @@ struct rai_info_control {
     float s1; // maximum | exponent
     float range;
     enum rai_scale scale;
-} __attribute__((__packed__));
+};
 
-enum rai_scale {
-    rai_type_float32 = 0,
+enum rai_type {
+    rai_type_float32 = 0,  // == float32
     rai_type_uint32  = 1,
     rai_type_int32   = 2,
 };
@@ -93,14 +95,14 @@ struct rai_info_param {
     const char *name;
     uintptr *dims;
     enum rai_type type;
-} __attribute__((__packed__));
+};
 
 struct rai_info_preset {
     u8 magic[RAI_MAGIC_SIZE];
     u32 header_bytes;
     u32 timestamp;
     u32 payload_bytes;
-} __attribute__((__packed__));
+};
 
 /* Maps v \in [0,1] to the control parameter's user feedback scale. */
 static inline float rai_info_control_interpolate(const struct rai_info_control *p, float v) {

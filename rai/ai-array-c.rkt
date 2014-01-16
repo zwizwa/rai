@@ -10,7 +10,7 @@
 (define (ai-array/c expr
                     #:indextype (indextype 'int)
                     #:prefix (prefix "proc_")
-                    #:default_type (default_type "float"))
+                    #:default_type (default_type "float32"))
   
   (define (pfx x) (format "~a~a" prefix x))
 
@@ -21,8 +21,8 @@
   
   (define ctype
     (match-lambda
-     ((struct type ('Float     #f '())) "float")
-     ((struct type ('Int       #f '())) "int")
+     ((struct type ('Float     #f '())) "float32")
+     ((struct type ('Int       #f '())) "int32")
      ((struct type ('Undefined #f '())) default_type)
      ((struct type-var (_)) default_type) ;; FIXME: should not happen
      (type (error 'ctype (format "~a" type)))))

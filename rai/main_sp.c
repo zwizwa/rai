@@ -10,6 +10,7 @@
 
 static inline _ local_fmod(_ x, _ range);
 #include "prim.h"  // primitive functions
+#include "rai.h"
 #include PROC_FILE // generated code
 static inline _ local_fmod(_ x, _ range) {
     _ mapped = x / range;
@@ -17,22 +18,23 @@ static inline _ local_fmod(_ x, _ range) {
     return frac * range;
 }
 
-#include "rai.h"
 
 
 
 
-#define GEN_DIM_ARRAY(name, kind, size, ...) static const uintptr name##_dims[kind+1] = {__VA_ARGS__};
+
+#define GEN_DIM_ARRAY(name, type, kind, size, ...) static const uintptr name##_dims[kind+1] = {__VA_ARGS__};
 PROC(for_in)    (GEN_DIM_ARRAY)
 PROC(for_param) (GEN_DIM_ARRAY)
 PROC(for_out)   (GEN_DIM_ARRAY)
 PROC(for_si)    (GEN_DIM_ARRAY)
 PROC(for_store) (GEN_DIM_ARRAY)
 
-#define GEN_INFO(name, kind, size, ...) {\
-.name = (void*)#name, \
-.dims = (void*)&name##_dims[0] \
-.type = rai_type_float32 \
+// FIXME: type
+#define GEN_INFO(__name, __type, kind, size, ...) {   \
+        .name = (void*)#__name,                       \
+        .dims = (void*)&__name##_dims[0],             \
+        .type = rai_type_##__type                     \
 },
 const struct rai_info_param info_in[]    = { PROC(for_in)    (GEN_INFO) {} };
 const struct rai_info_param info_param[] = { PROC(for_param) (GEN_INFO) {} };

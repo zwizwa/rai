@@ -26,7 +26,11 @@
   
 (define-cstruct _rai_info_param
   ([name _string/utf-8]
-   [dims _uintptr-pointer]))
+   [dims _uintptr-pointer]
+   [type (_enum '(float32 = 0
+                  uint32  = 1
+                  int32   = 2))]
+   ))
 
 (define-cstruct _rai_info_control
   ([desc  _string/utf-8]
