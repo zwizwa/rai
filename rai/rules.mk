@@ -6,6 +6,22 @@ RKT = $(shell ls $(RAI)/*.rkt *.rkt)
 RACKET := racket
 RACO := raco
 
+
+CFLAGS_OPTI  := -ffast-math -O3
+CFLAGS_BASE  := -g -Wall -Wno-unused-variable -I. -I$(RAI) -I../copy
+CFLAGS_DEBUG := -fPIC -std=gnu99 
+CFLAGS_PD    := -I/usr/local/pd/src   # FIXME: g_canvas.h is usually not exported?
+LDFLAGS      := -lm
+
+
+CFLAGS   := $(CFLAGS_BASE) $(CFLAGS_DEBUG) $(CFLAGS_OPTI) $(CFLAGS_PD)
+CXXFLAGS := $(CFLAGS_BASE) $(CFLAGS_OPTI)
+
+
+CFLAGS_DLL  := $(CXXFLAGS) -I$(VST_DIR) -I$(VST_DIR)/public.sdk/source/vst2.x -mfpmath=sse -msse2
+LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
+
+
 # Test running racket code.
 %.rkt.run: %.rkt $(RKT)
 	$(RACO) make -v -j 6 $<
@@ -73,18 +89,6 @@ sp_host.pd_linux: $(RAI)/prim.h $(RAI)/main_pd.c $(RAI)/rai.h rai.o
 
 
 
-CFLAGS_OPTI  := -ffast-math -O3
-CFLAGS_BASE  := -g -Wall -Wno-unused-variable -I. -I$(RAI) -I../copy
-CFLAGS_DEBUG := -fPIC -std=gnu99 
-LDFLAGS      := -lm
-
-
-CFLAGS   := $(CFLAGS_BASE) $(CFLAGS_DEBUG) $(CFLAGS_OPTI)
-CXXFLAGS := $(CFLAGS_BASE) $(CFLAGS_OPTI)
-
-
-CFLAGS_DLL  := $(CXXFLAGS) -I$(VST_DIR) -I$(VST_DIR)/public.sdk/source/vst2.x -mfpmath=sse -msse2
-LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 
 %.dll: %.g.h $(RAI)/main_vst.cpp $(LICENSE_DEPS) $(RAI)/win_debug.h
 	$(MINGW)g++ $(CFLAGS_DLL) $(LICENSE_CFLAGS) -DPROC_FILE=\"$<\" $(RAI)/main_vst.cpp $(LDFLAGS_DLL) -shared -o $@
