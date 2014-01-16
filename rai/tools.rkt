@@ -153,7 +153,9 @@
   (cond
    ((null? lst) "")
    ((null? (cdr lst)) (format "~a" (car lst)))
-   (else (format "~a, ~a" (car lst) (c-list (cdr lst))))))
+   ;; To make this work for macros containing symbols, don't add a
+   ;; space before/after comma.
+   (else (format "~a,~a" (car lst) (c-list (cdr lst))))))
 
 (define (with-output-to-string thunk)
   (let ((port (open-output-string)))

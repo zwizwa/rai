@@ -1,5 +1,10 @@
 // Stand-alone loadable module.
 
+/* CONTACT AUTHOR IF YOU DEPEND ON THE BINARY REPRESENTATION.
+   IMPLEMENTATION IS IN FLUX - VERSIONS ARE NOT YET TAGGED PROPERLY.
+
+   Once requirements are clear, this should stabilize. */
+
 #define fast_fmod local_fmod
 #define _ float
 
@@ -24,7 +29,11 @@ PROC(for_out)   (GEN_DIM_ARRAY)
 PROC(for_si)    (GEN_DIM_ARRAY)
 PROC(for_store) (GEN_DIM_ARRAY)
 
-#define GEN_INFO(name, kind, size, ...) {(void*)#name, (void*)&name##_dims[0]},
+#define GEN_INFO(name, kind, size, ...) {\
+.name = (void*)#name, \
+.dims = (void*)&name##_dims[0] \
+.type = rai_type_float32 \
+},
 const struct rai_info_param info_in[]    = { PROC(for_in)    (GEN_INFO) {} };
 const struct rai_info_param info_param[] = { PROC(for_param) (GEN_INFO) {} };
 const struct rai_info_param info_out[]   = { PROC(for_out)   (GEN_INFO) {} };

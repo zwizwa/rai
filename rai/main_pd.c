@@ -387,7 +387,7 @@ static void rai_pd_free(struct rai_pd *x) {
 static void rai_pd_param(struct rai_pd *x, t_symbol *name, t_float value) {
     post("rai_pd_param: %s %f", name->s_name, value);
 #if HAVE_STATIC
-#define HANDLE_PARAM(p_name, ...) \
+#define HANDLE_PARAM(p_name, p_type, ...)                               \
     if (gensym(#p_name) == name) { *(float *)(&x->param.p_name) = value; return; }
     proc_for_param(HANDLE_PARAM);
 #else

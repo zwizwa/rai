@@ -100,9 +100,9 @@ void create_param(const char *name, void*  base, int kind, int size) {
     p++;
 }
 
-#define CREATE_INPUT(  n, k, s, ...) create_input  (#n,(void*)&in.n,   k,s);
-#define CREATE_OUTPUT( n, k, s, ...) create_output (#n,(void*)&out.n,  k,s);
-#define CREATE_PARAM(  n, k, s, ...) create_param  (#n,(void*)&param.n,k,s);
+#define CREATE_INPUT(  n, t, k, s, ...) create_input  (#n,(void*)&in.n,   k,s);
+#define CREATE_OUTPUT( n, t, k, s, ...) create_output (#n,(void*)&out.n,  k,s);
+#define CREATE_PARAM(  n, t, k, s, ...) create_param  (#n,(void*)&param.n,k,s);
 void create_ports(jack_nframes_t sr) {
 
     LOG("parameters:\n"); proc_for_param (CREATE_PARAM);

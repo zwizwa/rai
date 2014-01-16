@@ -9,26 +9,28 @@
 
 (define (ai-array/c expr
                     #:indextype (indextype 'int)
-                    #:prefix (prefix "proc_"))
+                    #:prefix (prefix "proc_")
+                    #:default_type (default_type "float"))
+  
   (define (pfx x) (format "~a~a" prefix x))
 
   ;; FIXME: For unused variables, type is unknown.  Might just as well
   ;; not include them, i.e. expand as "//" to not define them, but
   ;; this requires the parameter macros to be adapted to not iterate
   ;; over undefined names.
-  (define unknown "/*?*/ float")
   
   (define ctype
     (match-lambda
      ((struct type ('Float     #f '())) "float")
      ((struct type ('Int       #f '())) "int")
-     ((struct type ('Undefined #f '())) unknown)
-     ((struct type-var (_)) unknown) ;; FIXME: should not happen
+     ((struct type ('Undefined #f '())) default_type)
+     ((struct type-var (_)) default_type) ;; FIXME: should not happen
      (type (error 'ctype (format "~a" type)))))
   
   (define *external-nodes* (make-hash))
   (define (node-name node) (caddr node))
   (define (node-dims node) (cadr node))
+  (define (node-base-type node) (car node))
   (define (node-kind node) (length (node-dims node)))
   (define (register-nodes! ts/nss)
     (for ((t/ns ts/nss))
@@ -89,6 +91,7 @@
       (printf "~am(~a) \\\n"
               tab-string
               (c-list `(,(node-name n)
+                        ,(ctype (node-base-type n))
                         ,(node-kind n)
                         ,(foldr * 1 (node-dims n))
                         ,@(reverse (node-dims n))))))
@@ -182,7 +185,7 @@
        (lambda ()
          (line "m(~a,~a) \\\n"
                node (c-list (map (fld node-info) fields))))))
-    (line "\n"))
+    (line " \n")) ;; FIXME: space is a hack to make scribble output work
     
   (define (gen-code)
     (match expr

@@ -12,7 +12,7 @@ typedef unsigned int u32;
 typedef unsigned char u8;
 typedef unsigned long word_t; // pointer-sized int
 typedef unsigned long uintptr;
-#define CT_ASSERT(name,expr) typedef int _assert_##name[-(!(expr))]
+typedef float fload_guess; // FIXME: remove this hack
 
 // Used for run-time loading
 #define RAI_MAGIC_SIZE 16
@@ -83,9 +83,16 @@ struct rai_info_control {
     enum rai_scale scale;
 } __attribute__((__packed__));
 
+enum rai_scale {
+    rai_type_float32 = 0,
+    rai_type_uint32  = 1,
+    rai_type_int32   = 2,
+};
+
 struct rai_info_param {
     const char *name;
     uintptr *dims;
+    enum rai_type type;
 } __attribute__((__packed__));
 
 struct rai_info_preset {
