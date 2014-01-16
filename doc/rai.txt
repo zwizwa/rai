@@ -1006,8 +1006,8 @@ Practice:
 
 - integrate loop transformations.
 - syntax cleanup
-- generated synth gui in PD
-
+- generated synth gui in PD  (done)
+- use structs instead of float arrays
 
 
 Entry: Cleanups
@@ -1044,6 +1044,9 @@ auto-lifting is still used to track grid indexing.
 
 
 
+It would be interesting to formalize this approach in Haskell.
+
+
 Entry: Loop transformations
 Date: Wed Jan 15 10:45:16 CET 2014
 
@@ -1072,3 +1075,11 @@ Date: Wed Jan 15 15:02:31 CET 2014
             printf("slider %p\n", o);
         }
     }
+
+
+Entry: Structs instead of float arrays
+Date: Thu Jan 16 15:07:09 CET 2014
+
+At the .g.h level everything is fine.  The problem is in the main_*
+wrappers.  Essentially, .sp modules need type annotation.
+

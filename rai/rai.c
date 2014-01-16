@@ -16,7 +16,7 @@ static void link_ptr(struct rai_info *ri, void *pointer) {
 static void link_info_param(struct rai_info *ri, struct rai_info_param **rpp) {
     link_ptr(ri, rpp);
     struct rai_info_param *rp = *rpp;
-    for (int i = 0; rp[i].name; i++) {
+    for (int i = 0; !rai_list_end(&rp[i]); i++) {
         link_ptr(ri, &(rp[i].name));
         link_ptr(ri, &(rp[i].dims));
     }
@@ -24,7 +24,7 @@ static void link_info_param(struct rai_info *ri, struct rai_info_param **rpp) {
 static void link_info_control(struct rai_info *ri, struct rai_info_control **rpp) {
     link_ptr(ri, rpp);
     struct rai_info_control *rp = *rpp;
-    for (int i = 0; rp[i].desc; i++) {
+    for (int i = 0; !rai_list_end(&rp[i]); i++) {
         link_ptr(ri, &(rp[i].desc));
         link_ptr(ri, &(rp[i].unit));
     }
@@ -65,11 +65,11 @@ struct rai_info *rai_load_bin(const char *filename) {
 bool rai_info_find(const struct rai_info_param *pi,
                    const char *name, int *offset, uintptr **dims) {
     *offset = 0;
-    for (int i = 0; pi[i].name; i++) {
+    for (int i = 0; !rai_list_end(&pi[i]); i++) {
         *dims = pi[i].dims;
         if (!strcmp(pi[i].name, name)) return true;
         int size = 1;
-        for (int j = 0; pi[i].dims[j]; j++) {
+        for (int j = 0; !rai_list_end(&(pi[i].dims[j])); j++) {
             size *= pi[i].dims[j];
         }
         *offset += size;
@@ -169,7 +169,7 @@ static void rai_print_info_param(const char *tag,
                                  rai_log log) {
     int offset = 0;
     log("%s %d:\n", tag, rai_info_size(pi));
-    for (int i = 0; pi[i].name; i++) {
+    for (int i = 0; !rai_list_end(&pi[i]); i++) {
         log("\t%d %s", i, pi[i].name);
         uintptr *dims = pi[i].dims;
         int size = 1;
@@ -185,7 +185,7 @@ static void rai_print_info_control(const char *tag,
                                    const struct rai_info_control *pi,
                                    rai_log log) {
     log("%s\n", tag);
-    for (int i = 0; pi[i].desc; i++) {
+    for (int i = 0; !rai_list_end(&pi[i]); i++) {
         log("\t%d %s(%s) [%f,%f]\n",
             pi[i].index,
             pi[i].desc,

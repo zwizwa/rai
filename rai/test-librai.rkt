@@ -7,6 +7,7 @@
 
 ;; FIXME: where to store the binaries? currently they're in the source dir.
 (define-runtime-path test_pd.sp "test_pd.sp")
+;; (define-runtime-path test_pd.sp "synth.sp")
 
 
 test_pd.sp

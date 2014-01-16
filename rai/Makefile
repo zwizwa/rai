@@ -54,6 +54,7 @@ zwizwa: ~/www/zwizwa.be/rai/index.html
 	cd doc ; scribble --htmls $(notdir $<)
 	cp -av doc/rai/* ~/www/zwizwa.be/rai/
 
+test-librai.rkt.run: test_pd.sp synth.sp librai.so
 
 livecode:
 	while sleep 1; do $(RACKET) livecode-synth.rkt; done

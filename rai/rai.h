@@ -27,11 +27,15 @@ typedef unsigned long uintptr;
 
    rai_info is structured data, where all pointers (to strings and
    substructures) are represented by a u64 file offset.
-
-   Lists in rai.h are implemented using sentinel-terminated arrays,
-   where the sentinal is a 0-filled field the size of a pointer.
-
 */
+
+
+/* Lists in rai.h are implemented using sentinel-terminated arrays,
+   where the sentinal is a 0-filled field the size of a pointer. */
+static inline int rai_list_end(const void *x) {
+    return *((const void**)x) == NULL;
+}
+
 typedef void (*rai_info_run)(float *state,
                              float **in,
                              float *param,
