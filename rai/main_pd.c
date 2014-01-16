@@ -6,6 +6,7 @@
 // Example for including .g.h file
 
 #include "prim.h"  // primitive functions
+#include "rai.h"
 
 // #undef PROC_FILE // testing
 
@@ -36,7 +37,6 @@
 #define HAVE_SYNTH 1
 #endif
 
-#include "rai.h"
 
 #include "m_pd.h"
 #include "g_canvas.h"

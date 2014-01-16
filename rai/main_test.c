@@ -1,8 +1,8 @@
 // Example for including .g.h file
 
 #include "prim.h"  // primitive functions
-#include PROC_FILE // generated code
 #include "rai.h"   // tools
+#include PROC_FILE // generated code
 
 #include <stdlib.h>
 #include <stdio.h>

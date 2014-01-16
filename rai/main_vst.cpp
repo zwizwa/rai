@@ -34,12 +34,12 @@
 
 extern "C" {
 #include "prim.h"
+#include "rai.h"
 #ifndef PROC_FILE
 #error PROC_FILE not defined
 #else
 #include PROC_FILE
 #endif
-#include "rai.h"
 }
 
 #ifndef LOG
