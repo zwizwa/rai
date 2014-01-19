@@ -126,6 +126,7 @@ static void update_gui(struct rai_pd *x, int control_index) {
     RAI_NUMBER_T value = rai_proc_get_param(x->rai_proc, param_index);
     t_symbol *s = gensym_n("slider",control_index);
     if (s->s_thing) {
+        post("update_gui %d %d %f", control_index, param_index, value);
         t_atom s_desc = FLOAT(value);
         typedmess(s->s_thing, gensym("set"), 1, &s_desc);
     }
@@ -425,6 +426,12 @@ static void rai_pd_cc(struct rai_pd *x, t_float cc_f, t_float val) {
             post("param_index = %d", param_index);
             float range_val = val * (1.0f / 127.0f);
             rai_proc_set_param(x->rai_proc, param_index, range_val);
+
+            float check = rai_proc_get_param(x->rai_proc, param_index);
+            if (range_val != check) {
+                post("param %d stuck", param_index);
+            }
+
             // FIXME: should we really do this from here??
             update_gui(x, control_index);
         }

@@ -99,8 +99,8 @@ enum rai_type {
 
 /* To keep things simple, all casts are to/from a single numeric type. */
 #define RAI_NUMBER_T double
-RAI_NUMBER_T rai_to_number(enum rai_type t, const void *p);
-void         rai_from_number(enum rai_type t, const void *p, RAI_NUMBER_T val);
+RAI_NUMBER_T rai_get_number(enum rai_type t, const void *rai_src);
+void         rai_set_number(enum rai_type t, void *rai_dst, RAI_NUMBER_T val);
 
 
 

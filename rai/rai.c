@@ -105,18 +105,18 @@ int rai_info_param_alloc_size(const struct rai_info_param *pi) {
     return bytes;
 }
 
-RAI_NUMBER_T rai_to_number(enum rai_type t, const void *p) {
-#define RAI_CASE_CAST_TO_NUMBER(_RAI_T_) case rai_type_##_RAI_T_: return (RAI_NUMBER_T)*((_RAI_T_*)p);
+RAI_NUMBER_T rai_get_number(enum rai_type t, const void *p) {
+#define RAI_CASE_GET_NUMBER(_RAI_T_) case rai_type_##_RAI_T_: return (RAI_NUMBER_T)*((_RAI_T_*)p);
     switch(t) {
-        RAI_TYPES_FOR(RAI_CASE_CAST_TO_NUMBER)
+        RAI_TYPES_FOR(RAI_CASE_GET_NUMBER)
     default:
         return (RAI_NUMBER_T)0;
     }
 }
-void rai_from_number(enum rai_type t, const void *p, RAI_NUMBER_T val) {
-#define RAI_CASE_CAST_FROM_NUMBER(_RAI_T_) case rai_type_##_RAI_T_: *((_RAI_T_*)p) = (RAI_NUMBER_T)val;
+void rai_set_number(enum rai_type t, void *p, RAI_NUMBER_T val) {
+#define RAI_CASE_SET_NUMBER(_RAI_T_) case rai_type_##_RAI_T_: *((_RAI_T_*)p) = (_RAI_T_)val; break;
     switch(t) {
-        RAI_TYPES_FOR(RAI_CASE_CAST_FROM_NUMBER)
+        RAI_TYPES_FOR(RAI_CASE_SET_NUMBER)
     }
 }
 
@@ -264,19 +264,30 @@ void rai_proc_set_param(struct rai_proc *p, int index, RAI_NUMBER_T val) {
         return;
     }
     void *param_buf = (void*)p->param + p->param_offset[index];
-    int nb = p->param_nb_el[index];
     enum rai_type t = p->info->info_param[index].type;
+    printf("param_buf %p\n", param_buf);
+
+    rai_set_number(t, param_buf, val);
+    return;
+
+#if 0
+    int nb = p->param_nb_el[index];
     int base_bytes = rai_type_sizeof(t);
     for (int i=0; i<nb; i++) {
         printf("p_%d <- %f\n", index, val); 
-        rai_from_number(t, param_buf, val);
+        rai_set_number(t, param_buf, val);
         param_buf += base_bytes;
     }
+#endif
 }
 RAI_NUMBER_T rai_proc_get_param(struct rai_proc *p, int index) {
-    if ((index < 0) || (index >= p->nb_param)) return 0;
+    if ((index < 0) || (index >= p->nb_param)) {
+        printf("! p_%d\n", index);
+        return 0;
+    }
     void *param_buf = (void*)p->param + p->param_offset[index];
-    return rai_to_number(p->info->info_param[index].type, param_buf);
+    printf("param_buf %p\n", param_buf);
+    return rai_get_number(p->info->info_param[index].type, param_buf);
 }
 
 
