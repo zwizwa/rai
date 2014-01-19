@@ -124,7 +124,7 @@ struct rai_proc *rai_proc_new(const struct rai_info *info,
     rai_param_init(info->info_state, p->state, info->init_state, size_state);
 
     /* Copy from proto or init struct. */
-    if (0 && proto) {
+    if (proto) {
         int proto_size_state = 0;
         int proto_size_param = 0;
         int proto_size_store = 0;

@@ -87,7 +87,6 @@ static void update_gui(struct rai_pd *x, int control_index) {
     RAI_NUMBER_T value = rai_proc_get_param(x->rai_proc, param_index);
     t_symbol *s = gensym_n("slider",control_index);
     if (s->s_thing) {
-        // post("update_gui %d %d %f", control_index, param_index, value);
         t_atom s_desc = FLOAT(value);
         typedmess(s->s_thing, gensym("set"), 1, &s_desc);
     }
@@ -200,6 +199,9 @@ static void rai_pd_load(struct rai_pd *x, t_symbol *filename) {
     struct rai_info *ri = rai_load_sp(filename->s_name);
     if (ri) {
 
+        /* FIXME: typecheck.  Params and state can be anything, but
+           in/out need to be float vectors. */
+
         int nb_in  = rai_info_param_list_size(ri->info_in);
         int nb_out = rai_info_param_list_size(ri->info_out);
 
@@ -306,7 +308,6 @@ static void rai_pd_free(struct rai_pd *x) {
 }
 
 static void rai_pd_param(struct rai_pd *x, t_symbol *name, t_float value) {
-    // post("rai_pd_param: %s %f", name->s_name, value);
     int param_index = rai_proc_find_param(x->rai_proc, name->s_name);
     rai_proc_set_param(x->rai_proc, param_index, value);
 }
@@ -321,7 +322,6 @@ static void rai_pd_control(struct rai_pd *x, t_float f_index, t_float value) {
 
 static void rai_pd_cc_map(struct rai_pd *x, t_symbol *s, int argc, t_atom *argv) {
     int i;
-    // post("nb_control = %d\n", x->rai_proc->nb_control);
     for (int control_index=0;
          control_index < argc && control_index < x->rai_proc->nb_control;
          control_index++) {
@@ -331,8 +331,6 @@ static void rai_pd_cc_map(struct rai_pd *x, t_symbol *s, int argc, t_atom *argv)
         }
     }
 }
-// 4 levels of indirections:
-// midi CC -> control_index -> param_index -> byte offset
 
 static void rai_pd_post_cc_map(struct rai_pd *x) {
     for (int i = 0; i<128; i++) {
@@ -340,13 +338,14 @@ static void rai_pd_post_cc_map(struct rai_pd *x) {
     }
 }
 
+// the full stack has 4 levels of indirection:
+// midi CC -> control_index -> param_index -> byte offset
 static void rai_pd_cc(struct rai_pd *x, t_float cc_f, t_float val) {
     if ((cc_f >= 0) && (cc_f <= 127)) {
         int cc = cc_f;
         int control_index = x->cc_map[(int)cc];
         if (control_index >= 0) { // -1 means not mapped
             int param_index = rai_proc_find_control(x->rai_proc, control_index);
-            //post("param_index = %d", param_index);
             float range_val = val * (1.0f / 127.0f);
             rai_proc_set_param(x->rai_proc, param_index, range_val);
 
@@ -355,7 +354,6 @@ static void rai_pd_cc(struct rai_pd *x, t_float cc_f, t_float val) {
         }
         else {
             post("cc %d not mapped", cc);
-            // rai_pd_post_cc_map(x);
         }
     }
 }
