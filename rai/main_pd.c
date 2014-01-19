@@ -30,8 +30,8 @@ struct rai_pd {
     t_float x_f;
     t_canvas *x_canvas;
     t_symbol *proc_name;
-    struct rai_proc *rai_proc;
-    struct rai_info *rai_info;
+    struct proc_instance *proc_instance;
+    struct proc_class *proc_class;
     int nb_pd_in;  float **pd_in;
     int nb_pd_out; float **pd_out;
     struct rai_voice voice;
@@ -41,7 +41,7 @@ struct rai_pd {
 t_int *rai_pd_perform(t_int *w) {
     struct rai_pd *x = (void*)w[1];
     t_int n = w[2];
-    rai_proc_run(x->rai_proc, (void*)x->pd_in, (void*)x->pd_out, n);
+    proc_instance_run(x->proc_instance, (void*)x->pd_in, (void*)x->pd_out, n);
     return w+3;
 }
 
@@ -58,7 +58,7 @@ static t_symbol *gensym_n(const char *name, int n) {
     return gensym(sname);
 }
 
-static t_symbol *slider_label(const struct rai_info_control *p) {
+static t_symbol *slider_label(const struct proc_class_control *p) {
     int buflen = 2 + strlen(p->desc) + strlen(p->unit);
     char buf[buflen];
     strcpy(buf, p->desc);
@@ -72,7 +72,7 @@ static t_symbol *slider_label(const struct rai_info_control *p) {
 }
 
 static void update_gui_labels(struct rai_pd *x) {
-    const struct rai_info_control *p = x->rai_info->info_control;
+    const struct proc_class_control *p = x->proc_class->info_control;
     for (int i = 0; p[i].desc; i++) {
         t_symbol *s = gensym_n("slider",i);
         if (s->s_thing) {
@@ -82,9 +82,9 @@ static void update_gui_labels(struct rai_pd *x) {
     }
 }
 static void update_gui(struct rai_pd *x, int control_index) {
-    int param_index = rai_proc_find_control(x->rai_proc, control_index);
+    int param_index = proc_instance_find_control(x->proc_instance, control_index);
     if (param_index < 0) return;
-    RAI_NUMBER_T value = rai_proc_get_param(x->rai_proc, param_index);
+    RAI_NUMBER_T value = proc_instance_get_param(x->proc_instance, param_index);
     t_symbol *s = gensym_n("slider",control_index);
     if (s->s_thing) {
         t_atom s_desc = FLOAT(value);
@@ -92,7 +92,7 @@ static void update_gui(struct rai_pd *x, int control_index) {
     }
 }
 static void rai_pd_update_gui(struct rai_pd *x) {
-    for(int i=0; i<x->rai_proc->nb_control; i++) {
+    for(int i=0; i<proc_instance_nb_control(x->proc_instance); i++) {
         update_gui(x, i);
     }
 }
@@ -107,7 +107,7 @@ static void rai_pd_create_gui(struct rai_pd *x, float x_coord, float y_coord) {
 
 
     /* Create slider on current canvas if there is no receiver. */
-    const struct rai_info_control *p = x->rai_info->info_control;
+    const struct proc_class_control *p = x->proc_class->info_control;
     t_symbol *obj = gensym("obj");
     t_symbol *hsl = gensym("hsl");
     t_symbol *empty  = gensym("empty");
@@ -196,14 +196,14 @@ static void rai_pd_create_gui(struct rai_pd *x, float x_coord, float y_coord) {
 /* Force code reload by loading stand-alone binary fPIC code.
    Note that libdl won't reload a library if it is opened somewhere else. */
 static void rai_pd_load(struct rai_pd *x, t_symbol *filename) {
-    struct rai_info *ri = rai_load_sp(filename->s_name);
+    struct proc_class *ri = rai_load_sp(filename->s_name);
     if (ri) {
 
         /* FIXME: typecheck.  Params and state can be anything, but
            in/out need to be float vectors. */
 
-        int nb_in  = rai_info_param_list_size(ri->info_in);
-        int nb_out = rai_info_param_list_size(ri->info_out);
+        int nb_in  = proc_class_param_list_size(ri->info_in);
+        int nb_out = proc_class_param_list_size(ri->info_out);
 
         if (x->pd_in == NULL) {
             /* First run: create I/O and alloc array buffers. */
@@ -226,16 +226,16 @@ static void rai_pd_load(struct rai_pd *x, t_symbol *filename) {
         }
         else {
             /* Replace code */
-            struct rai_proc *proc = rai_proc_new(ri, x->rai_proc);
-            if (x->rai_proc) rai_proc_free(x->rai_proc);
-            x->rai_proc = proc;
-            if (x->rai_info) free(x->rai_info);
-            x->rai_info = ri;
+            struct proc_instance *proc = proc_instance_new(ri, x->proc_instance);
+            if (x->proc_instance) proc_instance_free(x->proc_instance);
+            x->proc_instance = proc;
+            if (x->proc_class) free(x->proc_class);
+            x->proc_class = ri;
             x->proc_name = filename;
 
             /* Config synth voices */
             bzero(&x->voice, sizeof(x->voice));
-            if (0 == rai_voice_init_from_proc(x->rai_proc, &x->voice)) {
+            if (0 == rai_voice_init_from_proc(x->proc_instance, &x->voice)) {
                 post(ME "%d synth voices", x->voice.nb);
             }
 
@@ -263,10 +263,10 @@ static void rai_pd_dsp(struct rai_pd *x, t_signal **sp) {
 }
 
 static void rai_pd_reset_state(struct rai_pd *x) {
-    rai_proc_reset_state(x->rai_proc);
+    proc_instance_reset_state(x->proc_instance);
 }
 static void rai_pd_reset_param(struct rai_pd *x) {
-    rai_proc_reset_param(x->rai_proc);
+    proc_instance_reset_param(x->proc_instance);
 }
 
 static void rai_pd_note(struct rai_pd *x, t_float freq, t_float gain) {
@@ -287,7 +287,7 @@ static void *rai_pd_new(t_symbol *filename) {
     x->nb_pd_in  = 1;  x->pd_in  = NULL;
     x->nb_pd_out = 0;  x->pd_out = NULL;
     rai_pd_load(x, filename);
-    if (!x->rai_proc) {
+    if (!x->proc_instance) {
         // FIXME: pd_free(x); ???
         return NULL;
     }
@@ -301,29 +301,30 @@ static void *rai_pd_new(t_symbol *filename) {
 }
 
 static void rai_pd_free(struct rai_pd *x) {
-    rai_proc_free(x->rai_proc);
-    free(x->rai_info);
+    proc_instance_free(x->proc_instance);
+    free(x->proc_class);
     if (x->pd_in)  free(x->pd_in);
     if (x->pd_out) free(x->pd_out);
 }
 
 static void rai_pd_param(struct rai_pd *x, t_symbol *name, t_float value) {
-    int param_index = rai_proc_find_param(x->rai_proc, name->s_name);
-    rai_proc_set_param(x->rai_proc, param_index, value);
+    int param_index = proc_instance_find_param(x->proc_instance, name->s_name);
+    proc_instance_set_param(x->proc_instance, param_index, value);
 }
 
 /* Controls are a subset of parameters exported to a GUI. */
 static void rai_pd_control(struct rai_pd *x, t_float f_index, t_float value) {
     int index = f_index;
-    int param_index = rai_proc_find_control(x->rai_proc, f_index);
-    rai_proc_set_param(x->rai_proc, param_index, value);
-    // FIXME: display ui_value = rai_info_control_interpolate(p, value)
+    int param_index = proc_instance_find_control(x->proc_instance, f_index);
+    proc_instance_set_param(x->proc_instance, param_index, value);
+    // FIXME: display ui_value = proc_class_control_interpolate(p, value)
 }
 
 static void rai_pd_cc_map(struct rai_pd *x, t_symbol *s, int argc, t_atom *argv) {
     int i;
+    int nb_control = proc_instance_nb_control(x->proc_instance);
     for (int control_index=0;
-         control_index < argc && control_index < x->rai_proc->nb_control;
+         control_index < argc && control_index < nb_control;
          control_index++) {
         float f = atom_getfloat(&argv[control_index]);
         if ((f > 0) && (f < 128)) {
@@ -345,9 +346,9 @@ static void rai_pd_cc(struct rai_pd *x, t_float cc_f, t_float val) {
         int cc = cc_f;
         int control_index = x->cc_map[(int)cc];
         if (control_index >= 0) { // -1 means not mapped
-            int param_index = rai_proc_find_control(x->rai_proc, control_index);
+            int param_index = proc_instance_find_control(x->proc_instance, control_index);
             float range_val = val * (1.0f / 127.0f);
-            rai_proc_set_param(x->rai_proc, param_index, range_val);
+            proc_instance_set_param(x->proc_instance, param_index, range_val);
 
             // FIXME: should we really do this from here??
             update_gui(x, control_index);

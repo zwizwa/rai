@@ -80,7 +80,7 @@ struct control_info {
     const char *desc;
     const char *unit;
     unsigned int offset;
-    struct rai_info_control_map map;
+    struct proc_class_control_map map;
 };
 
 #define VST_PARAM(_param, _desc, _unit, _min, _max, _range, _curve) \
@@ -323,7 +323,7 @@ void Plugin :: getParameterUnit (VstInt32 index, char *text) {
 }
 void Plugin :: getParameterDisplay (VstInt32 index, char *text) { 
     float v = getParameter(index);
-    float out_v = rai_info_control_interpolate(&param[index].map, v);
+    float out_v = proc_class_control_interpolate(&param[index].map, v);
     sprintf(text, "%f", out_v);
     LOG("getParameterDisplay(%d) -> %s (%f)\n",index,text,v);
 }

@@ -26,18 +26,18 @@ proc_for_store (GEN_DIM_ARRAY)
         .type = rai_type_##__type,                    \
 },
 
-const struct rai_info_param info_in[]    = { proc_for_in    (GEN_INFO) {} };
-const struct rai_info_param info_out[]   = { proc_for_out   (GEN_INFO) {} };
-const struct rai_info_param info_state[] = { proc_for_si    (GEN_INFO) {} };
-const struct rai_info_param info_store[] = { proc_for_store (GEN_INFO) {} };
+const struct proc_class_param info_in[]    = { proc_for_in    (GEN_INFO) {} };
+const struct proc_class_param info_out[]   = { proc_for_out   (GEN_INFO) {} };
+const struct proc_class_param info_state[] = { proc_for_si    (GEN_INFO) {} };
+const struct proc_class_param info_store[] = { proc_for_store (GEN_INFO) {} };
 
 /* To allow element ref by name, info_param is a struct instead of an array. */
-#define PARAM_BY_NAME(__name, ...) const struct rai_info_param __name;
-struct rai_info_param_by_name {
+#define PARAM_BY_NAME(__name, ...) const struct proc_class_param __name;
+struct proc_class_param_by_name {
     proc_for_param(PARAM_BY_NAME)
-    const struct rai_info_param _end_;
+    const struct proc_class_param _end_;
 };
-const struct rai_info_param_by_name info_param = {
+const struct proc_class_param_by_name info_param = {
     proc_for_param (GEN_INFO)  {}
 };
 
@@ -55,10 +55,10 @@ const struct proc_store init_store = { proc_for_store (GEN_INIT) };
                      .range = _range,                                   \
                      .scale = rai_scale_##_curve }                      \
             },
-const struct rai_info_control info_control[] = { proc_for_control (GEN_CONTROL) {} };
+const struct proc_class_control info_control[] = { proc_for_control (GEN_CONTROL) {} };
 
 /* Start of binary file. */
-struct rai_info __attribute__((section(".header"))) proc_info = {
+struct proc_class __attribute__((section(".header"))) proc_info = {
     .magic      = RAI_MAGIC,
     .entry      = (void*)proc_loop,
 

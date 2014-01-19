@@ -13,27 +13,27 @@
 test_pd.sp
 
 (define test_sp_info (rai_load_sp test_pd.sp))
-(define test_sp_proc (rai_proc_new test_sp_info #f))
+(define test_sp_proc (proc_instance_new test_sp_info #f))
 
 
 (define v (make-f32vector 16))
 
 test_sp_proc
 
-(define test_param (rai_info-info_param test_sp_info))
+(define test_param (proc_class-info_param test_sp_info))
 
 test_param
 
 
-(define (rai_info->name i n)
-  (map rai_info_param-name (array0->list (rai_info-info_param i))))
+(define (proc_class->name i n)
+  (map proc_class_param-name (array0->list (proc_class-info_param i))))
 
 
 (define param-names
-  (map rai_info_param-name (array0->list (rai_info-info_param test_sp_info) _rai_info_param)))
+  (map proc_class_param-name (array0->list (proc_class-info_param test_sp_info) _proc_class_param)))
 
 (define control-names
-  (map rai_info_control-desc (array0->list (rai_info-info_control test_sp_info) _rai_info_control)))
+  (map proc_class_control-desc (array0->list (proc_class-info_control test_sp_info) _proc_class_control)))
 
 param-names
 control-names

@@ -6,43 +6,44 @@
 
 
 /* Relocation: every date structure pointer needs to be patched from
-   rai_info relative to absolute memory location. */
-static void link_ptr(struct rai_info *ri, void *pointer) {
+   proc_class relative to absolute memory location. */
+static void link_ptr(struct proc_class *ri, void *pointer) {
     long offset = *(long*)pointer;
     char *linked = (char*)ri + offset;
     *(void **)pointer = linked;
 }
-static void link_info_param(struct rai_info *ri, struct rai_info_param **rpp) {
+static void link_info_param(struct proc_class *ri, struct proc_class_param **rpp) {
     link_ptr(ri, rpp);
-    struct rai_info_param *rp = *rpp;
+    struct proc_class_param *rp = *rpp;
     for (int i = 0; !rai_list_end(&rp[i]); i++) {
         link_ptr(ri, &(rp[i].name));
         link_ptr(ri, &(rp[i].dims));
     }
 }
-static void link_info_control(struct rai_info *ri, struct rai_info_control **rpp) {
+static void link_info_control(struct proc_class *ri, struct proc_class_control **rpp) {
     link_ptr(ri, rpp);
-    struct rai_info_control *rp = *rpp;
+    struct proc_class_control *rp = *rpp;
     for (int i = 0; !rai_list_end(&rp[i]); i++) {
         link_ptr(ri, &(rp[i].desc));
         link_ptr(ri, &(rp[i].unit));
         link_ptr(ri, &(rp[i].param));
     }
 }
-static void link_header(struct rai_info *ri) {
+static void link_header(struct proc_class *ri) {
     link_ptr(ri, &ri->entry);
-    link_info_param(ri, (struct rai_info_param**)&ri->info_state);
-    link_info_param(ri, (struct rai_info_param**)&ri->info_in);
-    link_info_param(ri, (struct rai_info_param**)&ri->info_param);
-    link_info_param(ri, (struct rai_info_param**)&ri->info_out);
-    link_info_param(ri, (struct rai_info_param**)&ri->info_store);
-    link_info_control(ri, (struct rai_info_control**)&ri->info_control);
+    /* cast is needed to remove const */
+    link_info_param(ri, (struct proc_class_param**)&ri->info_state);
+    link_info_param(ri, (struct proc_class_param**)&ri->info_in);
+    link_info_param(ri, (struct proc_class_param**)&ri->info_param);
+    link_info_param(ri, (struct proc_class_param**)&ri->info_out);
+    link_info_param(ri, (struct proc_class_param**)&ri->info_store);
+    link_info_control(ri, (struct proc_class_control**)&ri->info_control);
     link_ptr(ri, &ri->init_param);
     link_ptr(ri, &ri->init_state);
     link_ptr(ri, &ri->init_store);
 }
 
-struct rai_info *rai_load_sp(const char *filename) {
+struct proc_class *rai_load_sp(const char *filename) {
     FILE *f = NULL;
     void *buf = NULL;
     if (NULL == (f = fopen(filename, "r"))) goto error;

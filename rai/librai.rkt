@@ -16,7 +16,7 @@
 (define _uintptr-pointer       (_cpointer _uintptr))
 
 ;; Note that these are float* and float**, but it's easier to drop the type here  (see rai.h)
-(define _rai_info_run
+(define _proc_class_run
   (_fun (_or-null _pointer) ;; state (two concatentated copies for double buffering)
         (_or-null _pointer) ;; array of input arrays
         (_or-null _pointer) ;; param array
@@ -25,7 +25,7 @@
         _uint               ;; nb_samples
         -> _void)) 
   
-(define-cstruct _rai_info_param
+(define-cstruct _proc_class_param
   ([name _string/utf-8]
    [dims _uintptr-pointer]
    [type (_enum '(float32 = 0
@@ -33,10 +33,10 @@
                   int32   = 2))]
    ))
 
-(define-cstruct _rai_info_control
+(define-cstruct _proc_class_control
   ([desc  _string/utf-8]
    [unit  _string/utf-8]
-   [param _rai_info_param]
+   [param _proc_class_param]
    [s0    _double]
    [s1    _double]
    [range _double]
@@ -45,36 +45,36 @@
                    slog = 2))]
    ))
 
-(define-cstruct _rai_info
+(define-cstruct _proc_class
   ([magic        (_array _uint8 16)]
    [version      (_array _uint8 16)]
-   [entry        _rai_info_run]
-   [info_state   _rai_info_param-pointer]
-   [info_in      _rai_info_param-pointer]
-   [info_param   _rai_info_param-pointer]
-   [info_out     _rai_info_param-pointer]
-   [info_store   _rai_info_param-pointer]
-   [info_control _rai_info_control-pointer]
+   [entry        _proc_class_run]
+   [info_state   _proc_class_param-pointer]
+   [info_in      _proc_class_param-pointer]
+   [info_param   _proc_class_param-pointer]
+   [info_out     _proc_class_param-pointer]
+   [info_store   _proc_class_param-pointer]
+   [info_control _proc_class_control-pointer]
    [init_param   _void-pointer]
    [init_state   _void-pointer]
    [init_store   _void-pointer]
    [build_stamp  _uint32]
    [__reserved   _uint32]))
 
-(define-cstruct _rai_proc
-  ([info  _rai_info-pointer]
+(define-cstruct _proc_instance
+  ([info  _proc_class-pointer]
    [state _float-pointer]
    [param _float-pointer]
    [store _float-pointer]
    ))
 
 
-(define-rai rai_load_sp (_fun _string -> _rai_info-pointer))
+(define-rai rai_load_sp (_fun _string -> _proc_class-pointer))
 
-(define-rai rai_proc_new (_fun _rai_info-pointer
-                               (_or-null _rai_proc-pointer)
+(define-rai proc_instance_new (_fun _proc_class-pointer
+                               (_or-null _proc_instance-pointer)
                                ->
-                               _rai_proc-pointer))
+                               _proc_instance-pointer))
 
 
 
@@ -93,25 +93,25 @@
 
 ;; Convert info to s-expression.
 (define (info-control i)
-  (for/list ((p (array0->list (rai_info-info_control i) _rai_info_control)))
-    `((desc  . ,(rai_info_control-desc p))
-      (unit  . ,(rai_info_control-unit p))
-      (param . ,(rai_info_control-param p))   ;; FIXME: unpack?
-      (s0    . ,(rai_info_control-s0 p))
-      (s1    . ,(rai_info_control-s1 p))
-      (range . ,(rai_info_control-range p))
-      (scale . ,(rai_info_control-scale p)))))
+  (for/list ((p (array0->list (proc_class-info_control i) _proc_class_control)))
+    `((desc  . ,(proc_class_control-desc p))
+      (unit  . ,(proc_class_control-unit p))
+      (param . ,(proc_class_control-param p))   ;; FIXME: unpack?
+      (s0    . ,(proc_class_control-s0 p))
+      (s1    . ,(proc_class_control-s1 p))
+      (range . ,(proc_class_control-range p))
+      (scale . ,(proc_class_control-scale p)))))
 
 (define (info-io i info_param)
   (let* ((s-offset 0)
-         (ips (array0->list (info_param i) _rai_info_param))
+         (ips (array0->list (info_param i) _proc_class_param))
          (pi
           (for/list ((ip ips))
-            (let* ((dims (for/list ((dp (array0->list (rai_info_param-dims ip) _uintptr)))
+            (let* ((dims (for/list ((dp (array0->list (proc_class_param-dims ip) _uintptr)))
                            (ptr-ref dp _uintptr)))
                    (offset s-offset))
               (set! s-offset (+ s-offset (foldl * 1 dims)))
-              (list (string->symbol (rai_info_param-name ip))
+              (list (string->symbol (proc_class_param-name ip))
                     offset
                     dims)))))
     `((total . ,s-offset)
@@ -119,11 +119,11 @@
 
 
 (define (info-ios i)
-  (for/list ((info_param (list rai_info-info_param
-                               rai_info-info_in
-                               rai_info-info_out
-                               rai_info-info_state
-                               rai_info-info_store))
+  (for/list ((info_param (list proc_class-info_param
+                               proc_class-info_in
+                               proc_class-info_out
+                               proc_class-info_state
+                               proc_class-info_store))
              (tag '(param in out state store)))
     `(,tag . ,(info-io i info_param))))
 
@@ -167,7 +167,7 @@
          (store (make/init-f32vector (total 'store)))
          (p
           (make-proc
-           (rai_info-entry i)
+           (proc_class-entry i)
            (rdict-ref info '(param info))
            param state store
            nin  (malloc _float-pointer nin)

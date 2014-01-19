@@ -28,8 +28,8 @@ typedef unsigned long word_t; // pointer-sized int
    The idea is to keep the description dumb and non-reduntant.
    Interpretation of the format can be abstracted in a library.
 
-   rai_info is structured data, where all pointers (to strings and
-   substructures) are represented by a u64 file offset.
+   proc_class is represented as structured data, where all pointers (to
+   strings and substructures) are represented by a u64 file offset.
 
    // FIXME: separate .sp loading from in-memory access
 */
@@ -42,8 +42,8 @@ static inline int rai_list_end(const void *x) {
     return *((const void**)x) == NULL;
 }
 
-struct rai_info_param;
-struct rai_info_control;
+struct proc_class_param;
+struct proc_class_control;
 
 struct proc_si;
 struct proc_in;
@@ -51,27 +51,29 @@ struct proc_param;
 struct proc_out;
 struct proc_store;
 
-typedef void (*rai_info_run)(struct proc_si    * restrict state,  /* double buffer */
-                             struct proc_in    * restrict in,
-                             struct proc_param * restrict param,
-                             struct proc_out   * restrict out,
-                             struct proc_store * restrict store,
-                             unsigned int nb_samples);
+typedef void (*proc_class_run)(
+    struct proc_si    * restrict state,  /* double buffer */
+    struct proc_in    * restrict in,
+    struct proc_param * restrict param,
+    struct proc_out   * restrict out,
+    struct proc_store * restrict store,
+    unsigned int nb_samples
+);
 
-struct rai_info {
+struct proc_class {
     uint8_t magic[RAI_MAGIC_SIZE];
     uint8_t version[RAI_VERSION_SIZE];
-    rai_info_run entry;
+    proc_class_run entry;
 
     /* Node type info. */
-    const struct rai_info_param *info_state;
-    const struct rai_info_param *info_in;
-    const struct rai_info_param *info_param;
-    const struct rai_info_param *info_out;
-    const struct rai_info_param *info_store;
+    const struct proc_class_param *info_state;
+    const struct proc_class_param *info_in;
+    const struct proc_class_param *info_param;
+    const struct proc_class_param *info_out;
+    const struct proc_class_param *info_store;
 
     /* param UI info. */
-    const struct rai_info_control *info_control;
+    const struct proc_class_control *info_control;
 
     /* Initial values. */
     const struct proc_param *init_param;
@@ -110,37 +112,37 @@ void         rai_set_number(enum rai_type t, void *rai_dst, RAI_NUMBER_T val);
 
 
 
-struct rai_info_param {
+struct proc_class_param {
     const char *name;
     const word_t *dims;
     enum rai_type type;
 };
 
-int rai_info_param_nb_elements(const struct rai_info_param *pi);
-int rai_info_param_list_size(const struct rai_info_param *pi);
-int rai_info_param_alloc_size(const struct rai_info_param *pi);
+int proc_class_param_nb_elements(const struct proc_class_param *pi);
+int proc_class_param_list_size(const struct proc_class_param *pi);
+int proc_class_param_alloc_size(const struct proc_class_param *pi);
 
-/* Params that have an associated rai_info_control are GUI worthy, and
+/* Params that have an associated proc_class_control are GUI worthy, and
    contain more meta info. */
 enum rai_scale {
     rai_scale_lin = 0,  // s0 + (s1 - s0) * v
     rai_scale_log = 1,  // s0 * (s1 / s0) ^ v
     rai_scale_slog = 2, // s0 * (v/(1-v)) ^ s1   "squeezed log / stretched exp"
 };
-struct rai_info_control_map {
+struct proc_class_control_map {
     double s0; // minimum | center
     double s1; // maximum | exponent
     double range;
     enum rai_scale scale;
 };
-struct rai_info_control {
+struct proc_class_control {
     const char *desc;
     const char *unit;
-    const struct rai_info_param *param;
-    struct rai_info_control_map map;
+    const struct proc_class_param *param;
+    struct proc_class_control_map map;
 };
 
-struct rai_info_preset {
+struct proc_class_preset {
     uint8_t  magic[RAI_MAGIC_SIZE];
     uint32_t header_bytes;
     uint32_t timestamp;
@@ -149,47 +151,37 @@ struct rai_info_preset {
 
 
 /* Maps v \in [0,1] to the control parameter's user feedback scale. */
-float rai_info_control_interpolate(const struct rai_info_control_map *p, float v);
+float proc_class_control_interpolate(const struct proc_class_control_map *p, float v);
 
 /* Load .sp class */
-struct rai_info *rai_load_sp(const char *filename);
+struct proc_class *rai_load_sp(const char *filename);
 
 
 /* Create proc instance. */
-struct rai_proc {
-    /* Description */
-    const struct rai_info *info;
-    /* State variables */
-    struct proc_si    * restrict state;
-    struct proc_param * restrict param;
-    struct proc_store * restrict store;
-    /* Indexing information computed from struct rai_info. */
-    int *param_offset;  // maps index in info.info_param to offset in storage buffer
-    int *param_nb_el;   // nb of grid elements
-    int nb_control;
-    int nb_param;
-};
+struct proc_instance;
 
-void rai_proc_run(struct rai_proc *p,
-                  struct proc_in  * restrict in,
-                  struct proc_out * restrict out,
-                  int n);
+void proc_instance_run(struct proc_instance *p,
+                       struct proc_in  * restrict in,
+                       struct proc_out * restrict out,
+                       int n);
 
-struct rai_proc *rai_proc_new(const struct rai_info *info,
-                              const struct rai_proc *proto);
-void rai_proc_free(struct rai_proc *p);
+int proc_instance_nb_control(struct proc_instance *p);
 
-void rai_proc_preset_save(const struct rai_proc *p, const char *filename);
-void rai_proc_preset_load(const struct rai_proc *p, const char *filename, int index);
+struct proc_instance *proc_instance_new(const struct proc_class *info,
+                                        const struct proc_instance *proto);
+void proc_instance_free(struct proc_instance *p);
 
-void rai_proc_reset_state(struct rai_proc *p);
-void rai_proc_reset_param(struct rai_proc *p);
+void proc_instance_preset_save(const struct proc_instance *p, const char *filename);
+void proc_instance_preset_load(const struct proc_instance *p, const char *filename, int index);
 
-int rai_proc_find_param(struct rai_proc *p, const char *name);
-int rai_proc_find_control(struct rai_proc *p, int c);
-void rai_proc_set_param(struct rai_proc *p, int index, RAI_NUMBER_T val);
+void proc_instance_reset_state(struct proc_instance *p);
+void proc_instance_reset_param(struct proc_instance *p);
 
-RAI_NUMBER_T rai_proc_get_param(struct rai_proc *p, int index);
+int proc_instance_find_param(struct proc_instance *p, const char *name);
+int proc_instance_find_control(struct proc_instance *p, int c);
+void proc_instance_set_param(struct proc_instance *p, int index, RAI_NUMBER_T val);
+
+RAI_NUMBER_T proc_instance_get_param(struct proc_instance *p, int index);
 
 /* Synth stuff */
 struct rai_voice {
@@ -202,7 +194,7 @@ struct rai_voice {
 
 // for convenience
 void rai_voice_init(struct rai_voice *v, int nb, float *gate, float *freq);
-int rai_voice_init_from_proc(struct rai_proc *p, struct rai_voice *v);
+int rai_voice_init_from_proc(struct proc_instance *p, struct rai_voice *v);
 void rai_voice_off(struct rai_voice *v, float freq);
 void rai_voice_on(struct rai_voice *v, float freq);
 float rai_midi_to_freq(int midi);
@@ -213,7 +205,7 @@ float rai_midi_to_freq(int midi);
 
 /* DEBUG */
 typedef void (*rai_log)(const char *msg, ...);
-void rai_print_info(const struct rai_info *ri, rai_log log);
+void rai_print_info(const struct proc_class *ri, rai_log log);
 
 #ifdef __cplusplus
 }

@@ -5,7 +5,7 @@
 #include <time.h>
 
 
-int rai_info_param_nb_elements(const struct rai_info_param *pi) {
+int proc_class_param_nb_elements(const struct proc_class_param *pi) {
     int nb_elements = 1;
     for (int i=0; !rai_list_end(&(pi->dims[i])); i++) {
         nb_elements *= pi->dims[i];
@@ -13,12 +13,12 @@ int rai_info_param_nb_elements(const struct rai_info_param *pi) {
     return nb_elements;
 }
 
-int rai_info_param_list_size(const struct rai_info_param *pi) {
+int proc_class_param_list_size(const struct proc_class_param *pi) {
     int i;
     for (i = 0; !rai_list_end(&pi[i]); i++);
     return i;
 }
-static int rai_info_control_list_size(const struct rai_info_control *ci) {
+static int proc_class_control_list_size(const struct proc_class_control *ci) {
     int i;
     for (i = 0; !rai_list_end(&ci[i]); i++);
     return i;
@@ -34,10 +34,10 @@ static int rai_type_sizeof(enum rai_type t) {
     }
 }
 
-int rai_info_param_alloc_size(const struct rai_info_param *pi) {
+int proc_class_param_alloc_size(const struct proc_class_param *pi) {
     int bytes = 0;
     for (int i = 0; !rai_list_end(&pi[i]); i++) {
-        bytes += rai_info_param_nb_elements(&pi[i])
+        bytes += proc_class_param_nb_elements(&pi[i])
             *rai_type_sizeof(pi[i].type);
     }
     return bytes;
@@ -62,12 +62,12 @@ void rai_set_number(enum rai_type t, void *p, RAI_NUMBER_T val) {
 /* Initialize from prototype if available, else use defaults.  This is
    useful for state-preserving code updates.  Note that consistency of
    the structs cannot be verified here, only size. */
-static void rai_param_init(const struct rai_info_param *pi,
-                           void *new, const void *old, int old_max_bytes) {
+static void param_init(const struct proc_class_param *pi,
+                       void *new, const void *old, int old_max_bytes) {
     int byte_offset = 0;
     for (int i = 0; !rai_list_end(&pi[i]); i++) {
         enum rai_type t = pi[i].type;
-        int nb_elements =  rai_info_param_nb_elements(&pi[i]);
+        int nb_elements =  proc_class_param_nb_elements(&pi[i]);
         int byte_size = rai_type_sizeof(t) * nb_elements;
 
         if (byte_size + byte_offset <= old_max_bytes) {
@@ -77,59 +77,81 @@ static void rai_param_init(const struct rai_info_param *pi,
     }
 }
 
-struct rai_proc *rai_proc_new(const struct rai_info *info,
-                              const struct rai_proc *proto) {
-    struct rai_proc *p = malloc(sizeof(*p));
+struct proc_instance {
+    /* Description */
+    const struct proc_class *info;
+    /* State variables */
+    struct proc_si    * restrict state;
+    struct proc_param * restrict param;
+    struct proc_store * restrict store;
+    /* Indexing information computed from struct proc_class. */
+    int *param_offset;  // maps index in info.info_param to offset in storage buffer
+    int *param_nb_el;   // nb of grid elements
+    int nb_control;
+    int nb_param;
+    int size_state;
+    int size_param;
+    int size_store;
+};
+
+int proc_instance_nb_control(struct proc_instance *p) {
+    return p->nb_control;
+}
+
+
+void proc_instance_reset_state(struct proc_instance *p) {
+    param_init(p->info->info_state, p->state, p->info->init_param, p->size_state);
+}
+void proc_instance_reset_param(struct proc_instance *p) {
+    param_init(p->info->info_param, p->param, p->info->init_state, p->size_param);
+}
+void proc_instance_reset_store(struct proc_instance *p) {
+    param_init(p->info->info_store, p->store, p->info->init_store, p->size_store);
+}
+struct proc_instance *proc_instance_new(const struct proc_class *info,
+                                        const struct proc_instance *proto) {
+    struct proc_instance *p = malloc(sizeof(*p));
     p->info = info;
 
     /* Allocate and build indexing data. */
-    p->nb_param   = rai_info_param_list_size(info->info_param);
-    p->nb_control = rai_info_control_list_size(info->info_control);
+    p->nb_param   = proc_class_param_list_size(info->info_param);
+    p->nb_control = proc_class_control_list_size(info->info_control);
     p->param_offset = malloc(p->nb_param * sizeof(p->param_offset[0]));
     p->param_nb_el  = malloc(p->nb_param * sizeof(p->param_nb_el[0]));
 
     for (int i = 0, byte_offset = 0; i < p->nb_param; i++) {
-        const struct rai_info_param *pi = &info->info_param[i];
+        const struct proc_class_param *pi = &info->info_param[i];
         p->param_offset[i] = byte_offset;
-        p->param_nb_el[i]  = rai_info_param_nb_elements(pi);
+        p->param_nb_el[i]  = proc_class_param_nb_elements(pi);
         int byte_size = rai_type_sizeof(pi->type) * p->param_nb_el[i];
         byte_offset += byte_size;
     }
 
     /* Allocate in 1 chunk to improve locality. */
-    int size_state = rai_info_param_alloc_size(info->info_state);
-    int size_param = rai_info_param_alloc_size(info->info_param);
-    int size_store = rai_info_param_alloc_size(info->info_store);
+    p->size_state = proc_class_param_alloc_size(info->info_state);
+    p->size_param = proc_class_param_alloc_size(info->info_param);
+    p->size_store = proc_class_param_alloc_size(info->info_store);
 
-    int buf_size = 2 * size_state + size_param + size_store;
+    int buf_size = 2 * p->size_state + p->size_param + p->size_store;
     void *buf = calloc(1, buf_size);
-    p->param    = buf; buf += size_param;
-    p->state    = buf; buf += (2 * size_state);
+    p->param    = buf; buf += p->size_param;
+    p->state    = buf; buf += (2 * p->size_state);
     p->store    = buf;
 
     /* Initialize from defaults. */
-    rai_param_init(info->info_param, p->param, info->init_param, size_param);
-    rai_param_init(info->info_store, p->store, info->init_store, size_store);
-    rai_param_init(info->info_state, p->state, info->init_state, size_state);
+    proc_instance_reset_param(p);
+    proc_instance_reset_state(p);
+    proc_instance_reset_store(p);
 
     /* Copy from proto or init struct. */
     if (proto) {
-        int proto_size_state = 0;
-        int proto_size_param = 0;
-        int proto_size_store = 0;
-        if (proto) {
-            const struct rai_info *pri = proto->info;
-            proto_size_state = rai_info_param_alloc_size(pri->info_state);
-            proto_size_param = rai_info_param_alloc_size(pri->info_param);
-            proto_size_store = rai_info_param_alloc_size(pri->info_store);
-        }
-        rai_param_init(info->info_param, p->param, proto->param, rai_min(size_param, proto_size_param));
-        rai_param_init(info->info_store, p->store, proto->store, rai_min(size_store, proto_size_store));
-        rai_param_init(info->info_state, p->state, proto->state, rai_min(size_state, proto_size_state));
+        param_init(info->info_param, p->param, proto->param, rai_min(p->size_param, proto->size_param));
+        param_init(info->info_store, p->store, proto->store, rai_min(p->size_store, proto->size_store));
+        param_init(info->info_state, p->state, proto->state, rai_min(p->size_state, proto->size_state));
     }
     return p;
 }
-void rai_proc_free(struct rai_proc *p) {
+void proc_instance_free(struct proc_instance *p) {
     if (p->param) {
         free(p->param);
         p->param = NULL;
@@ -138,28 +160,21 @@ void rai_proc_free(struct rai_proc *p) {
     free(p);
 }
 
-void rai_proc_run(struct rai_proc *p,
+void proc_instance_run(struct proc_instance *p,
                   struct proc_in  * restrict in,
                   struct proc_out * restrict out,
                   int n) {
     p->info->entry(p->state, in, p->param, out, p->store, n);
 }
 
-void rai_proc_reset_state(struct rai_proc *p) {
-    rai_param_init(p->info->info_state, p->state, NULL, 0);
-}
-void rai_proc_reset_param(struct rai_proc *p) {
-    rai_param_init(p->info->info_param, p->param, NULL, 0);
-}
-
-void rai_proc_preset_save(const struct rai_proc *p, const char *filename) {
+void proc_instance_preset_save(const struct proc_instance *p, const char *filename) {
     FILE *f = fopen(filename, "a");
     if (!f) return;
-    struct rai_info_preset hdr = {
+    struct proc_class_preset hdr = {
         .magic = "preset",
         .header_bytes = sizeof(hdr),
         .timestamp = time(NULL),
-        .payload_bytes = rai_info_param_alloc_size(p->info->info_param),
+        .payload_bytes = proc_class_param_alloc_size(p->info->info_param),
     };
     fwrite(&hdr, 1, sizeof(hdr), f);
     fwrite(p->param, 1, hdr.payload_bytes, f);
@@ -167,12 +182,12 @@ void rai_proc_preset_save(const struct rai_proc *p, const char *filename) {
 }
 
 
-void rai_proc_preset_load(const struct rai_proc *p, const char *filename, int index) {
+void proc_instance_preset_load(const struct proc_instance *p, const char *filename, int index) {
     FILE *f = fopen(filename, "r");
     if (!f) return;
-    struct rai_info_preset hdr;
+    struct proc_class_preset hdr;
     do {
-        int nb_bytes = rai_info_param_alloc_size(p->info->info_param);
+        int nb_bytes = proc_class_param_alloc_size(p->info->info_param);
         if (sizeof(hdr) != fread(&hdr, 1, sizeof(hdr), f)) goto error;
         if (nb_bytes != hdr.payload_bytes) goto error;
         if (nb_bytes != fread(p->param, 1, nb_bytes, f)) goto error;
@@ -181,20 +196,20 @@ void rai_proc_preset_load(const struct rai_proc *p, const char *filename, int in
     fclose(f);
 }
 
-int rai_proc_find_param(struct rai_proc *p, const char *name) {
+int proc_instance_find_param(struct proc_instance *p, const char *name) {
     for (int i = 0; !rai_list_end(&p->info->info_param[i]); i++) {
         if (!strcmp(p->info->info_param[i].name, name)) return i;
     }
     return -1;
 }
 
-int rai_proc_find_control(struct rai_proc *p, int c) {
+int proc_instance_find_control(struct proc_instance *p, int c) {
     if ((c < 0) || (c >= p->nb_control)) return -1;
     return p->info->info_control[c].param - p->info->info_param;
 }
 
 /* Set will set the entire grid.  Get will only pick the first element. */
-void rai_proc_set_param(struct rai_proc *p, int index, RAI_NUMBER_T val) {
+void proc_instance_set_param(struct proc_instance *p, int index, RAI_NUMBER_T val) {
     if ((index < 0) || (index >= p->nb_param)) {
         return;
     }
@@ -208,7 +223,7 @@ void rai_proc_set_param(struct rai_proc *p, int index, RAI_NUMBER_T val) {
         param_buf += base_bytes;
     }
 }
-RAI_NUMBER_T rai_proc_get_param(struct rai_proc *p, int index) {
+RAI_NUMBER_T proc_instance_get_param(struct proc_instance *p, int index) {
     if ((index < 0) || (index >= p->nb_param)) {
         return 0;
     }
@@ -231,10 +246,10 @@ void rai_voice_init(struct rai_voice *v, int nb, float *gate, float *freq) {
 }
 
 
-int rai_voice_init_from_proc(struct rai_proc *p, struct rai_voice *v) {
-    const struct rai_info_param *ip = p->info->info_param;
-    int gate_index = rai_proc_find_param(p, "voice_gate"); if (gate_index < 0) return -1;
-    int freq_index = rai_proc_find_param(p, "voice_freq"); if (freq_index < 0) return -1;
+int rai_voice_init_from_proc(struct proc_instance *p, struct rai_voice *v) {
+    const struct proc_class_param *ip = p->info->info_param;
+    int gate_index = proc_instance_find_param(p, "voice_gate"); if (gate_index < 0) return -1;
+    int freq_index = proc_instance_find_param(p, "voice_freq"); if (freq_index < 0) return -1;
     if (ip[gate_index].type != rai_type_float32_t) return -1;
     if (ip[freq_index].type != rai_type_float32_t) return -1;
     int nb =  p->param_nb_el[gate_index];
@@ -268,9 +283,9 @@ float rai_midi_to_freq(int midi) {
 
 /* DEBUG */
 static void rai_print_info_param(const char *tag,
-                                 const struct rai_info_param *pi,
+                                 const struct proc_class_param *pi,
                                  rai_log log) {
-    log("%s %d:\n", tag, rai_info_param_alloc_size(pi));
+    log("%s %d:\n", tag, proc_class_param_alloc_size(pi));
     for (int i = 0; !rai_list_end(&pi[i]); i++) {
         log("\t%d %s", i, pi[i].name);
         const word_t *dims = pi[i].dims;
@@ -283,7 +298,7 @@ static void rai_print_info_param(const char *tag,
     }
 }
 static void rai_print_info_control(const char *tag,
-                                   const struct rai_info_control *pi,
+                                   const struct proc_class_control *pi,
                                    rai_log log) {
     log("%s\n", tag);
     for (int i = 0; !rai_list_end(&pi[i]); i++) {
@@ -294,7 +309,7 @@ static void rai_print_info_control(const char *tag,
             pi[i].map.s1);
     }
 }
-void rai_print_info(const struct rai_info *ri, rai_log log) {
+void rai_print_info(const struct proc_class *ri, rai_log log) {
     if (!log) log = (rai_log)printf;
     rai_print_info_param("param", ri->info_param, log);
     rai_print_info_param("in",    ri->info_in, log);
@@ -305,7 +320,7 @@ void rai_print_info(const struct rai_info *ri, rai_log log) {
 }
 
 /* Maps v \in [0,1] to the control parameter's user feedback scale. */
-float rai_info_control_interpolate(const struct rai_info_control_map *p, float v) {
+float proc_class_control_interpolate(const struct proc_class_control_map *p, float v) {
     float out_v;
     switch(p->scale) {
     case rai_scale_lin:  out_v = p->s0 + (p->s1 - p->s0) * v;   break;
