@@ -10,7 +10,7 @@
 (define (ai-array/c expr
                     #:indextype (indextype 'int)
                     #:prefix (prefix "proc_")
-                    #:default_type (default_type "float32"))
+                    #:default_type (default_type "float32_t"))
   
   (define (pfx x) (format "~a~a" prefix x))
 
@@ -21,8 +21,8 @@
   
   (define ctype
     (match-lambda
-     ((struct type ('Float     #f '())) "float32")
-     ((struct type ('Int       #f '())) "int32")
+     ((struct type ('Float     #f '())) "float32_t")
+     ((struct type ('Int       #f '())) "int32_t")
      ((struct type ('Undefined #f '())) default_type)
      ((struct type-var (_)) default_type) ;; FIXME: should not happen
      (type (error 'ctype (format "~a" type)))))
@@ -62,6 +62,7 @@
     (apply string-append (map sqbr lst)))
 
   ;; Generate the structured state and param nodes.
+  ;; FIXME: space in " \n" is a hack to make scribble output work
   (define (gen-type tag nodes)
     (define stream
       (case tag
@@ -79,6 +80,17 @@
                         (arrayref (reverse dims))))))
     (printf "};\n")
 
+    
+    (for ((n nodes))
+      ;; Note this doesn't use the tag; as reference in main_sp.c is
+      ;; simpler by name only.  OK since name is unique.
+      (printf "#define ~a_init ~a\n"
+              (pfx (node-name n))
+              (if (zero? (node-kind n))
+                  "0"
+                  "{}")))
+    (printf " \n")
+
     ;; Some C preprocessor annotation for the i/o nodes.
     (for ((n nodes))
       (printf "#define ~a_~a ~a\n"
@@ -95,7 +107,7 @@
                         ,(node-kind n)
                         ,(foldr * 1 (node-dims n))
                         ,@(reverse (node-dims n))))))
-    (printf " \n")) ;; FIXME: space is a hack to make scribble output work
+    (printf " \n")) ;; FIXME
     
 
   (define (gen-types lst)
@@ -185,7 +197,7 @@
        (lambda ()
          (line "m(~a,~a) \\\n"
                node (c-list (map (fld node-info) fields))))))
-    (line " \n")) ;; FIXME: space is a hack to make scribble output work
+    (line " \n"))
     
   (define (gen-code)
     (match expr

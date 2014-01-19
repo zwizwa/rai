@@ -65,7 +65,6 @@ struct rai_pd {
     struct rai_info *rai_info;
     int nb_pd_in;  float **pd_in;
     int nb_pd_out; float **pd_out;
-    int nb_controls;
 #endif
     struct rai_voice voice;
     int cc_map[128];
@@ -77,7 +76,7 @@ t_int *rai_pd_perform(t_int *w) {
 #if HAVE_STATIC
     proc_loop((void*)&x->state, &x->in, &x->param, &x->out, &x->store, n);
 #else
-    rai_proc_run(x->rai_proc, x->pd_in, x->pd_out, n);
+    rai_proc_run(x->rai_proc, (void*)x->pd_in, (void*)x->pd_out, n);
 #endif
     return w+3;
 }
@@ -98,7 +97,7 @@ static t_symbol *gensym_n(const char *name, int n) {
     return gensym(sname);
 }
 
-static t_symbol *slider_label(struct rai_info_control *p) {
+static t_symbol *slider_label(const struct rai_info_control *p) {
     int buflen = 2 + strlen(p->desc) + strlen(p->unit);
     char buf[buflen];
     strcpy(buf, p->desc);
@@ -112,7 +111,7 @@ static t_symbol *slider_label(struct rai_info_control *p) {
 }
 
 static void update_gui_labels(struct rai_pd *x) {
-    struct rai_info_control *p = x->rai_info->info_control;
+    const struct rai_info_control *p = x->rai_info->info_control;
     for (int i = 0; p[i].desc; i++) {
         t_symbol *s = gensym_n("slider",i);
         if (s->s_thing) {
@@ -121,8 +120,10 @@ static void update_gui_labels(struct rai_pd *x) {
         }
     }
 }
-static void update_gui(struct rai_pd *x, int control_index, float value) {
-    struct rai_info_control *p = x->rai_info->info_control;
+static void update_gui(struct rai_pd *x, int control_index) {
+    int param_index = rai_proc_find_control(x->rai_proc, control_index);
+    if (param_index < 0) return;
+    RAI_NUMBER_T value = rai_proc_get_param(x->rai_proc, param_index);
     t_symbol *s = gensym_n("slider",control_index);
     if (s->s_thing) {
         t_atom s_desc = FLOAT(value);
@@ -130,9 +131,8 @@ static void update_gui(struct rai_pd *x, int control_index, float value) {
     }
 }
 static void rai_pd_update_gui(struct rai_pd *x) {
-    for(int i=0; i<x->nb_controls; i++) {
-        int param_index = x->rai_info->info_control[i].index;
-        update_gui(x, i, x->rai_proc->param[param_index]);
+    for(int i=0; i<x->rai_proc->nb_control; i++) {
+        update_gui(x, i);
     }
 }
 
@@ -146,7 +146,7 @@ static void rai_pd_create_gui(struct rai_pd *x, float x_coord, float y_coord) {
 
 
     /* Create slider on current canvas if there is no receiver. */
-    struct rai_info_control *p = x->rai_info->info_control;
+    const struct rai_info_control *p = x->rai_info->info_control;
     t_symbol *obj = gensym("obj");
     t_symbol *hsl = gensym("hsl");
     t_symbol *empty  = gensym("empty");
@@ -235,11 +235,11 @@ static void rai_pd_create_gui(struct rai_pd *x, float x_coord, float y_coord) {
 /* Force code reload by loading stand-alone binary fPIC code.
    Note that libdl won't reload a library if it is opened somewhere else. */
 static void rai_pd_load(struct rai_pd *x, t_symbol *filename) {
-    struct rai_info *ri = rai_load_bin(filename->s_name);
+    struct rai_info *ri = rai_load_sp(filename->s_name);
     if (ri) {
 
-        int nb_in  = rai_info_size(ri->info_in);
-        int nb_out = rai_info_size(ri->info_out);
+        int nb_in  = rai_info_param_list_size(ri->info_in);
+        int nb_out = rai_info_param_list_size(ri->info_out);
 
         if (x->pd_in == NULL) {
             /* First run: create I/O and alloc array buffers. */
@@ -269,21 +269,10 @@ static void rai_pd_load(struct rai_pd *x, t_symbol *filename) {
             x->rai_info = ri;
             x->proc_name = filename;
 
-            /* Config controls */
-            struct rai_info_control *p = ri->info_control;
-            for (x->nb_controls = 0; p[x->nb_controls].desc; x->nb_controls++);
-
             /* Config synth voices */
             bzero(&x->voice, sizeof(x->voice));
-            int gate_offset = 0, freq_offset = 0;
-            uintptr *dims = NULL;
-            if (rai_info_find(ri->info_param, "voice_gate", &gate_offset, &dims) &&
-                rai_info_find(ri->info_param, "voice_freq", &freq_offset, &dims)) {
-                rai_voice_init(&x->voice,
-                               dims[0],
-                               proc->param + gate_offset,
-                               proc->param + freq_offset);
-                post(ME "%d synth voices", dims[0]);
+            if (0 == rai_voice_init_from_proc(x->rai_proc, &x->voice)) {
+                post(ME "%d synth voices", x->voice.nb);
             }
 
             post(ME "%s (%d->%d) s:%d v:%s",
@@ -315,24 +304,18 @@ static void rai_pd_dsp(struct rai_pd *x, t_signal **sp) {
     rai_pd_param(x, gensym("timestep"), 1.0 / sp[0]->s_sr);
 }
 
-
-static inline void bzero_float(float *x, int n) {
-    for (int i = 0; i < n; i++) x[i] = 0;
-}
-
 static void rai_pd_reset_state(struct rai_pd *x) {
 #if HAVE_STATIC
-    bzero_float((float*)&x->state, 2*NB_STATE);
+    // FIXME: not implemented
 #else
-    int nb_state = rai_info_size(x->rai_info->info_state);
-    bzero_float(x->rai_proc->state, nb_state);
+    rai_proc_reset_state(x->rai_proc);
 #endif
 }
 static void rai_pd_reset_param(struct rai_pd *x) {
 #if HAVE_STATIC
-    bzero_float((float*)&x->param, NB_PARAM);
+    // FIXME: not implemented
 #else
-    bzero_float(x->rai_proc->param, rai_info_size(x->rai_info->info_param));
+    rai_proc_reset_param(x->rai_proc);
 #endif
 }
 
@@ -391,11 +374,8 @@ static void rai_pd_param(struct rai_pd *x, t_symbol *name, t_float value) {
     if (gensym(#p_name) == name) { *(float *)(&x->param.p_name) = value; return; }
     proc_for_param(HANDLE_PARAM);
 #else
-    int offset;
-    uintptr *dims;
-    if (rai_info_find(x->rai_info->info_param, name->s_name, &offset, &dims)) {
-        x->rai_proc->param[offset] = value;
-    }
+    int param_index = rai_proc_find_param(x->rai_proc, name->s_name);
+    rai_proc_set_param(x->rai_proc, param_index, value);
 #endif
 }
 
@@ -406,20 +386,18 @@ static void rai_pd_control(struct rai_pd *x, t_float f_index, t_float value) {
     post("rai_pd_control: %d %f", index, value);
     // FIXME: not implemented: see main_vst.c
 #else
-    if ((index < 0) || (index >= x->nb_controls)) return;
-    struct rai_info_control *p = &x->rai_info->info_control[index];
-    x->rai_proc->param[p->index] = value;
-    float ui_value = rai_info_control_interpolate(p, value);
-    //post("rai_pd_control: %s (%f) %f", p->desc, value, ui_value);
+    int param_index = rai_proc_find_control(x->rai_proc, f_index);
+    rai_proc_set_param(x->rai_proc, param_index, value);
+    // FIXME: display ui_value = rai_info_control_interpolate(p, value)
 #endif
 }
 
-// FIXME: map to gui param index first, then send out update symbol to slider
 static void rai_pd_cc_map(struct rai_pd *x, t_symbol *s, int argc, t_atom *argv) {
 #if !HAVE_STATIC
     int i;
+    post("nb_control = %d\n", x->rai_proc->nb_control);
     for (int control_index=0;
-         control_index < argc && control_index < x->nb_controls;
+         control_index < argc && control_index < x->rai_proc->nb_control;
          control_index++) {
         float f = atom_getfloat(&argv[control_index]);
         if ((f > 0) && (f < 128)) {
@@ -428,21 +406,31 @@ static void rai_pd_cc_map(struct rai_pd *x, t_symbol *s, int argc, t_atom *argv)
     }
 #endif
 }
+// 4 levels of indirections:
+// midi CC -> control_index -> param_index -> byte offset
+
+static void rai_pd_post_cc_map(struct rai_pd *x) {
+    for (int i = 0; i<128; i++) {
+        post("%d -> %d", i, x->cc_map[i]);
+    }
+}
+
 static void rai_pd_cc(struct rai_pd *x, t_float cc_f, t_float val) {
 #if !HAVE_STATIC
     if ((cc_f >= 0) && (cc_f <= 127)) {
         int cc = cc_f;
         int control_index = x->cc_map[(int)cc];
         if (control_index >= 0) { // -1 means not mapped
-            struct rai_info_control *p = x->rai_info->info_control;
-            int param_index = x->rai_info->info_control[control_index].index;
+            int param_index = rai_proc_find_control(x->rai_proc, control_index);
+            post("param_index = %d", param_index);
             float range_val = val * (1.0f / 127.0f);
-            x->rai_proc->param[param_index] = range_val;
+            rai_proc_set_param(x->rai_proc, param_index, range_val);
             // FIXME: should we really do this from here??
-            update_gui(x, control_index, range_val);
+            update_gui(x, control_index);
         }
         else {
             post("cc %d not mapped", cc);
+            rai_pd_post_cc_map(x);
         }
     }
 #endif

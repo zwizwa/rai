@@ -35,10 +35,10 @@
 (define-cstruct _rai_info_control
   ([desc  _string/utf-8]
    [unit  _string/utf-8]
-   [index _int]
-   [s0    _float]
-   [s1    _float]
-   [range _float]
+   [param _rai_info_param]
+   [s0    _double]
+   [s1    _double]
+   [range _double]
    [scale (_enum '(lin  = 0
                    log  = 1
                    slog = 2))]
@@ -54,6 +54,9 @@
    [info_out     _rai_info_param-pointer]
    [info_store   _rai_info_param-pointer]
    [info_control _rai_info_control-pointer]
+   [init_param   (_pointer _void)]
+   [init_state   (_pointer _void)]
+   [init_store   (_pointer _void)]
    [build_stamp  _uint32]
    [__reserved   _uint32]))
 
@@ -65,7 +68,7 @@
    ))
 
 
-(define-rai rai_load_bin (_fun _string -> _rai_info-pointer))
+(define-rai rai_load_sp (_fun _string -> _rai_info-pointer))
 
 (define-rai rai_proc_new (_fun _rai_info-pointer
                                (_or-null _rai_proc-pointer)
@@ -92,7 +95,7 @@
   (for/list ((p (array0->list (rai_info-info_control i) _rai_info_control)))
     `((desc  . ,(rai_info_control-desc p))
       (unit  . ,(rai_info_control-unit p))
-      (index . ,(rai_info_control-index p))
+      (param . ,(rai_info_control-param p))
       (s0    . ,(rai_info_control-s0 p))
       (s1    . ,(rai_info_control-s1 p))
       (range . ,(rai_info_control-range p))

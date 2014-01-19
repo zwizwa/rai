@@ -12,7 +12,7 @@
 
 test_pd.sp
 
-(define test_sp_info (rai_load_bin test_pd.sp))
+(define test_sp_info (rai_load_sp test_pd.sp))
 (define test_sp_proc (rai_proc_new test_sp_info #f))
 
 

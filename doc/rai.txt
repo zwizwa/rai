@@ -1083,3 +1083,16 @@ Date: Thu Jan 16 15:07:09 CET 2014
 At the .g.h level everything is fine.  The problem is in the main_*
 wrappers.  Essentially, .sp modules need type annotation.
 
+EDIT: This needs a design.  More functionality needs to be handled in
+a separate library.
+
+
+
+Entry: Changes to rai.h
+Date: Sun Jan 19 11:34:07 CET 2014
+
+essentially, all-float interface is simple, but too limiting.
+abstract it away in access methods.
+
+rai_info_control points rai_info_param (instead of index)
+rai_info_param as byte_offset member (pointing into flat container struct).
