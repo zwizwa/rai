@@ -123,9 +123,9 @@ int rai_info_param_alloc_size(const struct rai_info_param *pi);
 /* Params that have an associated rai_info_control are GUI worthy, and
    contain more meta info. */
 enum rai_scale {
-    rai_scale_lin = 0,  // s0 + (s1 - s1) * v
-    rai_scale_log = 1,  // s1 * (s1 / s1) ^ v
-    rai_scale_slog = 2, // s2 * (v/(1-v)) ^ s2   "squeezed log / stretched exp"
+    rai_scale_lin = 0,  // s0 + (s1 - s0) * v
+    rai_scale_log = 1,  // s0 * (s1 / s0) ^ v
+    rai_scale_slog = 2, // s0 * (v/(1-v)) ^ s1   "squeezed log / stretched exp"
 };
 struct rai_info_control_map {
     double s0; // minimum | center
@@ -147,18 +147,9 @@ struct rai_info_preset {
     uint32_t payload_bytes;
 };
 
-/* Maps v \in [0,1] to the control parameter's user feedback scale. */
-static inline float rai_info_control_interpolate(const struct rai_info_control_map *p, float v) {
-    float out_v;
-    switch(p->scale) {
-    case rai_scale_lin:  out_v = p->s0 + (p->s1 - p->s0) * v;   break;
-    case rai_scale_log:  out_v = p->s0 * pow(p->s1 / p->s0, v); break;
-    case rai_scale_slog: out_v = p->s0 * pow(v / (1-v), p->s1); break;
-    default:             out_v = v;                             break;
-    }
-    return out_v;
-}
 
+/* Maps v \in [0,1] to the control parameter's user feedback scale. */
+float rai_info_control_interpolate(const struct rai_info_control_map *p, float v);
 
 /* Load .sp class */
 struct rai_info *rai_load_sp(const char *filename);
@@ -178,12 +169,12 @@ struct rai_proc {
     int nb_control;
     int nb_param;
 };
-static inline void rai_proc_run(struct rai_proc *p,
-                                struct proc_in  * restrict in,
-                                struct proc_out * restrict out,
-                                int n) {
-    p->info->entry(p->state, in, p->param, out, p->store, n);
-}
+
+void rai_proc_run(struct rai_proc *p,
+                  struct proc_in  * restrict in,
+                  struct proc_out * restrict out,
+                  int n);
+
 struct rai_proc *rai_proc_new(const struct rai_info *info,
                               const struct rai_proc *proto);
 void rai_proc_free(struct rai_proc *p);
@@ -197,20 +188,8 @@ void rai_proc_reset_param(struct rai_proc *p);
 int rai_proc_find_param(struct rai_proc *p, const char *name);
 int rai_proc_find_control(struct rai_proc *p, int c);
 void rai_proc_set_param(struct rai_proc *p, int index, RAI_NUMBER_T val);
+
 RAI_NUMBER_T rai_proc_get_param(struct rai_proc *p, int index);
-
-#ifndef PROC
-#define PROC(x) proc_##x
-#endif
-
-#define PROC_NB_EL(x,t) ((sizeof(x) / sizeof(t)))
-#define PROC_PARAM_DIM(name) PROC_NB_EL(((struct PROC(param) *)0)->name, float)
-
-#define proc_size_param   PROC_NB_EL(struct proc_param, float)
-#define proc_size_in      PROC_NB_EL(struct proc_in,    float*)
-#define proc_size_out     PROC_NB_EL(struct proc_out,   float*)
-#define proc_size_state   PROC_NB_EL(struct proc_si,    float)
-#define proc_size_store   PROC_NB_EL(struct proc_store, float)
 
 /* Synth stuff */
 struct rai_voice {
@@ -219,20 +198,10 @@ struct rai_voice {
     float32_t *freq;
     uint32_t next;
 };
-/* Simple round-robin voice allocator.
-   Some extensions:
-   - "pedal" action to set the decay of all voices
-   - voice stealing based on envelope decay
-*/
 
-static inline void rai_voice_init(struct rai_voice *v, int nb, float *gate, float *freq) {
-    v->nb = nb;
-    v->gate = gate;
-    v->freq = freq;
-    v->next = 0;
-}
 
 // for convenience
+void rai_voice_init(struct rai_voice *v, int nb, float *gate, float *freq);
 int rai_voice_init_from_proc(struct rai_proc *p, struct rai_voice *v);
 void rai_voice_off(struct rai_voice *v, float freq);
 void rai_voice_on(struct rai_voice *v, float freq);

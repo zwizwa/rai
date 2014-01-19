@@ -24,8 +24,6 @@ static int rai_info_control_list_size(const struct rai_info_control *ci) {
     return i;
 }
 
-
-
 static int rai_min(int x, int y) { return x < y ? x : y; }
 
 static int rai_type_sizeof(enum rai_type t) {
@@ -59,15 +57,6 @@ void rai_set_number(enum rai_type t, void *p, RAI_NUMBER_T val) {
         RAI_TYPES_FOR(RAI_CASE_SET_NUMBER)
     }
 }
-
-
-#if 0
-static inline void * _memcpy(void *dst, void *src, int bytes) {
-    printf("memcpy(%p,%p,%d)\n", dst, src, bytes);
-    return memcpy(dst, src, bytes);
-}
-#endif
-
 
 
 /* Initialize from prototype if available, else use defaults.  This is
@@ -149,6 +138,13 @@ void rai_proc_free(struct rai_proc *p) {
     free(p);
 }
 
+void rai_proc_run(struct rai_proc *p,
+                  struct proc_in  * restrict in,
+                  struct proc_out * restrict out,
+                  int n) {
+    p->info->entry(p->state, in, p->param, out, p->store, n);
+}
+
 void rai_proc_reset_state(struct rai_proc *p) {
     rai_param_init(p->info->info_state, p->state, NULL, 0);
 }
@@ -200,34 +196,38 @@ int rai_proc_find_control(struct rai_proc *p, int c) {
 /* Set will set the entire grid.  Get will only pick the first element. */
 void rai_proc_set_param(struct rai_proc *p, int index, RAI_NUMBER_T val) {
     if ((index < 0) || (index >= p->nb_param)) {
-        // printf("! p_%d\n", index);
         return;
     }
     void *param_buf = (void*)p->param + p->param_offset[index];
     enum rai_type t = p->info->info_param[index].type;
-    // printf("param_buf %p\n", param_buf);
 
-    rai_set_number(t, param_buf, val);
-    return;
-
-#if 0
     int nb = p->param_nb_el[index];
     int base_bytes = rai_type_sizeof(t);
     for (int i=0; i<nb; i++) {
-        // printf("p_%d <- %f\n", index, val); 
         rai_set_number(t, param_buf, val);
         param_buf += base_bytes;
     }
-#endif
 }
 RAI_NUMBER_T rai_proc_get_param(struct rai_proc *p, int index) {
     if ((index < 0) || (index >= p->nb_param)) {
-        // printf("! p_%d\n", index);
         return 0;
     }
     void *param_buf = (void*)p->param + p->param_offset[index];
-    // printf("param_buf %p\n", param_buf);
     return rai_get_number(p->info->info_param[index].type, param_buf);
+}
+
+
+/* Simple round-robin voice allocator.
+   Some extensions:
+   - "pedal" action to set the decay of all voices
+   - voice stealing based on envelope decay
+*/
+
+void rai_voice_init(struct rai_voice *v, int nb, float *gate, float *freq) {
+    v->nb = nb;
+    v->gate = gate;
+    v->freq = freq;
+    v->next = 0;
 }
 
 
@@ -304,4 +304,14 @@ void rai_print_info(const struct rai_info *ri, rai_log log) {
     rai_print_info_control("control", ri->info_control, log);
 }
 
-
+/* Maps v \in [0,1] to the control parameter's user feedback scale. */
+float rai_info_control_interpolate(const struct rai_info_control_map *p, float v) {
+    float out_v;
+    switch(p->scale) {
+    case rai_scale_lin:  out_v = p->s0 + (p->s1 - p->s0) * v;   break;
+    case rai_scale_log:  out_v = p->s0 * pow(p->s1 / p->s0, v); break;
+    case rai_scale_slog: out_v = p->s0 * pow(v / (1-v), p->s1); break;
+    default:             out_v = v;                             break;
+    }
+    return out_v;
+}

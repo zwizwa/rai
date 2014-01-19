@@ -47,6 +47,12 @@ extern "C" {
 #define LOG(...)
 #endif
 
+// FIXME: old float-only interface
+#define PROC_NB_EL(x,t) ((sizeof(x) / sizeof(t)))
+#define PROC_PARAM_DIM(name) PROC_NB_EL(((struct proc_param *)0)->name, float)
+#define proc_size_in      PROC_NB_EL(struct proc_in,    float*)
+#define proc_size_out     PROC_NB_EL(struct proc_out,   float*)
+
 
 /* Create synth voice allocator if freq and gate params are defined as
    1-dim arrays.  */

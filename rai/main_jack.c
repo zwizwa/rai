@@ -34,6 +34,14 @@ float **a_param  = (float**)&param;
 float **a_in     = (float**)&in;
 float **a_out    = (float**)&out;
 
+
+// FIXME: old float-only interface
+#define PROC_NB_EL(x,t) ((sizeof(x) / sizeof(t)))
+#define proc_size_param   PROC_NB_EL(struct proc_param, float)
+#define proc_size_in      PROC_NB_EL(struct proc_in,    float*)
+#define proc_size_out     PROC_NB_EL(struct proc_out,   float*)
+
+
 /* Jack port objects */
 jack_port_t *input_port[proc_size_in];
 jack_port_t *output_port[proc_size_out];

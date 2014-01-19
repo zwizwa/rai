@@ -1,10 +1,5 @@
 // Stand-alone loadable module.
 
-/* CONTACT AUTHOR IF YOU DEPEND ON THE BINARY REPRESENTATION.
-   IMPLEMENTATION IS IN FLUX - VERSIONS ARE NOT YET TAGGED PROPERLY.
-
-   Once requirements are clear, this should stabilize. */
-
 #define fast_fmod local_fmod
 #define _ float
 
@@ -18,17 +13,12 @@ static inline _ local_fmod(_ x, _ range) {
     return frac * range;
 }
 
-
 #define GEN_DIM_ARRAY(name, type, kind, size, ...) static const word_t name##_dims[kind+1] = {__VA_ARGS__};
 proc_for_in    (GEN_DIM_ARRAY)
 proc_for_param (GEN_DIM_ARRAY)
 proc_for_out   (GEN_DIM_ARRAY)
 proc_for_si    (GEN_DIM_ARRAY)
 proc_for_store (GEN_DIM_ARRAY)
-
-
-
-
 
 #define GEN_INFO(__name, __type, kind, size, ...) {   \
         .name = (void*)#__name,                       \
@@ -51,12 +41,10 @@ const struct rai_info_param_by_name info_param = {
     proc_for_param (GEN_INFO)  {}
 };
 
-
 #define GEN_INIT(__name, ...) .__name = proc_##__name##_init,
 const struct proc_param init_param = { proc_for_param (GEN_INIT) };
 const struct proc_si    init_state = { proc_for_si    (GEN_INIT) };
 const struct proc_store init_store = { proc_for_store (GEN_INIT) };
-
 
 #define GEN_CONTROL(_param, _desc, _unit, _min, _max, _range, _curve) { \
             .desc = _desc,                                              \
@@ -69,11 +57,10 @@ const struct proc_store init_store = { proc_for_store (GEN_INIT) };
             },
 const struct rai_info_control info_control[] = { proc_for_control (GEN_CONTROL) {} };
 
-
 /* Start of binary file. */
 struct rai_info __attribute__((section(".header"))) proc_info = {
     .magic      = RAI_MAGIC,
-    .entry      = (void*)PROC(loop),
+    .entry      = (void*)proc_loop,
 
     /* Detailed meta info */
     .info_state = (void*)info_state,
@@ -87,7 +74,6 @@ struct rai_info __attribute__((section(".header"))) proc_info = {
     .init_param = (void*)&init_param,
     .init_state = (void*)&init_state,
     .init_store = (void*)&init_store,
-
 
 #if defined(RAI_BUILD_STAMP)
     .build_stamp = RAI_BUILD_STAMP,
