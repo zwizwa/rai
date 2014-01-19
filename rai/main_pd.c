@@ -1,42 +1,18 @@
 /*
  *   Pd wrapper for rai dsp processor
- *   Copyright (c) 2000-2013 by Tom Schouten
+ *   Copyright (c) 2000-2014 by Tom Schouten
  */
 
-// Example for including .g.h file
+
+/* Pd is used as the main development host for RAI plugins.
+   This object supports dynamic loading using the .sp format. */
+
 
 #include "prim.h"  // primitive functions
 #include "rai.h"
 
-// #undef PROC_FILE // testing
-
 #define ME "sp: "
-
-#ifdef PROC_FILE
-#define HAVE_STATIC 1
-#include PROC_FILE // generated code
-/* Assume the prefix is default "proc_"
-   We just work with flat arrays, not structured grid data. */
-#define NB_PARAM  proc_size_param
-#define NB_IN     proc_size_in
-#define NB_OUT    proc_size_out
-#define NB_STATE  proc_size_state
-/* Create synth voice allocator if freq and gate params are defined as
-   1-dim arrays.  */
-#if defined(proc_param_voice_freq) && \
-    defined(proc_param_voice_gate) && \
-    proc_param_voice_freq == 1 && \
-    proc_param_voice_gate == 1
 #define HAVE_SYNTH 1
-#else
-#define HAVE_SYNTH 0
-#endif
-
-#else
-#define HAVE_STATIC 0
-#define HAVE_SYNTH 1
-#endif
-
 
 #include "m_pd.h"
 #include "g_canvas.h"
@@ -53,19 +29,11 @@ struct rai_pd {
     t_object x_obj;
     t_float x_f;
     t_canvas *x_canvas;
-#if HAVE_STATIC
-    struct proc_si state[2];
-    struct proc_param param;
-    struct proc_in in;
-    struct proc_out out;
-    struct proc_store store;
-#else
     t_symbol *proc_name;
     struct rai_proc *rai_proc;
     struct rai_info *rai_info;
     int nb_pd_in;  float **pd_in;
     int nb_pd_out; float **pd_out;
-#endif
     struct rai_voice voice;
     int cc_map[128];
 };
@@ -73,11 +41,7 @@ struct rai_pd {
 t_int *rai_pd_perform(t_int *w) {
     struct rai_pd *x = (void*)w[1];
     t_int n = w[2];
-#if HAVE_STATIC
-    proc_loop((void*)&x->state, &x->in, &x->param, &x->out, &x->store, n);
-#else
     rai_proc_run(x->rai_proc, (void*)x->pd_in, (void*)x->pd_out, n);
-#endif
     return w+3;
 }
 
@@ -86,9 +50,6 @@ t_int *rai_pd_perform(t_int *w) {
 #define nb_el(x) (sizeof(x)/sizeof(x[0]))
 
 
-
-
-#if !HAVE_STATIC
 
 static t_symbol *gensym_n(const char *name, int n) {
     char sname[strlen(name)+20];
@@ -287,37 +248,23 @@ static void rai_pd_load(struct rai_pd *x, t_symbol *filename) {
         post(ME "Can't load code from %s", filename->s_name);
     }
 }
-#endif
 
 
 static void rai_pd_param(struct rai_pd *x, t_symbol *name, t_float value);
 
 static void rai_pd_dsp(struct rai_pd *x, t_signal **sp) {
-#if HAVE_STATIC
-    for (int i = 0; i < NB_IN;  i++) { ((float**)(&x->in))[i]  = sp[i]->s_vec; }
-    for (int i = 0; i < NB_OUT; i++) { ((float**)(&x->out))[i] = sp[i+NB_IN]->s_vec; }
-#else
     for (int i = 0; i < x->nb_pd_in;  i++) { x->pd_in[i]  = sp[i]->s_vec; }
     for (int i = 0; i < x->nb_pd_out; i++) { x->pd_out[i] = sp[i+x->nb_pd_in]->s_vec; }
-#endif
     dsp_add(rai_pd_perform, 2, x, sp[0]->s_n);
     rai_pd_param(x, gensym("samplerate"), sp[0]->s_sr);
     rai_pd_param(x, gensym("timestep"), 1.0 / sp[0]->s_sr);
 }
 
 static void rai_pd_reset_state(struct rai_pd *x) {
-#if HAVE_STATIC
-    // FIXME: not implemented
-#else
     rai_proc_reset_state(x->rai_proc);
-#endif
 }
 static void rai_pd_reset_param(struct rai_pd *x) {
-#if HAVE_STATIC
-    // FIXME: not implemented
-#else
     rai_proc_reset_param(x->rai_proc);
-#endif
 }
 
 static void rai_pd_note(struct rai_pd *x, t_float freq, t_float gain) {
@@ -334,13 +281,6 @@ static void *rai_pd_new(t_symbol *filename) {
     x->x_canvas = canvas_getcurrent();
     for(int i=0; i<128; i++) x->cc_map[i] = -1;
 
-#if HAVE_STATIC
-    /* Create I/O */
-    for (int i=1; i<NB_IN; i++)
-        inlet_new(&x->x_obj, &x->x_obj.ob_pd, gensym("signal"), gensym("signal"));
-    for (int i=0; i<NB_OUT; i++)
-        outlet_new(&x->x_obj, gensym("signal"));
-#else
     /* Need file argument. */
     x->nb_pd_in  = 1;  x->pd_in  = NULL;
     x->nb_pd_out = 0;  x->pd_out = NULL;
@@ -349,7 +289,6 @@ static void *rai_pd_new(t_symbol *filename) {
         // FIXME: pd_free(x); ???
         return NULL;
     }
-#endif
 
     /* Init state and input param vectors. */
     rai_pd_reset_state(x);
@@ -360,41 +299,27 @@ static void *rai_pd_new(t_symbol *filename) {
 }
 
 static void rai_pd_free(struct rai_pd *x) {
-#if !HAVE_STATIC
     rai_proc_free(x->rai_proc);
     free(x->rai_info);
     if (x->pd_in)  free(x->pd_in);
     if (x->pd_out) free(x->pd_out);
-#endif
 }
 
 static void rai_pd_param(struct rai_pd *x, t_symbol *name, t_float value) {
     // post("rai_pd_param: %s %f", name->s_name, value);
-#if HAVE_STATIC
-#define HANDLE_PARAM(p_name, p_type, ...)                               \
-    if (gensym(#p_name) == name) { *(float *)(&x->param.p_name) = value; return; }
-    proc_for_param(HANDLE_PARAM);
-#else
     int param_index = rai_proc_find_param(x->rai_proc, name->s_name);
     rai_proc_set_param(x->rai_proc, param_index, value);
-#endif
 }
 
 /* Controls are a subset of parameters exported to a GUI. */
 static void rai_pd_control(struct rai_pd *x, t_float f_index, t_float value) {
     int index = f_index;
-#if HAVE_STATIC
-    // post("rai_pd_control: %d %f", index, value);
-    // FIXME: not implemented: see main_vst.c
-#else
     int param_index = rai_proc_find_control(x->rai_proc, f_index);
     rai_proc_set_param(x->rai_proc, param_index, value);
     // FIXME: display ui_value = rai_info_control_interpolate(p, value)
-#endif
 }
 
 static void rai_pd_cc_map(struct rai_pd *x, t_symbol *s, int argc, t_atom *argv) {
-#if !HAVE_STATIC
     int i;
     // post("nb_control = %d\n", x->rai_proc->nb_control);
     for (int control_index=0;
@@ -405,7 +330,6 @@ static void rai_pd_cc_map(struct rai_pd *x, t_symbol *s, int argc, t_atom *argv)
             x->cc_map[(int)f] = control_index;
         }
     }
-#endif
 }
 // 4 levels of indirections:
 // midi CC -> control_index -> param_index -> byte offset
@@ -417,7 +341,6 @@ static void rai_pd_post_cc_map(struct rai_pd *x) {
 }
 
 static void rai_pd_cc(struct rai_pd *x, t_float cc_f, t_float val) {
-#if !HAVE_STATIC
     if ((cc_f >= 0) && (cc_f <= 127)) {
         int cc = cc_f;
         int control_index = x->cc_map[(int)cc];
@@ -435,7 +358,6 @@ static void rai_pd_cc(struct rai_pd *x, t_float cc_f, t_float val) {
             // rai_pd_post_cc_map(x);
         }
     }
-#endif
 }
 
 
