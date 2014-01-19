@@ -1096,3 +1096,19 @@ abstract it away in access methods.
 
 rai_info_control points rai_info_param (instead of index)
 rai_info_param as byte_offset member (pointing into flat container struct).
+
+
+
+Entry: SP structures
+Date: Sun Jan 19 20:56:15 CET 2014
+
+It seems best to stick to the sp structures as default.  Leave the
+static C interfaces for where it makes sense, i.e. on deeply embedded
+stuff.
+
+To make this work, make it possible to share the functionality in
+main_sp.c
+
+TODO:
+- librai.c  -> operate on a (linked) rai_info
+- sp.c      -> load binary .sp into rai_info

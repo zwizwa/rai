@@ -225,40 +225,11 @@ static inline void rai_voice_init(struct rai_voice *v, int nb, float *gate, floa
 }
 
 // for convenience
-static inline int rai_voice_init_from_proc(struct rai_proc *p, struct rai_voice *v) {
-    const struct rai_info_param *ip = p->info->info_param;
-    int gate_index = rai_proc_find_param(p, "voice_gate"); if (gate_index < 0) return -1;
-    int freq_index = rai_proc_find_param(p, "voice_freq"); if (freq_index < 0) return -1;
-    if (ip[gate_index].type != rai_type_float32_t) return -1;
-    if (ip[freq_index].type != rai_type_float32_t) return -1;
-    int nb =  p->param_nb_el[gate_index];
-    if (nb != p->param_nb_el[freq_index]) return -1;
-    rai_voice_init(v, nb,
-                   (void*)p->param + p->param_offset[gate_index],
-                   (void*)p->param + p->param_offset[freq_index]);
-    return 0;
-}
+int rai_voice_init_from_proc(struct rai_proc *p, struct rai_voice *v);
+void rai_voice_off(struct rai_voice *v, float freq);
+void rai_voice_on(struct rai_voice *v, float freq);
+float rai_midi_to_freq(int midi);
 
-static inline void rai_voice_on(struct rai_voice *v, float freq) {
-    v->gate[v->next] = 1;
-    v->freq[v->next] = freq;
-    v->next = (v->next + 1) % v->nb;
-}
-static inline void rai_voice_off(struct rai_voice *v, float freq) {
-    /* Turn off 0 or 1 notes, start from oldest. */
-    for (int i=1; i<=v->nb; i++) {
-        int j = (v->nb + v->next - i) % v->nb;
-        if (v->freq[j] == freq) {
-            v->gate[j] = 0;
-            break;
-        }
-    }
-}
-static inline float rai_midi_to_freq(int midi) {
-    // 69 -> 440
-    float fmidi = midi-69;
-    return 440 * pow(2, fmidi/12);
-}
 
 
 

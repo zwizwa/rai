@@ -126,7 +126,7 @@ static void update_gui(struct rai_pd *x, int control_index) {
     RAI_NUMBER_T value = rai_proc_get_param(x->rai_proc, param_index);
     t_symbol *s = gensym_n("slider",control_index);
     if (s->s_thing) {
-        post("update_gui %d %d %f", control_index, param_index, value);
+        // post("update_gui %d %d %f", control_index, param_index, value);
         t_atom s_desc = FLOAT(value);
         typedmess(s->s_thing, gensym("set"), 1, &s_desc);
     }
@@ -369,7 +369,7 @@ static void rai_pd_free(struct rai_pd *x) {
 }
 
 static void rai_pd_param(struct rai_pd *x, t_symbol *name, t_float value) {
-    post("rai_pd_param: %s %f", name->s_name, value);
+    // post("rai_pd_param: %s %f", name->s_name, value);
 #if HAVE_STATIC
 #define HANDLE_PARAM(p_name, p_type, ...)                               \
     if (gensym(#p_name) == name) { *(float *)(&x->param.p_name) = value; return; }
@@ -384,7 +384,7 @@ static void rai_pd_param(struct rai_pd *x, t_symbol *name, t_float value) {
 static void rai_pd_control(struct rai_pd *x, t_float f_index, t_float value) {
     int index = f_index;
 #if HAVE_STATIC
-    post("rai_pd_control: %d %f", index, value);
+    // post("rai_pd_control: %d %f", index, value);
     // FIXME: not implemented: see main_vst.c
 #else
     int param_index = rai_proc_find_control(x->rai_proc, f_index);
@@ -396,7 +396,7 @@ static void rai_pd_control(struct rai_pd *x, t_float f_index, t_float value) {
 static void rai_pd_cc_map(struct rai_pd *x, t_symbol *s, int argc, t_atom *argv) {
 #if !HAVE_STATIC
     int i;
-    post("nb_control = %d\n", x->rai_proc->nb_control);
+    // post("nb_control = %d\n", x->rai_proc->nb_control);
     for (int control_index=0;
          control_index < argc && control_index < x->rai_proc->nb_control;
          control_index++) {
@@ -423,21 +423,16 @@ static void rai_pd_cc(struct rai_pd *x, t_float cc_f, t_float val) {
         int control_index = x->cc_map[(int)cc];
         if (control_index >= 0) { // -1 means not mapped
             int param_index = rai_proc_find_control(x->rai_proc, control_index);
-            post("param_index = %d", param_index);
+            //post("param_index = %d", param_index);
             float range_val = val * (1.0f / 127.0f);
             rai_proc_set_param(x->rai_proc, param_index, range_val);
-
-            float check = rai_proc_get_param(x->rai_proc, param_index);
-            if (range_val != check) {
-                post("param %d stuck", param_index);
-            }
 
             // FIXME: should we really do this from here??
             update_gui(x, control_index);
         }
         else {
             post("cc %d not mapped", cc);
-            rai_pd_post_cc_map(x);
+            // rai_pd_post_cc_map(x);
         }
     }
 #endif
@@ -454,6 +449,7 @@ void EXTERN_SETUP (void) {
     class_addmethod(rai_pd_class, (t_method)rai_pd_control, gensym("control"), A_FLOAT, A_FLOAT, A_NULL);
     class_addmethod(rai_pd_class, (t_method)rai_pd_note, gensym("note"), A_FLOAT, A_FLOAT, A_NULL);
     class_addmethod(rai_pd_class, (t_method)rai_pd_cc_map, gensym("cc_map"), A_GIMME, A_NULL);
+    class_addmethod(rai_pd_class, (t_method)rai_pd_post_cc_map, gensym("post_cc_map"), A_GIMME, A_NULL);
     class_addmethod(rai_pd_class, (t_method)rai_pd_cc, gensym("cc"), A_FLOAT, A_FLOAT, A_NULL);
 #if !HAVE_STATIC
     class_addmethod(rai_pd_class, (t_method)rai_pd_load, gensym("load"), A_SYMBOL, A_NULL);

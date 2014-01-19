@@ -260,12 +260,12 @@ int rai_proc_find_control(struct rai_proc *p, int c) {
 /* Set will set the entire grid.  Get will only pick the first element. */
 void rai_proc_set_param(struct rai_proc *p, int index, RAI_NUMBER_T val) {
     if ((index < 0) || (index >= p->nb_param)) {
-        printf("! p_%d\n", index);
+        // printf("! p_%d\n", index);
         return;
     }
     void *param_buf = (void*)p->param + p->param_offset[index];
     enum rai_type t = p->info->info_param[index].type;
-    printf("param_buf %p\n", param_buf);
+    // printf("param_buf %p\n", param_buf);
 
     rai_set_number(t, param_buf, val);
     return;
@@ -274,7 +274,7 @@ void rai_proc_set_param(struct rai_proc *p, int index, RAI_NUMBER_T val) {
     int nb = p->param_nb_el[index];
     int base_bytes = rai_type_sizeof(t);
     for (int i=0; i<nb; i++) {
-        printf("p_%d <- %f\n", index, val); 
+        // printf("p_%d <- %f\n", index, val); 
         rai_set_number(t, param_buf, val);
         param_buf += base_bytes;
     }
@@ -282,13 +282,49 @@ void rai_proc_set_param(struct rai_proc *p, int index, RAI_NUMBER_T val) {
 }
 RAI_NUMBER_T rai_proc_get_param(struct rai_proc *p, int index) {
     if ((index < 0) || (index >= p->nb_param)) {
-        printf("! p_%d\n", index);
+        // printf("! p_%d\n", index);
         return 0;
     }
     void *param_buf = (void*)p->param + p->param_offset[index];
-    printf("param_buf %p\n", param_buf);
+    // printf("param_buf %p\n", param_buf);
     return rai_get_number(p->info->info_param[index].type, param_buf);
 }
+
+
+int rai_voice_init_from_proc(struct rai_proc *p, struct rai_voice *v) {
+    const struct rai_info_param *ip = p->info->info_param;
+    int gate_index = rai_proc_find_param(p, "voice_gate"); if (gate_index < 0) return -1;
+    int freq_index = rai_proc_find_param(p, "voice_freq"); if (freq_index < 0) return -1;
+    if (ip[gate_index].type != rai_type_float32_t) return -1;
+    if (ip[freq_index].type != rai_type_float32_t) return -1;
+    int nb =  p->param_nb_el[gate_index];
+    if (nb != p->param_nb_el[freq_index]) return -1;
+    rai_voice_init(v, nb,
+                   (void*)p->param + p->param_offset[gate_index],
+                   (void*)p->param + p->param_offset[freq_index]);
+    return 0;
+}
+void rai_voice_on(struct rai_voice *v, float freq) {
+    v->gate[v->next] = 1;
+    v->freq[v->next] = freq;
+    v->next = (v->next + 1) % v->nb;
+}
+void rai_voice_off(struct rai_voice *v, float freq) {
+    /* Turn off 0 or 1 notes, start from oldest. */
+    for (int i=1; i<=v->nb; i++) {
+        int j = (v->nb + v->next - i) % v->nb;
+        if (v->freq[j] == freq) {
+            v->gate[j] = 0;
+            break;
+        }
+    }
+}
+float rai_midi_to_freq(int midi) {
+    // 69 -> 440
+    float fmidi = midi-69;
+    return 440 * pow(2, fmidi/12);
+}
+
 
 
 
