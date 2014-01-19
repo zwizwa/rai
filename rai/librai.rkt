@@ -9,6 +9,7 @@
  
 (define-ffi-definer define-rai (ffi-lib "librai"))
 
+(define _void-pointer          (_cpointer _void))
 (define _float-pointer         (_cpointer _float))
 (define _float-pointer-pointer (_cpointer _float-pointer))
 (define _uint32-pointer        (_cpointer _uint32))
@@ -54,9 +55,9 @@
    [info_out     _rai_info_param-pointer]
    [info_store   _rai_info_param-pointer]
    [info_control _rai_info_control-pointer]
-   [init_param   (_pointer _void)]
-   [init_state   (_pointer _void)]
-   [init_store   (_pointer _void)]
+   [init_param   _void-pointer]
+   [init_state   _void-pointer]
+   [init_store   _void-pointer]
    [build_stamp  _uint32]
    [__reserved   _uint32]))
 
