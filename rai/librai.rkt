@@ -96,7 +96,7 @@
   (for/list ((p (array0->list (rai_info-info_control i) _rai_info_control)))
     `((desc  . ,(rai_info_control-desc p))
       (unit  . ,(rai_info_control-unit p))
-      (param . ,(rai_info_control-param p))
+      (param . ,(rai_info_control-param p))   ;; FIXME: unpack?
       (s0    . ,(rai_info_control-s0 p))
       (s1    . ,(rai_info_control-s1 p))
       (range . ,(rai_info_control-range p))
@@ -178,7 +178,7 @@
        
 
          
-
+;; FIXME: use librai methods.
 (define (proc-param-set! p param val)
   (unless (number? param)
     (set! param (car (dict-ref (proc-pinfo p) param))))
