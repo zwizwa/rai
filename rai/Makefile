@@ -19,6 +19,7 @@ ALL := \
 	test_pd.sp test_pd.g.elf test_pd.g.run \
 	test-ai.rkt.run \
 	librai.so \
+	librai.a \
 	compalg.rkt.run \
 	test_jack.g.h test_jack.jack \
 	sp_host.pd_linux \

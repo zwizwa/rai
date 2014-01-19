@@ -6,6 +6,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define PROC_CMD_INFO -1
 
 typedef float  float32_t;
@@ -97,6 +101,7 @@ enum rai_type {
 
 
 
+
 /* To keep things simple, all casts are to/from a single numeric type. */
 #define RAI_NUMBER_T double
 RAI_NUMBER_T rai_get_number(enum rai_type t, const void *rai_src);
@@ -122,14 +127,17 @@ enum rai_scale {
     rai_scale_log = 1,  // s1 * (s1 / s1) ^ v
     rai_scale_slog = 2, // s2 * (v/(1-v)) ^ s2   "squeezed log / stretched exp"
 };
-struct rai_info_control {
-    const char *desc;
-    const char *unit;
-    const struct rai_info_param *param;
+struct rai_info_control_map {
     double s0; // minimum | center
     double s1; // maximum | exponent
     double range;
     enum rai_scale scale;
+};
+struct rai_info_control {
+    const char *desc;
+    const char *unit;
+    const struct rai_info_param *param;
+    struct rai_info_control_map map;
 };
 
 struct rai_info_preset {
@@ -140,7 +148,7 @@ struct rai_info_preset {
 };
 
 /* Maps v \in [0,1] to the control parameter's user feedback scale. */
-static inline float rai_info_control_interpolate(const struct rai_info_control *p, float v) {
+static inline float rai_info_control_interpolate(const struct rai_info_control_map *p, float v) {
     float out_v;
     switch(p->scale) {
     case rai_scale_lin:  out_v = p->s0 + (p->s1 - p->s0) * v;   break;
@@ -237,6 +245,11 @@ float rai_midi_to_freq(int midi);
 /* DEBUG */
 typedef void (*rai_log)(const char *msg, ...);
 void rai_print_info(const struct rai_info *ri, rai_log log);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif
 

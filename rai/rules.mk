@@ -89,9 +89,12 @@ sp_host.pd_linux: $(RAI)/prim.h $(RAI)/main_pd.c $(RAI)/rai.h rai.o
 
 
 
-
-%.dll: %.g.h $(RAI)/main_vst.cpp $(LICENSE_DEPS) $(RAI)/win_debug.h
-	$(MINGW)g++ $(CFLAGS_DLL) $(LICENSE_CFLAGS) -DPROC_FILE=\"$<\" $(RAI)/main_vst.cpp $(LDFLAGS_DLL) -shared -o $@
+# FIXME: This is for compiling a .dll on unix.
+# This should be a separate platform
+%.dll: %.g.h $(RAI)/main_vst.cpp $(LICENSE_DEPS) $(RAI)/win_debug.h $(RAI)/rai.c
+	$(MINGW)gcc $(CFLAGS) -c $(RAI)/rai.c -o mingw_rai.o
+	$(MINGW)g++ $(CFLAGS_DLL) $(LICENSE_CFLAGS) -DPROC_FILE=\"$<\" $(RAI)/main_vst.cpp mingw_rai.o $(LDFLAGS_DLL) -shared -o $@
+	rm mingw_rai.o
 	$(MINGW)strip $@ ; ls -l $@
 
 %.exe: %.c
@@ -109,8 +112,9 @@ BCR2000 := make -C $(RAI) bcr2000 && $(RAI)/bcr2000 </dev/midi3 |
 	$(BCR2000) $(DTACH) $$(readlink -f $<) $(JACK_SECONDS)
 
 
-librai.so: $(RAI)/rai.h rai.o
+librai.so: $(RAI)/rai.h rai.o rai_sp.o
 	gcc rai.o $(LDFLAGS) -rdynamic -shared -o $@
+
 
 bcr2000: $(RAI)/bcr2000.c
 	gcc -o $@ $<

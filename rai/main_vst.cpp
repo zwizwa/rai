@@ -67,36 +67,20 @@ extern "C" {
 
 
 
-/* Parameter discription structures */
+/* Static parameter discription structures.
+   Ad-hoc, defined from macros in .g.h */
 
-#define GEN_DIM_ARRAY(name, type, kind, size, ...) static const word_t name##_dims[kind+1] = {__VA_ARGS__};
-proc_for_param (GEN_DIM_ARRAY)
-
-/* To allow element ref by name, info_param is a struct instead of an array. */
-#define PARAM_BY_NAME(__name, ...) const struct rai_info_param __name;
-struct rai_info_param_by_name {
-    proc_for_param(PARAM_BY_NAME)
-    const struct rai_info_param _end_;
-};
-#define GEN_INFO(__name, __type, kind, size, ...) {   \
-      #__name,                                        \
-      &__name##_dims[0],                              \
-      rai_type_##__type,                              \
-},
-const struct rai_info_param_by_name info_param = {
-    proc_for_param(GEN_INFO)  {}
+struct control_info {
+    const char *desc;
+    const char *unit;
+    unsigned int offset;
+    struct rai_info_control_map map;
 };
 
-#define VST_PARAM(_param, _desc, _unit, _min, _max, _range, _curve) {   \
-      _desc,                                                            \
-      _unit,                                                            \
-      &info_param._param,                                               \
-      _min,                                                             \
-      _max,                                                             \
-      _range,                                                           \
-      rai_scale_##_curve,                                               \
-      },
-const struct rai_info_control param[] = {
+#define VST_PARAM(_param, _desc, _unit, _min, _max, _range, _curve) \
+  { _desc, _unit, offsetof(struct proc_param,_param), {_min, _max, _range, rai_scale_##_curve }},
+
+const struct control_info param[] = {
     proc_for_control(VST_PARAM) 
 };
 
@@ -120,6 +104,8 @@ private:
     struct plugin_state *state;
     VstEvents* events;
     void MIDI(VstMidiEvent *e);
+    float *findParam(VstInt32 index);
+
 public:
     Plugin (audioMasterCallback audioMaster, VstInt32 numPrograms, VstInt32 numParams);
     ~Plugin ();
@@ -307,15 +293,18 @@ VstIntPtr Plugin :: dispatcher (VstInt32 opCode, VstInt32 index,
 /* Only unit-annotated parameters are accessible through the VST
    parameter interface to avoid exposure of system parameters such as
    `samplerate'. */
+
+float* Plugin :: findParam(VstInt32 index) {
+    char *addr = (char *)(&this->state->param) + param[index].offset;
+    return (float*)addr;
+}
 void Plugin :: setParameter (VstInt32 index, float value) {
     LOG("setParameter(%d,%f)\n",index,value);
-    float *p = (float*)&state->param;
-    p[param[index].index] = value;
+    *findParam(index) = value;
 }
 float Plugin :: getParameter (VstInt32 index) {
     LOG("getParameter(%d)\n",index);
-    float *p = (float*)&state->param;
-    return p[param[index].index];
+    return *findParam(index);
 }
 
 void Plugin :: getParameterName (VstInt32 index, char *text) {
@@ -327,9 +316,8 @@ void Plugin :: getParameterUnit (VstInt32 index, char *text) {
     LOG("getParameterUnit(%d) -> %s\n",index,text);
 }
 void Plugin :: getParameterDisplay (VstInt32 index, char *text) { 
-    const struct rai_info_control *p = &param[index];
     float v = getParameter(index);
-    float out_v = rai_info_control_interpolate(p, v);
+    float out_v = rai_info_control_interpolate(&param[index].map, v);
     sprintf(text, "%f", out_v);
     LOG("getParameterDisplay(%d) -> %s (%f)\n",index,text,v);
 }
