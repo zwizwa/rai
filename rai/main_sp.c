@@ -62,10 +62,10 @@ const struct proc_store init_store = { proc_for_store (GEN_INIT) };
             .desc = _desc,                                              \
             .unit = _unit,                                              \
             .param = &info_param._param,                                \
-            .s0 = _min,                                                 \
-            .s1 = _max,                                                 \
-            .range = _range,                                            \
-            .scale = rai_scale_##_curve,                                \
+            .map = { .s0 = _min,                                        \
+                     .s1 = _max,                                        \
+                     .range = _range,                                   \
+                     .scale = rai_scale_##_curve }                      \
             },
 const struct rai_info_control info_control[] = { proc_for_control (GEN_CONTROL) {} };
 

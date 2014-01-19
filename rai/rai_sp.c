@@ -1,5 +1,9 @@
+#include "rai.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/mman.h>
 #include <unistd.h>
+
 
 /* Relocation: every date structure pointer needs to be patched from
    rai_info relative to absolute memory location. */
