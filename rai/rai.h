@@ -42,9 +42,53 @@ static inline int rai_list_end(const void *x) {
     return *((const void**)x) == NULL;
 }
 
-struct proc_class_param;
-struct proc_class_control;
+/* Implementation note: Compile time (type) lists are implemented as
+   "functor macros".  This makes it easier to construct a collection
+   of types and functions that abstract over types. */
 
+/* Iterate a macro m over types. */
+#define RAI_TYPES_FOR(m)                        \
+    m(float32_t)                                \
+    m(uint32_t)                                 \
+    m(int32_t)
+
+enum rai_type {
+#define RAI_DEFINE_TYPE(T) rai_type_##T,
+    RAI_TYPES_FOR(RAI_DEFINE_TYPE)
+};
+
+
+
+
+/* Bare-bones parameter. */
+struct proc_class_param {
+    const char *name;
+    const word_t *dims;
+    enum rai_type type;
+};
+
+/* Params that have an associated proc_class_control are GUI worthy, and
+   contain more meta info. */
+enum rai_scale {
+    rai_scale_lin = 0,  // s0 + (s1 - s0) * v
+    rai_scale_log = 1,  // s0 * (s1 / s0) ^ v
+    rai_scale_slog = 2, // s0 * (v/(1-v)) ^ s1   "squeezed log / stretched exp"
+};
+struct proc_class_control_map {
+    double s0; // minimum | center
+    double s1; // maximum | exponent
+    double range;
+    enum rai_scale scale;
+};
+struct proc_class_control {
+    const char *desc;
+    const char *unit;
+    const struct proc_class_param *param;
+    struct proc_class_control_map map;
+};
+
+
+/* Defined in .g.h */
 struct proc_si;
 struct proc_in;
 struct proc_param;
@@ -59,6 +103,11 @@ typedef void (*proc_class_run)(
     struct proc_store * restrict store,
     unsigned int nb_samples
 );
+
+
+/* Reified signal processor class.
+   defined in main_sp.c from proc_ macros in a .g.h
+   The .g.h is generated from stream code by ai-array-c.rkt */
 
 struct proc_class {
     uint8_t magic[RAI_MAGIC_SIZE];
@@ -86,20 +135,6 @@ struct proc_class {
 
 };
 
-/* Implementation note: Compile time (type) lists are implemented as
-   "functor macros".  This makes it easier to construct a collection
-   of types and functions that abstract over types. */
-
-/* Iterate a macro m over types. */
-#define RAI_TYPES_FOR(m)                        \
-    m(float32_t)                                \
-    m(uint32_t)                                 \
-    m(int32_t)
-
-enum rai_type {
-#define RAI_DEFINE_TYPE(T) rai_type_##T,
-    RAI_TYPES_FOR(RAI_DEFINE_TYPE)
-};
 
 
 
@@ -112,35 +147,13 @@ void         rai_set_number(enum rai_type t, void *rai_dst, RAI_NUMBER_T val);
 
 
 
-struct proc_class_param {
-    const char *name;
-    const word_t *dims;
-    enum rai_type type;
-};
+
 
 int proc_class_param_nb_elements(const struct proc_class_param *pi);
 int proc_class_param_list_size(const struct proc_class_param *pi);
 int proc_class_param_alloc_size(const struct proc_class_param *pi);
 
-/* Params that have an associated proc_class_control are GUI worthy, and
-   contain more meta info. */
-enum rai_scale {
-    rai_scale_lin = 0,  // s0 + (s1 - s0) * v
-    rai_scale_log = 1,  // s0 * (s1 / s0) ^ v
-    rai_scale_slog = 2, // s0 * (v/(1-v)) ^ s1   "squeezed log / stretched exp"
-};
-struct proc_class_control_map {
-    double s0; // minimum | center
-    double s1; // maximum | exponent
-    double range;
-    enum rai_scale scale;
-};
-struct proc_class_control {
-    const char *desc;
-    const char *unit;
-    const struct proc_class_param *param;
-    struct proc_class_control_map map;
-};
+
 
 struct proc_class_preset {
     uint8_t  magic[RAI_MAGIC_SIZE];
@@ -157,8 +170,12 @@ float proc_class_control_interpolate(const struct proc_class_control_map *p, flo
 struct proc_class *rai_load_sp(const char *filename);
 
 
-/* Create proc instance. */
 struct proc_instance;
+
+struct proc_instance *proc_instance_new(const struct proc_class *info,
+                                        const struct proc_instance *proto);
+
+void proc_instance_free(struct proc_instance *p);
 
 void proc_instance_run(struct proc_instance *p,
                        struct proc_in  * restrict in,
@@ -167,9 +184,6 @@ void proc_instance_run(struct proc_instance *p,
 
 int proc_instance_nb_control(struct proc_instance *p);
 
-struct proc_instance *proc_instance_new(const struct proc_class *info,
-                                        const struct proc_instance *proto);
-void proc_instance_free(struct proc_instance *p);
 
 void proc_instance_preset_save(const struct proc_instance *p, const char *filename);
 void proc_instance_preset_load(const struct proc_instance *p, const char *filename, int index);
