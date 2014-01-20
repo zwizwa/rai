@@ -3,7 +3,7 @@
  * Adapted from simple_client.c */
 
 #include "prim.h"
-#include "rai.h"
+#include "proc.h"
 #ifndef PROC_FILE
 #error PROC_FILE not defined
 #else

@@ -1,5 +1,5 @@
 #lang racket/base
-(require "librai.rkt"
+(require "libproc.rkt"
          racket/runtime-path
          ffi/vector
          ffi/unsafe

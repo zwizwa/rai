@@ -4,8 +4,8 @@
  */
 
 #include "prim.h"
+#include "proc.h"
 #include PROC_FILE // generated code
-#include "rai.h"
 
 #include <math.h>
 #include <stdlib.h>

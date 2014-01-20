@@ -7,7 +7,7 @@
          ffi/unsafe/define)
 (provide (all-defined-out))
  
-(define-ffi-definer define-rai (ffi-lib "librai"))
+(define-ffi-definer define-proc (ffi-lib "libproc"))
 
 (define _void-pointer          (_cpointer _void))
 (define _float-pointer         (_cpointer _float))
@@ -68,9 +68,9 @@
    ))
 
 
-(define-rai rai_load_sp (_fun _string -> _proc_class-pointer))
+(define-proc rai_load_sp (_fun _string -> _proc_class-pointer))
 
-(define-rai proc_instance_new (_fun _proc_class-pointer
+(define-proc proc_instance_new (_fun _proc_class-pointer
                                (_or-null _proc_instance-pointer)
                                ->
                                _proc_instance-pointer))
@@ -78,7 +78,7 @@
 
 
 
-;; Lists in rai.h are implemented using sentinel-terminated arrays,
+;; Lists in proc.h are implemented using sentinel-terminated arrays,
 ;; where the sentinal is a 0-filled field the size of a pointer.
 
 ;; Unpack sentinel-terminated array into a list of pointers.

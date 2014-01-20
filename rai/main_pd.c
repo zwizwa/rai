@@ -9,7 +9,7 @@
 
 
 #include "prim.h"  // primitive functions
-#include "rai.h"
+#include "proc.h"
 
 #define ME "sp: "
 #define HAVE_SYNTH 1

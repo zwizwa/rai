@@ -897,7 +897,7 @@ Date: Thu Jan  9 22:38:37 EST 2014
 
 - formalize subsampling
 
-- formalize delay lines
+- formalize delay lines  (+- ok?  it's already constructor based)
 
 - fix transfer function computation (see DSP book?): separate
   computatuion of polygon / poles (once)from evaluation of rational
@@ -1016,7 +1016,7 @@ Date: Tue Jan 14 15:04:14 CET 2014
 - Turn everything into call by name?
 
 - The autolifting is still quite weird.  The reason for this is the
-  way state threading is implemented.  (see next post)
+  way state threading is implemented.  (it's ok, see next post)
 
 
 Entry: About implicit indexing
@@ -1111,12 +1111,13 @@ main_sp.c
 
 TODO:
 - librai.c  -> operate on a (linked) rai_info
-- sp.c      -> load binary .sp into rai_info
-
+- sp.c      -> load binary .sp into rai_info 
+(+- done: rai.c rai_sp.c)
 
 
 Entry: Next?
 Date: Mon Jan 20 12:16:58 CET 2014
 
-- Initial values.
+- Initial state values.  DONE!
+
 
