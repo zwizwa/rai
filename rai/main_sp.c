@@ -42,7 +42,6 @@ const struct proc_class_param_by_name info_param = {
 };
 
 #define GEN_INIT(__name, ...) .__name = proc_##__name##_init,
-const struct proc_param init_param = { proc_for_param (GEN_INIT) };
 const struct proc_si    init_state = { proc_for_si    (GEN_INIT) };
 const struct proc_store init_store = { proc_for_store (GEN_INIT) };
 
@@ -71,7 +70,6 @@ struct proc_class __attribute__((section(".header"))) proc_info = {
 
     .info_control = (void*)info_control,
 
-    .init_param = (void*)&init_param,
     .init_state = (void*)&init_state,
     .init_store = (void*)&init_store,
 

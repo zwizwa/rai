@@ -1112,3 +1112,11 @@ main_sp.c
 TODO:
 - librai.c  -> operate on a (linked) rai_info
 - sp.c      -> load binary .sp into rai_info
+
+
+
+Entry: Next?
+Date: Mon Jan 20 12:16:58 CET 2014
+
+- Initial values.
+

@@ -55,7 +55,6 @@
    [info_out     _proc_class_param-pointer]
    [info_store   _proc_class_param-pointer]
    [info_control _proc_class_control-pointer]
-   [init_param   _void-pointer]
    [init_state   _void-pointer]
    [init_store   _void-pointer]
    [build_stamp  _uint32]

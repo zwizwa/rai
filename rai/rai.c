@@ -100,10 +100,7 @@ int proc_instance_nb_control(struct proc_instance *p) {
 
 
 void proc_instance_reset_state(struct proc_instance *p) {
-    param_init(p->info->info_state, p->state, p->info->init_param, p->size_state);
-}
-void proc_instance_reset_param(struct proc_instance *p) {
-    param_init(p->info->info_param, p->param, p->info->init_state, p->size_param);
+    param_init(p->info->info_state, p->state, p->info->init_state, p->size_state);
 }
 void proc_instance_reset_store(struct proc_instance *p) {
     param_init(p->info->info_store, p->store, p->info->init_store, p->size_store);
@@ -125,6 +122,9 @@ struct proc_instance *proc_instance_new(const struct proc_class *info,
         p->param_nb_el[i]  = proc_class_param_nb_elements(pi);
         int byte_size = rai_type_sizeof(pi->type) * p->param_nb_el[i];
         byte_offset += byte_size;
+        /* Params are algo inputs so don't have initial values, but
+           since we're stateful we have to initialize. */
+        proc_instance_set_param(p, i, 0.0);
     }
 
     /* Allocate in 1 chunk to improve locality. */
@@ -138,8 +138,7 @@ struct proc_instance *proc_instance_new(const struct proc_class *info,
     p->state    = buf; buf += (2 * p->size_state);
     p->store    = buf;
 
-    /* Initialize from defaults. */
-    proc_instance_reset_param(p);
+    /* Initialize from initial values specified in code. */
     proc_instance_reset_state(p);
     proc_instance_reset_store(p);
 

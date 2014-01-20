@@ -125,7 +125,6 @@ struct proc_class {
     const struct proc_class_control *info_control;
 
     /* Initial values. */
-    const struct proc_param *init_param;
     const struct proc_state *init_state;
     const struct proc_store *init_store;
 
