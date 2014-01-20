@@ -1022,7 +1022,7 @@
                     (block
                      ,@(annotate-time-bindings (bindings) #:phase #f))))))
   
-  (pp compiled-expr)
+  ;; (pp compiled-expr)
   compiled-expr)
 
 

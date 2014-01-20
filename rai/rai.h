@@ -188,7 +188,6 @@ void proc_instance_preset_save(const struct proc_instance *p, const char *filena
 void proc_instance_preset_load(const struct proc_instance *p, const char *filename, int index);
 
 void proc_instance_reset_state(struct proc_instance *p);
-void proc_instance_reset_param(struct proc_instance *p);
 
 int proc_instance_find_param(struct proc_instance *p, const char *name);
 int proc_instance_find_control(struct proc_instance *p, int c);

@@ -265,9 +265,6 @@ static void rai_pd_dsp(struct rai_pd *x, t_signal **sp) {
 static void rai_pd_reset_state(struct rai_pd *x) {
     proc_instance_reset_state(x->proc_instance);
 }
-static void rai_pd_reset_param(struct rai_pd *x) {
-    proc_instance_reset_param(x->proc_instance);
-}
 
 static void rai_pd_note(struct rai_pd *x, t_float freq, t_float gain) {
     if (!x->voice.nb) return;
@@ -291,11 +288,6 @@ static void *rai_pd_new(t_symbol *filename) {
         // FIXME: pd_free(x); ???
         return NULL;
     }
-
-    /* Init state and input param vectors. */
-    rai_pd_reset_state(x);
-    rai_pd_reset_param(x);
-
 
     return x;
 }
