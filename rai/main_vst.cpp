@@ -84,7 +84,7 @@ struct control_info {
 };
 
 #define VST_PARAM(_param, _desc, _unit, _min, _max, _range, _curve) \
-  { _desc, _unit, offsetof(struct proc_param,_param), {_min, _max, _range, rai_scale_##_curve }},
+  { _desc, _unit, offsetof(struct proc_param,_param), {_min, _max, _range, proc_scale_##_curve }},
 
 const struct control_info param[] = {
     proc_for_control(VST_PARAM) 
@@ -99,7 +99,7 @@ struct plugin_state {
     struct proc_param param;
     struct proc_store store;
 #if HAVE_SYNTH
-    struct rai_voice voice;
+    struct proc_voice voice;
 #endif
 };
 
@@ -164,10 +164,10 @@ Plugin :: Plugin(audioMasterCallback audioMaster, VstInt32 numPrograms, VstInt32
     setNumOutputs(proc_size_out);
 #if HAVE_SYNTH
     isSynth();
-    rai_voice_init(&state->voice,
-                   PROC_PARAM_DIM(voice_gate),
-                   (float*)&state->param.voice_gate,
-                   (float*)&state->param.voice_freq);
+    proc_voice_init(&state->voice,
+                    PROC_PARAM_DIM(voice_gate),
+                    (float*)&state->param.voice_gate,
+                    (float*)&state->param.voice_freq);
 #endif
     canProcessReplacing ();
 #define VST_PARAM_INIT(_param, ...) state->param._param = 0.5;
@@ -202,18 +202,18 @@ void Plugin :: MIDI(VstMidiEvent *e) {
     
     int tag     = d0 & 0xF0;
     int channel = d0 & 0x0F;
-    float freq  = rai_midi_to_freq(d1);
+    float freq  = proc_midi_to_freq(d1);
 
     LOG("midi %02x %02x %02x (%d)\n", d0, d1, d2);
     switch(tag) {
 #if HAVE_SYNTH
     case 0x90:
         LOG("Note on %f\n", freq);
-        rai_voice_on(&state->voice, freq);
+        proc_voice_on(&state->voice, freq);
         break;
     case 0x80:
         LOG("Note off %f\n", freq);
-        rai_voice_off(&state->voice, freq);
+        proc_voice_off(&state->voice, freq);
         break;
 #endif
     default:

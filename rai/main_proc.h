@@ -14,7 +14,7 @@ proc_for_store (GEN_DIM_ARRAY)
 #define GEN_INFO(__name, __type, kind, size, ...) {   \
         .name = (void*)#__name,                       \
         .dims = (void*)&__name##_dims[0],             \
-        .type = rai_type_##__type,                    \
+        .type = proc_type_##__type,                   \
 },
 
 const struct proc_class_param info_in[]    = { proc_for_in    (GEN_INFO) {} };
@@ -43,7 +43,7 @@ const struct proc_store init_store = { proc_for_store (GEN_INIT) };
             .map = { .s0 = _min,                                        \
                      .s1 = _max,                                        \
                      .range = _range,                                   \
-                     .scale = rai_scale_##_curve }                      \
+                     .scale = proc_scale_##_curve }                     \
             },
 const struct proc_class_control info_control[] = { proc_for_control (GEN_CONTROL) {} };
 

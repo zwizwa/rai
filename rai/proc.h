@@ -70,7 +70,7 @@ typedef unsigned long word_t; // pointer-sized int
 /* Lists in proc.h are implemented as sentinel-terminated arrays, where
    the sentinel is a 0-filled field the size of a native pointer. */
 
-static inline int rai_list_end(const void *x) {
+static inline int proc_list_end(const void *x) {
     return *((const void**)x) == NULL;
 }
 
@@ -79,14 +79,14 @@ static inline int rai_list_end(const void *x) {
    of types and functions that abstract over types. */
 
 /* Iterate a macro m over types. */
-#define RAI_TYPES_FOR(m)                        \
+#define PROC_TYPES_FOR(m)                        \
     m(float32_t)                                \
     m(uint32_t)                                 \
     m(int32_t)
 
-enum rai_type {
-#define RAI_DEFINE_TYPE(T) rai_type_##T,
-    RAI_TYPES_FOR(RAI_DEFINE_TYPE)
+enum proc_type {
+#define PROC_DEFINE_TYPE(T) proc_type_##T,
+    PROC_TYPES_FOR(PROC_DEFINE_TYPE)
 };
 
 
@@ -96,21 +96,21 @@ enum rai_type {
 struct proc_class_param {
     const char *name;
     const word_t *dims;
-    enum rai_type type;
+    enum proc_type type;
 };
 
 /* Params that have an associated proc_class_control are GUI worthy, and
    contain more meta info. */
-enum rai_scale {
-    rai_scale_lin = 0,  // s0 + (s1 - s0) * v
-    rai_scale_log = 1,  // s0 * (s1 / s0) ^ v
-    rai_scale_slog = 2, // s0 * (v/(1-v)) ^ s1   "squeezed log / stretched exp"
+enum proc_scale {
+    proc_scale_lin = 0,  // s0 + (s1 - s0) * v
+    proc_scale_log = 1,  // s0 * (s1 / s0) ^ v
+    proc_scale_slog = 2, // s0 * (v/(1-v)) ^ s1   "squeezed log / stretched exp"
 };
 struct proc_class_control_map {
     double s0; // minimum | center
     double s1; // maximum | exponent
     double range;
-    enum rai_scale scale;
+    enum proc_scale scale;
 };
 struct proc_class_control {
     const char *desc;
@@ -162,7 +162,6 @@ struct proc_class {
 
     /* Misc info */
     uint32_t build_stamp;
-    uint32_t __reserved;
 
 };
 
@@ -171,12 +170,9 @@ struct proc_class {
 
 
 /* To keep things simple, all casts are to/from a single numeric type. */
-#define RAI_NUMBER_T double
-RAI_NUMBER_T rai_get_number(enum rai_type t, const void *rai_src);
-void         rai_set_number(enum rai_type t, void *rai_dst, RAI_NUMBER_T val);
-
-
-
+#define PROC_NUMBER_T double
+PROC_NUMBER_T proc_get_number(enum proc_type t, const void *proc_src);
+void          proc_set_number(enum proc_type t, void *proc_dst, PROC_NUMBER_T val);
 
 
 
@@ -198,7 +194,7 @@ struct proc_class_preset {
 float proc_class_control_interpolate(const struct proc_class_control_map *p, float v);
 
 /* Load .sp class */
-struct proc_class *rai_load_sp(const char *filename);
+struct proc_class *proc_load_sp(const char *filename);
 
 
 struct proc_instance;
@@ -223,12 +219,12 @@ void proc_instance_reset_state(struct proc_instance *p);
 
 int proc_instance_find_param(struct proc_instance *p, const char *name);
 int proc_instance_find_control(struct proc_instance *p, int c);
-void proc_instance_set_param(struct proc_instance *p, int index, RAI_NUMBER_T val);
+void proc_instance_set_param(struct proc_instance *p, int index, PROC_NUMBER_T val);
 
-RAI_NUMBER_T proc_instance_get_param(struct proc_instance *p, int index);
+PROC_NUMBER_T proc_instance_get_param(struct proc_instance *p, int index);
 
 /* Synth stuff */
-struct rai_voice {
+struct proc_voice {
     uint32_t nb;
     float32_t *gate;
     float32_t *freq;
@@ -237,19 +233,19 @@ struct rai_voice {
 
 
 // for convenience
-void rai_voice_init(struct rai_voice *v, int nb, float *gate, float *freq);
-int rai_voice_init_from_proc(struct proc_instance *p, struct rai_voice *v);
-void rai_voice_off(struct rai_voice *v, float freq);
-void rai_voice_on(struct rai_voice *v, float freq);
-float rai_midi_to_freq(int midi);
+void proc_voice_init(struct proc_voice *v, int nb, float *gate, float *freq);
+int proc_voice_init_from_proc(struct proc_instance *p, struct proc_voice *v);
+void proc_voice_off(struct proc_voice *v, float freq);
+void proc_voice_on(struct proc_voice *v, float freq);
+float proc_midi_to_freq(int midi);
 
 
 
 
 
 /* DEBUG */
-typedef void (*rai_log)(const char *msg, ...);
-void rai_print_info(const struct proc_class *ri, rai_log log);
+typedef void (*proc_log)(const char *msg, ...);
+void proc_print_info(const struct proc_class *ri, proc_log log);
 
 #ifdef __cplusplus
 }

@@ -1119,5 +1119,58 @@ Entry: Next?
 Date: Mon Jan 20 12:16:58 CET 2014
 
 - Initial state values.  DONE!
+- fix libproc.rkt
+
+
+Entry: Status
+Date: Mon Jan 20 20:36:03 CET 2014
+
+Apart from some minor details (and maybe I broke VST?) it basically
+works.  The rest is incremental maintenance.  So time to have some
+fun.
+
+
+Entry: GUI in racket
+Date: Mon Jan 20 20:37:03 CET 2014
+
+Time for a reactive programming gui in racket.
+
+
+Entry: Quick compile & run
+Date: Mon Jan 20 21:43:27 CET 2014
+
+If full plugin functionality (parameterizability) is not necessary, it
+might be straightforward to run a C proc from racket.  Let's give it a
+try using the integrator, running in a single loop.
+
+
+
+
+Entry: A nice use case for rust?
+Date: Mon Jan 20 21:54:32 CET 2014
+
+An audio event scheduler!
+
+Basically, a granular synth would be an interesting use case.  It
+requires significant "systems" programming apart from pure number
+crunching.
+
+Let's do it on fractional time too, to get rid of the 1-sample
+aliasing artifacts.
+
+
+
+Entry: Racket gui experiments
+Date: Mon Jan 20 22:23:16 CET 2014
+
+Time to create some guis for filter design.
+
+
+
+Entry: C with holes
+Date: Tue Jan 21 23:49:46 CET 2014
+
+What about turning all constants into parameters for debug?  (I.e. to
+do the "code dial" thingy..)
 
 

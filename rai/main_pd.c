@@ -22,10 +22,10 @@
 #include <ctype.h>
 
 
-t_class *rai_pd_class;
+t_class *proc_pd_class;
 
 
-struct rai_pd {
+struct proc_pd {
     t_object x_obj;
     t_float x_f;
     t_canvas *x_canvas;
@@ -34,12 +34,12 @@ struct rai_pd {
     struct proc_class *proc_class;
     int nb_pd_in;  float **pd_in;
     int nb_pd_out; float **pd_out;
-    struct rai_voice voice;
+    struct proc_voice voice;
     int cc_map[128];
 };
 
-t_int *rai_pd_perform(t_int *w) {
-    struct rai_pd *x = (void*)w[1];
+t_int *proc_pd_perform(t_int *w) {
+    struct proc_pd *x = (void*)w[1];
     t_int n = w[2];
     proc_instance_run(x->proc_instance, (void*)x->pd_in, (void*)x->pd_out, n);
     return w+3;
@@ -71,7 +71,7 @@ static t_symbol *slider_label(const struct proc_class_control *p) {
     return gensym(buf);
 }
 
-static void update_gui_labels(struct rai_pd *x) {
+static void update_gui_labels(struct proc_pd *x) {
     const struct proc_class_control *p = x->proc_class->info_control;
     for (int i = 0; p[i].desc; i++) {
         t_symbol *s = gensym_n("slider",i);
@@ -81,17 +81,17 @@ static void update_gui_labels(struct rai_pd *x) {
         }
     }
 }
-static void update_gui(struct rai_pd *x, int control_index) {
+static void update_gui(struct proc_pd *x, int control_index) {
     int param_index = proc_instance_find_control(x->proc_instance, control_index);
     if (param_index < 0) return;
-    RAI_NUMBER_T value = proc_instance_get_param(x->proc_instance, param_index);
+    PROC_NUMBER_T value = proc_instance_get_param(x->proc_instance, param_index);
     t_symbol *s = gensym_n("slider",control_index);
     if (s->s_thing) {
         t_atom s_desc = FLOAT(value);
         typedmess(s->s_thing, gensym("set"), 1, &s_desc);
     }
 }
-static void rai_pd_update_gui(struct rai_pd *x) {
+static void proc_pd_update_gui(struct proc_pd *x) {
     for(int i=0; i<proc_instance_nb_control(x->proc_instance); i++) {
         update_gui(x, i);
     }
@@ -101,7 +101,7 @@ static void rai_pd_update_gui(struct rai_pd *x) {
 /* Note that adding new objects to the canvas has to wait until after
    the patch is finished loading.  Otherwise it will mess up the
    numbering of objects recorded in the .pd file. */
-static void rai_pd_create_gui(struct rai_pd *x, float x_coord, float y_coord) {
+static void proc_pd_create_gui(struct proc_pd *x, float x_coord, float y_coord) {
 
     t_canvas *canvas = glist_getcanvas(x->x_canvas);
 
@@ -185,7 +185,7 @@ static void rai_pd_create_gui(struct rai_pd *x, float x_coord, float y_coord) {
             }
         }
     }
-    rai_pd_update_gui(x);
+    proc_pd_update_gui(x);
 }
 
 
@@ -195,8 +195,8 @@ static void rai_pd_create_gui(struct rai_pd *x, float x_coord, float y_coord) {
 
 /* Force code reload by loading stand-alone binary fPIC code.
    Note that libdl won't reload a library if it is opened somewhere else. */
-static void rai_pd_load(struct rai_pd *x, t_symbol *filename) {
-    struct proc_class *ri = rai_load_sp(filename->s_name);
+static void proc_pd_load(struct proc_pd *x, t_symbol *filename) {
+    struct proc_class *ri = proc_load_sp(filename->s_name);
     if (ri) {
 
         /* FIXME: typecheck.  Params and state can be anything, but
@@ -235,14 +235,14 @@ static void rai_pd_load(struct rai_pd *x, t_symbol *filename) {
 
             /* Config synth voices */
             bzero(&x->voice, sizeof(x->voice));
-            if (0 == rai_voice_init_from_proc(x->proc_instance, &x->voice)) {
+            if (0 == proc_voice_init_from_proc(x->proc_instance, &x->voice)) {
                 post(ME "%d synth voices", x->voice.nb);
             }
 
             post(ME "%s (%d->%d) s:%d v:%s",
                  filename->s_name, nb_in, nb_out, ri->build_stamp, ri->version);
 
-            rai_print_info(ri, startpost);
+            proc_print_info(ri, startpost);
             update_gui_labels(x);
         }
     }
@@ -252,38 +252,38 @@ static void rai_pd_load(struct rai_pd *x, t_symbol *filename) {
 }
 
 
-static void rai_pd_param(struct rai_pd *x, t_symbol *name, t_float value);
+static void proc_pd_param(struct proc_pd *x, t_symbol *name, t_float value);
 
-static void rai_pd_dsp(struct rai_pd *x, t_signal **sp) {
+static void proc_pd_dsp(struct proc_pd *x, t_signal **sp) {
     for (int i = 0; i < x->nb_pd_in;  i++) { x->pd_in[i]  = sp[i]->s_vec; }
     for (int i = 0; i < x->nb_pd_out; i++) { x->pd_out[i] = sp[i+x->nb_pd_in]->s_vec; }
-    dsp_add(rai_pd_perform, 2, x, sp[0]->s_n);
-    rai_pd_param(x, gensym("samplerate"), sp[0]->s_sr);
-    rai_pd_param(x, gensym("timestep"), 1.0 / sp[0]->s_sr);
+    dsp_add(proc_pd_perform, 2, x, sp[0]->s_n);
+    proc_pd_param(x, gensym("samplerate"), sp[0]->s_sr);
+    proc_pd_param(x, gensym("timestep"), 1.0 / sp[0]->s_sr);
 }
 
-static void rai_pd_reset_state(struct rai_pd *x) {
+static void proc_pd_reset_state(struct proc_pd *x) {
     proc_instance_reset_state(x->proc_instance);
 }
 
-static void rai_pd_note(struct rai_pd *x, t_float freq, t_float gain) {
+static void proc_pd_note(struct proc_pd *x, t_float freq, t_float gain) {
     if (!x->voice.nb) return;
     if (gain > 0)
-        rai_voice_on(&x->voice, freq);
+        proc_voice_on(&x->voice, freq);
     else
-        rai_voice_off(&x->voice, freq);
+        proc_voice_off(&x->voice, freq);
 }
 
-static void *rai_pd_new(t_symbol *filename) {
+static void *proc_pd_new(t_symbol *filename) {
 
-    struct rai_pd *x = (void*)pd_new(rai_pd_class);
+    struct proc_pd *x = (void*)pd_new(proc_pd_class);
     x->x_canvas = canvas_getcurrent();
     for(int i=0; i<128; i++) x->cc_map[i] = -1;
 
     /* Need file argument. */
     x->nb_pd_in  = 1;  x->pd_in  = NULL;
     x->nb_pd_out = 0;  x->pd_out = NULL;
-    rai_pd_load(x, filename);
+    proc_pd_load(x, filename);
     if (!x->proc_instance) {
         // FIXME: pd_free(x); ???
         return NULL;
@@ -292,27 +292,27 @@ static void *rai_pd_new(t_symbol *filename) {
     return x;
 }
 
-static void rai_pd_free(struct rai_pd *x) {
+static void proc_pd_free(struct proc_pd *x) {
     proc_instance_free(x->proc_instance);
     free(x->proc_class);
     if (x->pd_in)  free(x->pd_in);
     if (x->pd_out) free(x->pd_out);
 }
 
-static void rai_pd_param(struct rai_pd *x, t_symbol *name, t_float value) {
+static void proc_pd_param(struct proc_pd *x, t_symbol *name, t_float value) {
     int param_index = proc_instance_find_param(x->proc_instance, name->s_name);
     proc_instance_set_param(x->proc_instance, param_index, value);
 }
 
 /* Controls are a subset of parameters exported to a GUI. */
-static void rai_pd_control(struct rai_pd *x, t_float f_index, t_float value) {
+static void proc_pd_control(struct proc_pd *x, t_float f_index, t_float value) {
     int index = f_index;
     int param_index = proc_instance_find_control(x->proc_instance, f_index);
     proc_instance_set_param(x->proc_instance, param_index, value);
     // FIXME: display ui_value = proc_class_control_interpolate(p, value)
 }
 
-static void rai_pd_cc_map(struct rai_pd *x, t_symbol *s, int argc, t_atom *argv) {
+static void proc_pd_cc_map(struct proc_pd *x, t_symbol *s, int argc, t_atom *argv) {
     int i;
     int nb_control = proc_instance_nb_control(x->proc_instance);
     for (int control_index=0;
@@ -325,7 +325,7 @@ static void rai_pd_cc_map(struct rai_pd *x, t_symbol *s, int argc, t_atom *argv)
     }
 }
 
-static void rai_pd_post_cc_map(struct rai_pd *x) {
+static void proc_pd_post_cc_map(struct proc_pd *x) {
     for (int i = 0; i<128; i++) {
         post("%d -> %d", i, x->cc_map[i]);
     }
@@ -333,7 +333,7 @@ static void rai_pd_post_cc_map(struct rai_pd *x) {
 
 // the full stack has 4 levels of indirection:
 // midi CC -> control_index -> param_index -> byte offset
-static void rai_pd_cc(struct rai_pd *x, t_float cc_f, t_float val) {
+static void proc_pd_cc(struct proc_pd *x, t_float cc_f, t_float val) {
     if ((cc_f >= 0) && (cc_f <= 127)) {
         int cc = cc_f;
         int control_index = x->cc_map[(int)cc];
@@ -354,19 +354,19 @@ static void rai_pd_cc(struct rai_pd *x, t_float cc_f, t_float val) {
 
 
 void EXTERN_SETUP (void) {
-    rai_pd_class = class_new(gensym(EXTERN_NAME), (t_newmethod)rai_pd_new,
-                             (t_method)rai_pd_free, sizeof(struct rai_pd), 0, A_DEFSYMBOL, 0);
-    class_addmethod(rai_pd_class, (t_method)rai_pd_dsp, gensym("dsp"), 0);
-    class_addmethod(rai_pd_class, (t_method)rai_pd_reset_state, gensym("reset"), A_NULL);
-    class_addmethod(rai_pd_class, (t_method)rai_pd_param, gensym("param"), A_SYMBOL, A_FLOAT, A_NULL);
-    class_addmethod(rai_pd_class, (t_method)rai_pd_control, gensym("control"), A_FLOAT, A_FLOAT, A_NULL);
-    class_addmethod(rai_pd_class, (t_method)rai_pd_note, gensym("note"), A_FLOAT, A_FLOAT, A_NULL);
-    class_addmethod(rai_pd_class, (t_method)rai_pd_cc_map, gensym("cc_map"), A_GIMME, A_NULL);
-    class_addmethod(rai_pd_class, (t_method)rai_pd_post_cc_map, gensym("post_cc_map"), A_GIMME, A_NULL);
-    class_addmethod(rai_pd_class, (t_method)rai_pd_cc, gensym("cc"), A_FLOAT, A_FLOAT, A_NULL);
+    proc_pd_class = class_new(gensym(EXTERN_NAME), (t_newmethod)proc_pd_new,
+                             (t_method)proc_pd_free, sizeof(struct proc_pd), 0, A_DEFSYMBOL, 0);
+    class_addmethod(proc_pd_class, (t_method)proc_pd_dsp, gensym("dsp"), 0);
+    class_addmethod(proc_pd_class, (t_method)proc_pd_reset_state, gensym("reset"), A_NULL);
+    class_addmethod(proc_pd_class, (t_method)proc_pd_param, gensym("param"), A_SYMBOL, A_FLOAT, A_NULL);
+    class_addmethod(proc_pd_class, (t_method)proc_pd_control, gensym("control"), A_FLOAT, A_FLOAT, A_NULL);
+    class_addmethod(proc_pd_class, (t_method)proc_pd_note, gensym("note"), A_FLOAT, A_FLOAT, A_NULL);
+    class_addmethod(proc_pd_class, (t_method)proc_pd_cc_map, gensym("cc_map"), A_GIMME, A_NULL);
+    class_addmethod(proc_pd_class, (t_method)proc_pd_post_cc_map, gensym("post_cc_map"), A_GIMME, A_NULL);
+    class_addmethod(proc_pd_class, (t_method)proc_pd_cc, gensym("cc"), A_FLOAT, A_FLOAT, A_NULL);
 #if !HAVE_STATIC
-    class_addmethod(rai_pd_class, (t_method)rai_pd_load, gensym("load"), A_SYMBOL, A_NULL);
-    class_addmethod(rai_pd_class, (t_method)rai_pd_create_gui, gensym("create_gui"), A_DEFFLOAT, A_DEFFLOAT, A_NULL);
+    class_addmethod(proc_pd_class, (t_method)proc_pd_load, gensym("load"), A_SYMBOL, A_NULL);
+    class_addmethod(proc_pd_class, (t_method)proc_pd_create_gui, gensym("create_gui"), A_DEFFLOAT, A_DEFFLOAT, A_NULL);
 #endif
-    CLASS_MAINSIGNALIN(rai_pd_class, struct rai_pd, x_f);
+    CLASS_MAINSIGNALIN(proc_pd_class, struct proc_pd, x_f);
 }

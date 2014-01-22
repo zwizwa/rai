@@ -14,6 +14,7 @@
 (define _float-pointer-pointer (_cpointer _float-pointer))
 (define _uint32-pointer        (_cpointer _uint32))
 (define _uintptr-pointer       (_cpointer _uintptr))
+(define _int-pointer           (_cpointer _int))
 
 ;; Note that these are float* and float**, but it's easier to drop the type here  (see rai.h)
 (define _proc_class_run
@@ -33,17 +34,19 @@
                   int32   = 2))]
    ))
 
-(define-cstruct _proc_class_control
-  ([desc  _string/utf-8]
-   [unit  _string/utf-8]
-   [param _proc_class_param]
-   [s0    _double]
+(define-cstruct _proc_class_control_map
+  ([s0    _double]
    [s1    _double]
    [range _double]
    [scale (_enum '(lin  = 0
                    log  = 1
-                   slog = 2))]
-   ))
+                   slog = 2))]))
+
+(define-cstruct _proc_class_control
+  ([desc  _string/utf-8]
+   [unit  _string/utf-8]
+   [param _proc_class_param]
+   [map   _proc_class_control_map]))
 
 (define-cstruct _proc_class
   ([magic        (_array _uint8 16)]
@@ -57,23 +60,30 @@
    [info_control _proc_class_control-pointer]
    [init_state   _void-pointer]
    [init_store   _void-pointer]
-   [build_stamp  _uint32]
-   [__reserved   _uint32]))
+   [build_stamp  _uint32]))
 
 (define-cstruct _proc_instance
-  ([info  _proc_class-pointer]
-   [state _float-pointer]
-   [param _float-pointer]
-   [store _float-pointer]
+  ([info         _proc_class-pointer]
+   [state        _float-pointer]
+   [param        _float-pointer]
+   [store        _float-pointer]
+   [param_offset _int-pointer]
+   [param_nb_el  _int-pointer]
+   [nb_control   _int]
+   [size_state   _int]
+   [size_param   _int]
+   [size_store   _int]
    ))
 
 
-(define-proc rai_load_sp (_fun _string -> _proc_class-pointer))
+(define-proc proc_load_sp
+  (_fun _string -> _proc_class-pointer))
 
-(define-proc proc_instance_new (_fun _proc_class-pointer
-                               (_or-null _proc_instance-pointer)
-                               ->
-                               _proc_instance-pointer))
+(define-proc proc_instance_new
+  (_fun _proc_class-pointer
+        (_or-null _proc_instance-pointer)
+        ->
+        _proc_instance-pointer))
 
 
 
@@ -93,13 +103,14 @@
 ;; Convert info to s-expression.
 (define (info-control i)
   (for/list ((p (array0->list (proc_class-info_control i) _proc_class_control)))
-    `((desc  . ,(proc_class_control-desc p))
-      (unit  . ,(proc_class_control-unit p))
-      (param . ,(proc_class_control-param p))   ;; FIXME: unpack?
-      (s0    . ,(proc_class_control-s0 p))
-      (s1    . ,(proc_class_control-s1 p))
-      (range . ,(proc_class_control-range p))
-      (scale . ,(proc_class_control-scale p)))))
+    (let ((m (proc_class_control-map p)))
+      `((desc  . ,(proc_class_control-desc p))
+        (unit  . ,(proc_class_control-unit p))
+        (param . ,(proc_class_control-param p))   ;; FIXME: unpack?
+        (s0    . ,(proc_class_control_map-s0 m))
+        (s1    . ,(proc_class_control_map-s1 m))
+        (range . ,(proc_class_control_map-range m))
+        (scale . ,(proc_class_control_map-scale m))))))
 
 (define (info-io i info_param)
   (let* ((s-offset 0)

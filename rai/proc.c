@@ -7,7 +7,7 @@
 
 int proc_class_param_nb_elements(const struct proc_class_param *pi) {
     int nb_elements = 1;
-    for (int i=0; !rai_list_end(&(pi->dims[i])); i++) {
+    for (int i=0; !proc_list_end(&(pi->dims[i])); i++) {
         nb_elements *= pi->dims[i];
     }
     return nb_elements;
@@ -15,46 +15,46 @@ int proc_class_param_nb_elements(const struct proc_class_param *pi) {
 
 int proc_class_param_list_size(const struct proc_class_param *pi) {
     int i;
-    for (i = 0; !rai_list_end(&pi[i]); i++);
+    for (i = 0; !proc_list_end(&pi[i]); i++);
     return i;
 }
 static int proc_class_control_list_size(const struct proc_class_control *ci) {
     int i;
-    for (i = 0; !rai_list_end(&ci[i]); i++);
+    for (i = 0; !proc_list_end(&ci[i]); i++);
     return i;
 }
 
-static int rai_min(int x, int y) { return x < y ? x : y; }
+static int proc_min(int x, int y) { return x < y ? x : y; }
 
-static int rai_type_sizeof(enum rai_type t) {
-#define RAI_TYPE_CASE_SIZEOF(_t) case rai_type_##_t: return sizeof(_t);
+static int proc_type_sizeof(enum proc_type t) {
+#define PROC_TYPE_CASE_SIZEOF(_t) case proc_type_##_t: return sizeof(_t);
     switch(t) {
-        RAI_TYPES_FOR(RAI_TYPE_CASE_SIZEOF)
+        PROC_TYPES_FOR(PROC_TYPE_CASE_SIZEOF)
     default: return 0;
     }
 }
 
 int proc_class_param_alloc_size(const struct proc_class_param *pi) {
     int bytes = 0;
-    for (int i = 0; !rai_list_end(&pi[i]); i++) {
+    for (int i = 0; !proc_list_end(&pi[i]); i++) {
         bytes += proc_class_param_nb_elements(&pi[i])
-            *rai_type_sizeof(pi[i].type);
+            *proc_type_sizeof(pi[i].type);
     }
     return bytes;
 }
 
-RAI_NUMBER_T rai_get_number(enum rai_type t, const void *p) {
-#define RAI_CASE_GET_NUMBER(_RAI_T_) case rai_type_##_RAI_T_: return (RAI_NUMBER_T)*((_RAI_T_*)p);
+PROC_NUMBER_T proc_get_number(enum proc_type t, const void *p) {
+#define PROC_CASE_GET_NUMBER(_PROC_T_) case proc_type_##_PROC_T_: return (PROC_NUMBER_T)*((_PROC_T_*)p);
     switch(t) {
-        RAI_TYPES_FOR(RAI_CASE_GET_NUMBER)
+        PROC_TYPES_FOR(PROC_CASE_GET_NUMBER)
     default:
-        return (RAI_NUMBER_T)0;
+        return (PROC_NUMBER_T)0;
     }
 }
-void rai_set_number(enum rai_type t, void *p, RAI_NUMBER_T val) {
-#define RAI_CASE_SET_NUMBER(_RAI_T_) case rai_type_##_RAI_T_: *((_RAI_T_*)p) = (_RAI_T_)val; break;
+void proc_set_number(enum proc_type t, void *p, PROC_NUMBER_T val) {
+#define PROC_CASE_SET_NUMBER(_PROC_T_) case proc_type_##_PROC_T_: *((_PROC_T_*)p) = (_PROC_T_)val; break;
     switch(t) {
-        RAI_TYPES_FOR(RAI_CASE_SET_NUMBER)
+        PROC_TYPES_FOR(PROC_CASE_SET_NUMBER)
     }
 }
 
@@ -65,10 +65,10 @@ void rai_set_number(enum rai_type t, void *p, RAI_NUMBER_T val) {
 static void param_init(const struct proc_class_param *pi,
                        void *new, const void *old, int old_max_bytes) {
     int byte_offset = 0;
-    for (int i = 0; !rai_list_end(&pi[i]); i++) {
-        enum rai_type t = pi[i].type;
+    for (int i = 0; !proc_list_end(&pi[i]); i++) {
+        enum proc_type t = pi[i].type;
         int nb_elements =  proc_class_param_nb_elements(&pi[i]);
-        int byte_size = rai_type_sizeof(t) * nb_elements;
+        int byte_size = proc_type_sizeof(t) * nb_elements;
 
         if (byte_size + byte_offset <= old_max_bytes) {
             memcpy(new + byte_offset, old + byte_offset, byte_size);
@@ -120,7 +120,7 @@ struct proc_instance *proc_instance_new(const struct proc_class *info,
         const struct proc_class_param *pi = &info->info_param[i];
         p->param_offset[i] = byte_offset;
         p->param_nb_el[i]  = proc_class_param_nb_elements(pi);
-        int byte_size = rai_type_sizeof(pi->type) * p->param_nb_el[i];
+        int byte_size = proc_type_sizeof(pi->type) * p->param_nb_el[i];
         byte_offset += byte_size;
         /* Params are algo inputs so don't have initial values, but
            since we're stateful we have to initialize. */
@@ -144,9 +144,9 @@ struct proc_instance *proc_instance_new(const struct proc_class *info,
 
     /* Copy from proto or init struct. */
     if (proto) {
-        param_init(info->info_param, p->param, proto->param, rai_min(p->size_param, proto->size_param));
-        param_init(info->info_store, p->store, proto->store, rai_min(p->size_store, proto->size_store));
-        param_init(info->info_state, p->state, proto->state, rai_min(p->size_state, proto->size_state));
+        param_init(info->info_param, p->param, proto->param, proc_min(p->size_param, proto->size_param));
+        param_init(info->info_store, p->store, proto->store, proc_min(p->size_store, proto->size_store));
+        param_init(info->info_state, p->state, proto->state, proc_min(p->size_state, proto->size_state));
     }
     return p;
 }
@@ -164,6 +164,10 @@ void proc_instance_run(struct proc_instance *p,
                   struct proc_out * restrict out,
                   int n) {
     p->info->entry(p->state, in, p->param, out, p->store, n);
+    if (n&1) {
+        /* Make sure ping-pong buffer is ready next time. */
+        memcpy(p->state, (void*)p->state + p->size_state, p->size_state);
+    }
 }
 
 void proc_instance_preset_save(const struct proc_instance *p, const char *filename) {
@@ -196,7 +200,7 @@ void proc_instance_preset_load(const struct proc_instance *p, const char *filena
 }
 
 int proc_instance_find_param(struct proc_instance *p, const char *name) {
-    for (int i = 0; !rai_list_end(&p->info->info_param[i]); i++) {
+    for (int i = 0; !proc_list_end(&p->info->info_param[i]); i++) {
         if (!strcmp(p->info->info_param[i].name, name)) return i;
     }
     return -1;
@@ -208,26 +212,26 @@ int proc_instance_find_control(struct proc_instance *p, int c) {
 }
 
 /* Set will set the entire grid.  Get will only pick the first element. */
-void proc_instance_set_param(struct proc_instance *p, int index, RAI_NUMBER_T val) {
+void proc_instance_set_param(struct proc_instance *p, int index, PROC_NUMBER_T val) {
     if ((index < 0) || (index >= p->nb_param)) {
         return;
     }
     void *param_buf = (void*)p->param + p->param_offset[index];
-    enum rai_type t = p->info->info_param[index].type;
+    enum proc_type t = p->info->info_param[index].type;
 
     int nb = p->param_nb_el[index];
-    int base_bytes = rai_type_sizeof(t);
+    int base_bytes = proc_type_sizeof(t);
     for (int i=0; i<nb; i++) {
-        rai_set_number(t, param_buf, val);
+        proc_set_number(t, param_buf, val);
         param_buf += base_bytes;
     }
 }
-RAI_NUMBER_T proc_instance_get_param(struct proc_instance *p, int index) {
+PROC_NUMBER_T proc_instance_get_param(struct proc_instance *p, int index) {
     if ((index < 0) || (index >= p->nb_param)) {
         return 0;
     }
     void *param_buf = (void*)p->param + p->param_offset[index];
-    return rai_get_number(p->info->info_param[index].type, param_buf);
+    return proc_get_number(p->info->info_param[index].type, param_buf);
 }
 
 
@@ -237,7 +241,7 @@ RAI_NUMBER_T proc_instance_get_param(struct proc_instance *p, int index) {
    - voice stealing based on envelope decay
 */
 
-void rai_voice_init(struct rai_voice *v, int nb, float *gate, float *freq) {
+void proc_voice_init(struct proc_voice *v, int nb, float *gate, float *freq) {
     v->nb = nb;
     v->gate = gate;
     v->freq = freq;
@@ -245,25 +249,25 @@ void rai_voice_init(struct rai_voice *v, int nb, float *gate, float *freq) {
 }
 
 
-int rai_voice_init_from_proc(struct proc_instance *p, struct rai_voice *v) {
+int proc_voice_init_from_proc(struct proc_instance *p, struct proc_voice *v) {
     const struct proc_class_param *ip = p->info->info_param;
     int gate_index = proc_instance_find_param(p, "voice_gate"); if (gate_index < 0) return -1;
     int freq_index = proc_instance_find_param(p, "voice_freq"); if (freq_index < 0) return -1;
-    if (ip[gate_index].type != rai_type_float32_t) return -1;
-    if (ip[freq_index].type != rai_type_float32_t) return -1;
+    if (ip[gate_index].type != proc_type_float32_t) return -1;
+    if (ip[freq_index].type != proc_type_float32_t) return -1;
     int nb =  p->param_nb_el[gate_index];
     if (nb != p->param_nb_el[freq_index]) return -1;
-    rai_voice_init(v, nb,
-                   (void*)p->param + p->param_offset[gate_index],
-                   (void*)p->param + p->param_offset[freq_index]);
+    proc_voice_init(v, nb,
+                    (void*)p->param + p->param_offset[gate_index],
+                    (void*)p->param + p->param_offset[freq_index]);
     return 0;
 }
-void rai_voice_on(struct rai_voice *v, float freq) {
+void proc_voice_on(struct proc_voice *v, float freq) {
     v->gate[v->next] = 1;
     v->freq[v->next] = freq;
     v->next = (v->next + 1) % v->nb;
 }
-void rai_voice_off(struct rai_voice *v, float freq) {
+void proc_voice_off(struct proc_voice *v, float freq) {
     /* Turn off 0 or 1 notes, start from oldest. */
     for (int i=1; i<=v->nb; i++) {
         int j = (v->nb + v->next - i) % v->nb;
@@ -273,7 +277,7 @@ void rai_voice_off(struct rai_voice *v, float freq) {
         }
     }
 }
-float rai_midi_to_freq(int midi) {
+float proc_midi_to_freq(int midi) {
     // 69 -> 440
     float fmidi = midi-69;
     return 440 * pow(2, fmidi/12);
@@ -281,11 +285,11 @@ float rai_midi_to_freq(int midi) {
 
 
 /* DEBUG */
-static void rai_print_info_param(const char *tag,
-                                 const struct proc_class_param *pi,
-                                 rai_log log) {
+static void proc_print_info_param(const char *tag,
+                                  const struct proc_class_param *pi,
+                                  proc_log log) {
     log("%s %d:\n", tag, proc_class_param_alloc_size(pi));
-    for (int i = 0; !rai_list_end(&pi[i]); i++) {
+    for (int i = 0; !proc_list_end(&pi[i]); i++) {
         log("\t%d %s", i, pi[i].name);
         const word_t *dims = pi[i].dims;
         int size = 1;
@@ -296,11 +300,11 @@ static void rai_print_info_param(const char *tag,
         log(" (size=%d)\n", size);
     }
 }
-static void rai_print_info_control(const char *tag,
-                                   const struct proc_class_control *pi,
-                                   rai_log log) {
+static void proc_print_info_control(const char *tag,
+                                    const struct proc_class_control *pi,
+                                    proc_log log) {
     log("%s\n", tag);
-    for (int i = 0; !rai_list_end(&pi[i]); i++) {
+    for (int i = 0; !proc_list_end(&pi[i]); i++) {
         log("\t%s(%s) [%f,%f]\n",
             pi[i].desc,
             pi[i].unit,
@@ -308,24 +312,24 @@ static void rai_print_info_control(const char *tag,
             pi[i].map.s1);
     }
 }
-void rai_print_info(const struct proc_class *ri, rai_log log) {
-    if (!log) log = (rai_log)printf;
-    rai_print_info_param("param", ri->info_param, log);
-    rai_print_info_param("in",    ri->info_in, log);
-    rai_print_info_param("out",   ri->info_out, log);
-    rai_print_info_param("state", ri->info_state, log);
+void proc_print_info(const struct proc_class *ri, proc_log log) {
+    if (!log) log = (proc_log)printf;
+    proc_print_info_param("param", ri->info_param, log);
+    proc_print_info_param("in",    ri->info_in, log);
+    proc_print_info_param("out",   ri->info_out, log);
+    proc_print_info_param("state", ri->info_state, log);
 
-    rai_print_info_control("control", ri->info_control, log);
+    proc_print_info_control("control", ri->info_control, log);
 }
 
 /* Maps v \in [0,1] to the control parameter's user feedback scale. */
 float proc_class_control_interpolate(const struct proc_class_control_map *p, float v) {
     float out_v;
     switch(p->scale) {
-    case rai_scale_lin:  out_v = p->s0 + (p->s1 - p->s0) * v;   break;
-    case rai_scale_log:  out_v = p->s0 * pow(p->s1 / p->s0, v); break;
-    case rai_scale_slog: out_v = p->s0 * pow(v / (1-v), p->s1); break;
-    default:             out_v = v;                             break;
+    case proc_scale_lin:  out_v = p->s0 + (p->s1 - p->s0) * v;   break;
+    case proc_scale_log:  out_v = p->s0 * pow(p->s1 / p->s0, v); break;
+    case proc_scale_slog: out_v = p->s0 * pow(v / (1-v), p->s1); break;
+    default:              out_v = v;                             break;
     }
     return out_v;
 }

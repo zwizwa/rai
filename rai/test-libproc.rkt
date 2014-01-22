@@ -12,7 +12,7 @@
 
 test_pd.sp
 
-(define test_sp_info (rai_load_sp test_pd.sp))
+(define test_sp_info (proc_load_sp test_pd.sp))
 (define test_sp_proc (proc_instance_new test_sp_info #f))
 
 
@@ -41,8 +41,8 @@ control-names
 (info test_sp_info)
 
 
-(define i (proc-instantiate test_sp_info
+#;(define i (proc-instantiate test_sp_info
                             '((samplerate . 1.0)
                               (voice_gate . 1.0)
                               (voice_freq . 0.2))))
-(map f32vector->list (proc-run i 10))
+#;(map f32vector->list (proc-run i 10))
