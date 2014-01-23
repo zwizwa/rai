@@ -1,4 +1,4 @@
-#N canvas 0 29 1438 269 10;
+#N canvas 720 254 718 194 10;
 #X obj 80 256 dac~;
 #X floatatom 112 190 5 0 0 0 - - -;
 #X obj 128 7 loadbang;
@@ -14,7 +14,7 @@
 -1 -1;
 #X obj 271 245 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#N canvas 320 104 402 263 rx 0;
+#N canvas 0 29 718 869 rx 1;
 #X obj 138 183 outlet;
 #X obj 52 15 ctlin;
 #X floatatom 48 54 5 0 0 0 - - -;
@@ -36,12 +36,14 @@
 #X connect 3 0 5 1;
 #X connect 5 0 7 0;
 #X connect 7 0 0 0;
+#X connect 7 0 6 0;
 #X connect 8 0 9 0;
 #X connect 8 1 11 0;
 #X connect 9 0 10 0;
 #X connect 10 0 12 0;
 #X connect 11 0 10 1;
 #X connect 12 0 0 0;
+#X connect 12 0 13 0;
 #X restore 57 127 pd rx;
 #X obj 77 346 env~;
 #X floatatom 78 375 5 0 0 0 - - -;
@@ -51,44 +53,44 @@
 #X msg 19 87 load synth.sp;
 #X msg 112 162 80;
 #X obj 79 225 vols~;
-#N canvas 924 260 851 551 sp 1;
-#X obj 417 291 inlet;
-#X obj 417 340 outlet~;
-#X obj 417 314 sp_host synth.sp;
-#X text 608 293 from synth metadata;
-#X text 607 308 ( before clicking \, delete sliders + control objects
+#N canvas 720 29 718 194 sp 1;
+#X obj 417 -66 inlet;
+#X obj 417 -17 outlet~;
+#X obj 417 -43 sp_host synth.sp;
+#X text 608 -64 from synth metadata;
+#X text 607 -49 ( before clicking \, delete sliders + control objects
 );
-#X msg 480 291 create_gui 10 10;
-#X obj 10 10 hsl 128 15 0 1 0 1 empty slider0 Attack/ms -2 -8 0 10
--262144 -1 -1 0 1;
-#X msg 210 25 control 0 \$1;
-#X obj 10 40 hsl 128 15 0 1 0 1 empty slider1 Decay/ms -2 -8 0 10 -262144
--1 -1 5100 1;
-#X msg 210 55 control 1 \$1;
-#X obj 10 70 hsl 128 15 0 1 0 1 empty slider2 Sustain/dB -2 -8 0 10
--262144 -1 -1 12500 1;
-#X msg 210 85 control 2 \$1;
-#X obj 10 100 hsl 128 15 0 1 0 1 empty slider3 Release/ms -2 -8 0 10
--262144 -1 -1 6400 1;
-#X msg 210 115 control 3 \$1;
-#X obj 10 130 hsl 128 15 0 1 0 1 empty slider4 Cutoff/Hz -2 -8 0 10
--262144 -1 -1 7400 1;
-#X msg 210 145 control 4 \$1;
-#X obj 10 160 hsl 128 15 0 1 0 1 empty slider5 Filter_Attack/ms -2
--8 0 10 -262144 -1 -1 0 1;
-#X msg 210 175 control 5 \$1;
-#X obj 10 190 hsl 128 15 0 1 0 1 empty slider6 Filter_Release/ms -2
--8 0 10 -262144 -1 -1 10300 1;
-#X msg 210 205 control 6 \$1;
-#X obj 10 220 hsl 128 15 0 1 0 1 empty slider7 Filter_Env/Hz -2 -8
-0 10 -262144 -1 -1 7800 1;
-#X msg 210 235 control 7 \$1;
-#X obj 10 250 hsl 128 15 0 1 0 1 empty slider8 Filter_Q/dB -2 -8 0
+#X msg 480 -66 create_gui 10 10;
+#X obj 10 -65 hsl 128 15 0 1 0 1 empty slider0 Attack/ms -2 -8 0 10
+-262144 -1 -1 6000 1;
+#X msg 210 -50 control 0 \$1;
+#X obj 10 -35 hsl 128 15 0 1 0 1 empty slider1 Decay/ms -2 -8 0 10
+-262144 -1 -1 12700 1;
+#X msg 210 -20 control 1 \$1;
+#X obj 10 -5 hsl 128 15 0 1 0 1 empty slider2 Sustain/dB -2 -8 0 10
+-262144 -1 -1 10200 1;
+#X msg 210 10 control 2 \$1;
+#X obj 10 25 hsl 128 15 0 1 0 1 empty slider3 Release/ms -2 -8 0 10
+-262144 -1 -1 12400 1;
+#X msg 210 40 control 3 \$1;
+#X obj 10 55 hsl 128 15 0 1 0 1 empty slider4 Cutoff/Hz -2 -8 0 10
+-262144 -1 -1 7800 1;
+#X msg 210 70 control 4 \$1;
+#X obj 10 85 hsl 128 15 0 1 0 1 empty slider5 Filter_Attack/ms -2 -8
+0 10 -262144 -1 -1 300 1;
+#X msg 210 100 control 5 \$1;
+#X obj 10 115 hsl 128 15 0 1 0 1 empty slider6 Filter_Release/ms -2
+-8 0 10 -262144 -1 -1 6600 1;
+#X msg 210 130 control 6 \$1;
+#X obj 10 145 hsl 128 15 0 1 0 1 empty slider7 Filter_Env/Hz -2 -8
+0 10 -262144 -1 -1 7300 1;
+#X msg 210 160 control 7 \$1;
+#X obj 10 175 hsl 128 15 0 1 0 1 empty slider8 Filter_Q/dB -2 -8 0
 10 -262144 -1 -1 0 1;
-#X msg 210 265 control 8 \$1;
-#X obj 10 280 hsl 128 15 0 1 0 1 empty slider9 Osc_Spread/% -2 -8 0
+#X msg 210 190 control 8 \$1;
+#X obj 10 205 hsl 128 15 0 1 0 1 empty slider9 Osc_Spread/% -2 -8 0
 10 -262144 -1 -1 0 1;
-#X msg 210 295 control 9 \$1;
+#X msg 210 220 control 9 \$1;
 #X connect 0 0 2 0;
 #X connect 2 0 1 0;
 #X connect 5 0 2 0;
@@ -112,7 +114,7 @@
 #X connect 23 0 2 0;
 #X connect 24 0 25 0;
 #X connect 25 0 2 0;
-#X coords 0 551 1 550 85 60 0;
+#X coords 0 194 1 193 85 60 0;
 #X restore 41 163 pd sp;
 #X msg 131 100 cc_map 74 71 73 75 72 91 93 10;
 #X text 357 102 UMA25S knobs CC defaults;

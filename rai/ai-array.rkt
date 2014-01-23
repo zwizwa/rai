@@ -82,6 +82,7 @@
 ;; Global bookkeeping
 (define state-in  (make-parameter* '()))  ;; State i/o
 (define state-out (make-parameter* '()))
+(define state-0   (make-parameter* '()))  ;; si -> init map
 (define store     (make-parameter* '()))  ;; Global array storage
 (define in        (make-parameter* '()))
 (define out       (make-parameter* '()))
@@ -107,6 +108,7 @@
      (parameterize ((bindings  '())
                     (state-in  '())
                     (state-out '())
+                    (state-0   '())
                     (store     '())
                     (units     '())
                     (phases    '())
@@ -506,12 +508,12 @@
                       in-nodes
                       time-names
                       update)
-    ;; (pp (loop))
     (let*
         ((nb-state   (length state-names))
          (si-nodes/a (make-named-nodes state-names))  ;; -s- for setup
-
          (si-nodes   (map (node-load sem (loop-type) (loop-index)) si-nodes/a))
+         (si-init    (map cdr state-names))
+         (si-0       (map cons si-nodes/a si-init))
          
          (time-nodes (get-time-nodes time-names))
          (all-in     (append si-nodes in-nodes time-nodes))
@@ -529,6 +531,7 @@
          ;; In and out need to be different nodes.
          (so-nodes/a (map (unique-node sem all-in) so-nodes/a)))
 
+      
       ;; State in/out should have the same types.
       (for ((si si-nodes)
             (so so-nodes))
@@ -539,7 +542,8 @@
       ;; Keep track of the vector storage nodes.
       (nsave state-in    si-nodes/a)
       (nsave state-out   so-nodes/a)
-    
+      (nsave state-0     si-0)
+      
       (apply values out)))
 
   
@@ -994,8 +998,9 @@
   ;; Convert pass1 dictionar to imperative block form.
   (define compiled-expr
     `(block-function
-      ;; GUI annotation info.
-      ((units . ,(units)))
+      
+      ((units . ,(units))    ;; GUI annotation info.
+       (inits . ,(state-0))) ;; State initial values
       ;; Numerical I/O
       (,(data (state-in))
        ,(data (state-out))

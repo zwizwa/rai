@@ -897,7 +897,7 @@ Date: Thu Jan  9 22:38:37 EST 2014
 
 - formalize subsampling
 
-- formalize delay lines
+- formalize delay lines  (+- ok?  it's already constructor based)
 
 - fix transfer function computation (see DSP book?): separate
   computatuion of polygon / poles (once)from evaluation of rational
@@ -1016,7 +1016,7 @@ Date: Tue Jan 14 15:04:14 CET 2014
 - Turn everything into call by name?
 
 - The autolifting is still quite weird.  The reason for this is the
-  way state threading is implemented.  (see next post)
+  way state threading is implemented.  (it's ok, see next post)
 
 
 Entry: About implicit indexing
@@ -1091,4 +1091,94 @@ It sounded good to just use floats, however in practice this will be
 very difficult to accomodate.  Some library code is necessary to link
 up parameter connectivity.   Not a quick fix!
 
+EDIT: This needs a design.  More functionality needs to be handled in
+a separate library.
+
+
+
+Entry: Changes to rai.h
+Date: Sun Jan 19 11:34:07 CET 2014
+
+essentially, all-float interface is simple, but too limiting.
+abstract it away in access methods.
+
+rai_info_control points rai_info_param (instead of index)
+rai_info_param as byte_offset member (pointing into flat container struct).
+
+
+
+Entry: SP structures
+Date: Sun Jan 19 20:56:15 CET 2014
+
+It seems best to stick to the sp structures as default.  Leave the
+static C interfaces for where it makes sense, i.e. on deeply embedded
+stuff.
+
+To make this work, make it possible to share the functionality in
+main_sp.c
+
+TODO:
+- librai.c  -> operate on a (linked) rai_info
+- sp.c      -> load binary .sp into rai_info 
+(+- done: rai.c rai_sp.c)
+
+
+Entry: Next?
+Date: Mon Jan 20 12:16:58 CET 2014
+
+- Initial state values.  DONE!
+- fix libproc.rkt
+
+
+Entry: Status
+Date: Mon Jan 20 20:36:03 CET 2014
+
+Apart from some minor details (and maybe I broke VST?) it basically
+works.  The rest is incremental maintenance.  So time to have some
+fun.
+
+
+Entry: GUI in racket
+Date: Mon Jan 20 20:37:03 CET 2014
+
+Time for a reactive programming gui in racket.
+
+
+Entry: Quick compile & run
+Date: Mon Jan 20 21:43:27 CET 2014
+
+If full plugin functionality (parameterizability) is not necessary, it
+might be straightforward to run a C proc from racket.  Let's give it a
+try using the integrator, running in a single loop.
+
+
+
+
+Entry: A nice use case for rust?
+Date: Mon Jan 20 21:54:32 CET 2014
+
+An audio event scheduler!
+
+Basically, a granular synth would be an interesting use case.  It
+requires significant "systems" programming apart from pure number
+crunching.
+
+Let's do it on fractional time too, to get rid of the 1-sample
+aliasing artifacts.
+
+
+
+Entry: Racket gui experiments
+Date: Mon Jan 20 22:23:16 CET 2014
+
+Time to create some guis for filter design.
+
+
+
+
+Entry: C with holes
+Date: Tue Jan 21 23:49:46 CET 2014
+
+What about turning all constants into parameters for debug?  (I.e. to
+do the "code dial" thingy..)
 

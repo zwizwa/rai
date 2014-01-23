@@ -12,7 +12,7 @@ SECTIONS {
         *(.header*)
         *(.text*)
         *(.rodata*)
-        *(.data.rel.ro.local*)
+        *(.data.rel.ro*)
     } >file
 
     /* To silence warnings.  Only .text segment is of interest. */

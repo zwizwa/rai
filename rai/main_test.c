@@ -1,13 +1,22 @@
 // Example for including .g.h file
 
 #include "prim.h"  // primitive functions
-#include "rai.h"   // tools
+#include "proc.h"   // tools
 #include PROC_FILE // generated code
 
 #include <stdlib.h>
 #include <stdio.h>
 
 #define NB_SAMP 16
+
+// FIXME: old float-only interface
+#define PROC_NB_EL(x,t) ((sizeof(x) / sizeof(t)))
+#define PROC_PARAM_DIM(name) PROC_NB_EL(((struct proc_param *)0)->name, float)
+#define proc_size_param   PROC_NB_EL(struct proc_param, float)
+#define proc_size_in      PROC_NB_EL(struct proc_in,    float*)
+#define proc_size_out     PROC_NB_EL(struct proc_out,   float*)
+#define proc_size_state   PROC_NB_EL(struct proc_si,    float)
+#define proc_size_store   PROC_NB_EL(struct proc_store, float)
 
 _ *new_array(int n, _ init) {
     _ *a = malloc(sizeof(_) * n);
@@ -31,27 +40,27 @@ int main(int argc, char **argv) {
 
     /* Alloc buffers */
     float **state = malloc(sizeof(*state) * 2);
-    state[0] = new_array(PROC(size_state), 0);
-    state[1] = new_array(PROC(size_state), 0);
+    state[0] = new_array(proc_size_state, 0);
+    state[1] = new_array(proc_size_state, 0);
 
-    _ **in    = malloc(sizeof(*in) * PROC(size_in));
-    for (int i = 0; i < PROC(size_in); i++)
+    _ **in    = malloc(sizeof(*in) * proc_size_in);
+    for (int i = 0; i < proc_size_in; i++)
         in[i]  = new_array(NB_SAMP, in_default(i));
 
-    _ *param = new_array(PROC(size_param), 0);
-    for (int i = 0; i < PROC(size_param); i++)
+    _ *param = new_array(proc_size_param, 0);
+    for (int i = 0; i < proc_size_param; i++)
         param[i] = in_default(i);
 
-    _ **out   = malloc(sizeof(*out) * PROC(size_out));
-    for (int i = 0; i < PROC(size_out); i++)
+    _ **out   = malloc(sizeof(*out) * proc_size_out);
+    for (int i = 0; i < proc_size_out; i++)
         out[i] = new_array(NB_SAMP, 0);
 
-    _ *store = new_array(PROC(size_store), 0);
+    _ *store = new_array(proc_size_store, 0);
 
     /* Run once */
-    PROC(loop)((void*)state, (void*)in, (void*)param, (void*)out, (void*)store, NB_SAMP);
+    proc_loop((void*)state, (void*)in, (void*)param, (void*)out, (void*)store, NB_SAMP);
     for (int i = 0; i < NB_SAMP; i++) {
-        for (int o = 0; o < PROC(size_out); o++) {
+        for (int o = 0; o < proc_size_out; o++) {
             printf("%+0.4f ", out[o][i]);
         }
         printf("\n");

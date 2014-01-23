@@ -20,6 +20,7 @@
 #include <string.h>
 #include <stdio.h>
 
+
 /* Software license check */
 #ifdef   LICENSE
 #include LICENSE
@@ -34,7 +35,7 @@
 
 extern "C" {
 #include "prim.h"
-#include "rai.h"
+#include "proc.h"
 #ifndef PROC_FILE
 #error PROC_FILE not defined
 #else
@@ -45,6 +46,12 @@ extern "C" {
 #ifndef LOG
 #define LOG(...)
 #endif
+
+// FIXME: old float-only interface
+#define PROC_NB_EL(x,t) ((sizeof(x) / sizeof(t)))
+#define PROC_PARAM_DIM(name) PROC_NB_EL(((struct proc_param *)0)->name, float)
+#define proc_size_in      PROC_NB_EL(struct proc_in,    float*)
+#define proc_size_out     PROC_NB_EL(struct proc_out,   float*)
 
 
 /* Create synth voice allocator if freq and gate params are defined as
@@ -65,16 +72,21 @@ extern "C" {
 #define control_block 32
 
 
-#define VST_PARAM(_param, _desc, _unit, _min, _max, _range, _curve) {   \
-            _desc,                                                      \
-            _unit,                                                      \
-            offsetof(struct proc_param,_param)/sizeof(float),           \
-            _min,                                                       \
-            _max,                                                       \
-            _range,                                                     \
-            rai_scale_##_curve,                                         \
-            },
-const struct rai_info_control param[] = {
+
+/* Static parameter discription structures.
+   Ad-hoc, defined from macros in .g.h */
+
+struct control_info {
+    const char *desc;
+    const char *unit;
+    unsigned int offset;
+    struct proc_class_control_map map;
+};
+
+#define VST_PARAM(_param, _desc, _unit, _min, _max, _range, _curve) \
+  { _desc, _unit, offsetof(struct proc_param,_param), {_min, _max, _range, proc_scale_##_curve }},
+
+const struct control_info param[] = {
     proc_for_control(VST_PARAM) 
 };
 
@@ -87,7 +99,7 @@ struct plugin_state {
     struct proc_param param;
     struct proc_store store;
 #if HAVE_SYNTH
-    struct rai_voice voice;
+    struct proc_voice voice;
 #endif
 };
 
@@ -98,6 +110,8 @@ private:
     struct plugin_state *state;
     VstEvents* events;
     void MIDI(VstMidiEvent *e);
+    float *findParam(VstInt32 index);
+
 public:
     Plugin (audioMasterCallback audioMaster, VstInt32 numPrograms, VstInt32 numParams);
     ~Plugin ();
@@ -150,10 +164,10 @@ Plugin :: Plugin(audioMasterCallback audioMaster, VstInt32 numPrograms, VstInt32
     setNumOutputs(proc_size_out);
 #if HAVE_SYNTH
     isSynth();
-    rai_voice_init(&state->voice,
-                   PROC_PARAM_DIM(voice_gate),
-                   (float*)&state->param.voice_gate,
-                   (float*)&state->param.voice_freq);
+    proc_voice_init(&state->voice,
+                    PROC_PARAM_DIM(voice_gate),
+                    (float*)&state->param.voice_gate,
+                    (float*)&state->param.voice_freq);
 #endif
     canProcessReplacing ();
 #define VST_PARAM_INIT(_param, ...) state->param._param = 0.5;
@@ -182,24 +196,24 @@ VstInt32 Plugin :: processEvents (VstEvents* e) {
 
 
 void Plugin :: MIDI(VstMidiEvent *e) {
-    u8 d0 = e->midiData[0];
-    u8 d1 = e->midiData[1];
-    u8 d2 = e->midiData[2];
+    uint8_t d0 = e->midiData[0];
+    uint8_t d1 = e->midiData[1];
+    uint8_t d2 = e->midiData[2];
     
     int tag     = d0 & 0xF0;
     int channel = d0 & 0x0F;
-    float freq  = rai_midi_to_freq(d1);
+    float freq  = proc_midi_to_freq(d1);
 
     LOG("midi %02x %02x %02x (%d)\n", d0, d1, d2);
     switch(tag) {
 #if HAVE_SYNTH
     case 0x90:
         LOG("Note on %f\n", freq);
-        rai_voice_on(&state->voice, freq);
+        proc_voice_on(&state->voice, freq);
         break;
     case 0x80:
         LOG("Note off %f\n", freq);
-        rai_voice_off(&state->voice, freq);
+        proc_voice_off(&state->voice, freq);
         break;
 #endif
     default:
@@ -237,8 +251,8 @@ void Plugin :: processReplacing  (float **in0, float **out0, VstInt32 total) {
 
         /* Perform next control chunk. */
         // LOG(" chunk %d %d\n", offset, chunk);
-        float *in [proc_size_in];  for (u32 i = 0; i < proc_size_in;  i++) in[i]  = in0[i]  + offset;
-        float *out[proc_size_out]; for (u32 i = 0; i < proc_size_out; i++) out[i] = out0[i] + offset;
+        float *in [proc_size_in];  for (uint32_t i = 0; i < proc_size_in;  i++) in[i]  = in0[i]  + offset;
+        float *out[proc_size_out]; for (uint32_t i = 0; i < proc_size_out; i++) out[i] = out0[i] + offset;
         proc_loop((struct proc_si *)&state->state,
                   (struct proc_in *)(void *)in,
                   &state->param,
@@ -285,15 +299,18 @@ VstIntPtr Plugin :: dispatcher (VstInt32 opCode, VstInt32 index,
 /* Only unit-annotated parameters are accessible through the VST
    parameter interface to avoid exposure of system parameters such as
    `samplerate'. */
+
+float* Plugin :: findParam(VstInt32 index) {
+    char *addr = (char *)(&this->state->param) + param[index].offset;
+    return (float*)addr;
+}
 void Plugin :: setParameter (VstInt32 index, float value) {
     LOG("setParameter(%d,%f)\n",index,value);
-    float *p = (float*)&state->param;
-    p[param[index].index] = value;
+    *findParam(index) = value;
 }
 float Plugin :: getParameter (VstInt32 index) {
     LOG("getParameter(%d)\n",index);
-    float *p = (float*)&state->param;
-    return p[param[index].index];
+    return *findParam(index);
 }
 
 void Plugin :: getParameterName (VstInt32 index, char *text) {
@@ -305,9 +322,8 @@ void Plugin :: getParameterUnit (VstInt32 index, char *text) {
     LOG("getParameterUnit(%d) -> %s\n",index,text);
 }
 void Plugin :: getParameterDisplay (VstInt32 index, char *text) { 
-    const struct rai_info_control *p = &param[index];
     float v = getParameter(index);
-    float out_v = rai_info_control_interpolate(p, v);
+    float out_v = proc_class_control_interpolate(&param[index].map, v);
     sprintf(text, "%f", out_v);
     LOG("getParameterDisplay(%d) -> %s (%f)\n",index,text,v);
 }

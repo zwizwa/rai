@@ -18,15 +18,14 @@ ALL := \
 	test_pd.g.h test_pd.pd_linux  \
 	test_pd.sp test_pd.g.elf test_pd.g.run \
 	test-ai.rkt.run \
-	librai.so \
+	libproc.so \
 	compalg.rkt.run \
 	test_jack.g.h test_jack.jack \
 	sp_host.pd_linux \
 	test_pd.dll \
-	test-librai.rkt.run \
-	synth.sp
+	synth.sp \
 
-#	test-librai.rkt.run \
+#	test-libproc.rkt.run \
 #	test_pd1.sp test_pd1.g.run \
 
 RAI := .
@@ -54,7 +53,7 @@ zwizwa: ~/www/zwizwa.be/rai/index.html
 	cd doc ; scribble --htmls $(notdir $<)
 	cp -av doc/rai/* ~/www/zwizwa.be/rai/
 
-test-librai.rkt.run: test_pd.sp synth.sp librai.so
+test-libproc.rkt.run: test_pd.sp synth.sp libproc.so
 
 livecode:
 	while sleep 1; do $(RACKET) livecode-synth.rkt; done
