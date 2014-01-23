@@ -1083,3 +1083,12 @@ Date: Thu Jan 16 15:07:09 CET 2014
 At the .g.h level everything is fine.  The problem is in the main_*
 wrappers.  Essentially, .sp modules need type annotation.
 
+
+Entry: From floats arrays to generic types?
+Date: Fri Jan 17 16:45:29 CET 2014
+
+It sounded good to just use floats, however in practice this will be
+very difficult to accomodate.  Some library code is necessary to link
+up parameter connectivity.   Not a quick fix!
+
+
