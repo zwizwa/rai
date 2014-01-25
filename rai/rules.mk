@@ -46,7 +46,9 @@ LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 	gcc -nostartfiles -T $(RAI)/sp.ld $< -o $@
 %.sp: %.sp.elf
 	objcopy --only-section=.text -O binary $< $@
-	chmod +x $(RAI)/pd_notify.sh ; $(RAI)/pd_notify.sh $@
+%.sp.pd: %.sp
+	chmod +x $(RAI)/pd_notify.sh ; $(RAI)/pd_notify.sh $< >$@
+
 
 
 # Scheme -> C code generation.
