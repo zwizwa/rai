@@ -1151,6 +1151,9 @@ If full plugin functionality (parameterizability) is not necessary, it
 might be straightforward to run a C proc from racket.  Let's give it a
 try using the integrator, running in a single loop.
 
+EDIT: Done.  Simplest approach:
+- compile stream processor to proc_class
+- instantiate proc_class inside -run function (abstract away state)
 
 
 
@@ -1172,7 +1175,7 @@ Entry: Racket gui experiments
 Date: Mon Jan 20 22:23:16 CET 2014
 
 Time to create some guis for filter design.
-`
+
 
 
 
