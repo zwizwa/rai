@@ -740,9 +740,7 @@
 
 
 
-(define (ai-array/2 
-         #:nsi [nb-stream 0])
-  
+(define (ai-array/2 nb-stream)
 
   ;; Map vbuf read references back to parent vbuf objects.
   (define vbuf-read->write
@@ -1031,13 +1029,14 @@
 ;; This can be passed to a language back-end code generator.
 (define (ai-array program
                   #:out-base (out-base #f)
-                  #:nsi (nsi 0))
+                  #:nsi (nsi #f))
   (with-ai-array-env
    (lambda ()
      ;; Build binding tree and node annotation dictionaries.
      (ai-array/1 program #:out-base out-base)
      ;; Returns pure code object representing imperative program.
-     (ai-array/2 #:nsi nsi))))
+     (let ((nb-stream (if nsi nsi (length (in)))))
+       (ai-array/2 nb-stream)))))
 
 
 

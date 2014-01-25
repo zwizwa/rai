@@ -263,7 +263,7 @@
 ;; Compiler driver.
 (define (ai-array-c program
                     #:tc (ignored #f)
-                    #:nsi (nsi 0))   ;; Default: no inputs are streams
+                    #:nsi (nsi #f))   ;; Default: all inputs are streams
   (ai-array/c
    (ai-array program
              #:out-base Float

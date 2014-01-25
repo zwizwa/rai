@@ -182,6 +182,7 @@
            param state store
            nin  (malloc _float-pointer nin)
            nout (malloc _float-pointer nout))))
+    (pretty-print p)
     (for (((k v) (in-dict defaults)))
       (proc-param-set! p k v))
     p))
