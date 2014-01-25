@@ -4,7 +4,9 @@
          racket/pretty
          ffi/vector
          ffi/unsafe
-         ffi/unsafe/define)
+         ffi/unsafe/define
+         "f32vector.rkt")
+
 (provide (all-defined-out))
  
 (define-ffi-definer define-proc (ffi-lib "libproc"))
@@ -162,10 +164,6 @@
 
 (define-struct proc (entry pinfo param state store nin pin nout pout) #:transparent)
 
-(define (make/init-f32vector n [val 0.0])
-  (let ((vec (make-f32vector n)))
-    (for ((i (in-range n))) (f32vector-set! vec i val))
-    vec))
 
 (define (proc-instantiate i [defaults '()])
   (let* ((info (info i))

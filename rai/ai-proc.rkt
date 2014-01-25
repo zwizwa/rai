@@ -30,9 +30,9 @@
 
 (define (ai-proc proc)
   (let ((.sp (ai-sp proc)))
-    (let ((sp (proc_load_sp .sp)))
+    (let ((proc-class (proc_load_sp .sp)))
       (delete-file .sp) 
-      sp)))
+      proc-class)))
 
 ;; Single run, don't keep state.
 (define (ai-proc-run-once proc-class ins/n [outs #f])

@@ -24,6 +24,7 @@ ALL := \
 	sp_host.pd_linux \
 	test_pd.dll \
 	synth.sp \
+	test-ai-proc.rkt.run \
 
 #	test-libproc.rkt.run \
 #	test_pd1.sp test_pd1.g.run \
