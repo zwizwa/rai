@@ -17,6 +17,12 @@
 ;; Generate C types and code from generic imperative block processing
 ;; program.
 
+;; TODO: It might be interesting to generate a function with implicit
+;; state for single-shot or inifinite processes (e.g. threads).  This
+;; allows defining all state variables as local variables in the loop,
+;; giving more opportunity for optimization to the compiler.
+
+
 (define (ai-array/c expr
                     #:indextype (indextype 'int)
                     #:prefix (prefix "proc_")

@@ -97,6 +97,9 @@ struct proc_instance {
 int proc_instance_nb_control(struct proc_instance *p) {
     return p->nb_control;
 }
+int proc_instance_nb_param(struct proc_instance *p) {
+    return p->nb_param;
+}
 
 
 void proc_instance_reset_state(struct proc_instance *p) {
@@ -116,27 +119,29 @@ struct proc_instance *proc_instance_new(const struct proc_class *info,
     p->param_offset = malloc(p->nb_param * sizeof(p->param_offset[0]));
     p->param_nb_el  = malloc(p->nb_param * sizeof(p->param_nb_el[0]));
 
-    for (int i = 0, byte_offset = 0; i < p->nb_param; i++) {
-        const struct proc_class_param *pi = &info->info_param[i];
-        p->param_offset[i] = byte_offset;
-        p->param_nb_el[i]  = proc_class_param_nb_elements(pi);
-        int byte_size = proc_type_sizeof(pi->type) * p->param_nb_el[i];
-        byte_offset += byte_size;
-        /* Params are algo inputs so don't have initial values, but
-           since we're stateful we have to initialize. */
-        proc_instance_set_param(p, i, 0.0);
-    }
-
     /* Allocate in 1 chunk to improve locality. */
     p->size_state = proc_class_param_alloc_size(info->info_state);
     p->size_param = proc_class_param_alloc_size(info->info_param);
     p->size_store = proc_class_param_alloc_size(info->info_store);
 
     int buf_size = 2 * p->size_state + p->size_param + p->size_store;
-    void *buf = calloc(1, buf_size);
+    void *buf = calloc(1,buf_size);
     p->param    = buf; buf += p->size_param;
     p->state    = buf; buf += (2 * p->size_state);
     p->store    = buf;
+
+
+    /* Init params & param meta data */
+    for (int i = 0, byte_offset = 0; i < p->nb_param; i++) {
+        const struct proc_class_param *pi = &info->info_param[i];
+        p->param_offset[i] = byte_offset;
+        p->param_nb_el[i]  = proc_class_param_nb_elements(pi);
+        int byte_size = proc_type_sizeof(pi->type) * p->param_nb_el[i];
+        byte_offset += byte_size;
+        /* Params don't have initial values, but since we're stateful
+           we have to initialize. */
+        proc_instance_set_param(p, i, 0.0);
+    }
 
     /* Initialize from initial values specified in code. */
     proc_instance_reset_state(p);
@@ -151,11 +156,9 @@ struct proc_instance *proc_instance_new(const struct proc_class *info,
     return p;
 }
 void proc_instance_free(struct proc_instance *p) {
-    if (p->param) {
-        free(p->param);
-        p->param = NULL;
-        p->state = NULL;
-    }
+    free(p->param);
+    free(p->param_offset);
+    free(p->param_nb_el);
     free(p);
 }
 

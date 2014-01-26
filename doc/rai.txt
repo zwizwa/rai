@@ -1185,3 +1185,26 @@ Date: Tue Jan 21 23:49:46 CET 2014
 What about turning all constants into parameters for debug?  (I.e. to
 do the "code dial" thingy..)
 
+
+
+
+Entry: Data structures.
+Date: Sat Jan 25 22:46:27 CET 2014
+
+Possible optimization, exposing more representation freedom to the C
+compiler: If state is kept as local variables, it might be possible to
+avoid making the structs explicit in the .g.h
+
+This would work for a single-threaded application, or if the processor
+runs in a blocking thread.
+
+
+
+Entry: Next
+Date: Sun Jan 26 12:01:35 CET 2014
+
+- fix libproc.rkt
+
+Found one x vs. x-pointer mixup.
+
+It seems best to add compile time size to proc.h api.

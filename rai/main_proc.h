@@ -11,10 +11,10 @@ proc_for_out   (GEN_DIM_ARRAY)
 proc_for_si    (GEN_DIM_ARRAY)
 proc_for_store (GEN_DIM_ARRAY)
 
-#define GEN_INFO(__name, __type, kind, size, ...) {   \
-        .name = (void*)#__name,                       \
-        .dims = (void*)&__name##_dims[0],             \
-        .type = proc_type_##__type,                   \
+#define GEN_INFO(__name, __type, __kind, __size, ...) {   \
+        .name = (void*)#__name,                           \
+        .dims = (void*)&__name##_dims[0],                 \
+        .type = proc_type_##__type,                       \
 },
 
 const struct proc_class_param info_in[]    = { proc_for_in    (GEN_INFO) {} };

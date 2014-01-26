@@ -79,7 +79,7 @@ static inline int proc_list_end(const void *x) {
    of types and functions that abstract over types. */
 
 /* Iterate a macro m over types. */
-#define PROC_TYPES_FOR(m)                        \
+#define PROC_TYPES_FOR(m)                       \
     m(float32_t)                                \
     m(uint32_t)                                 \
     m(int32_t)
@@ -210,6 +210,7 @@ void proc_instance_run(struct proc_instance *p,
                        int n);
 
 int proc_instance_nb_control(struct proc_instance *p);
+int proc_instance_nb_param(struct proc_instance *p);
 
 
 void proc_instance_preset_save(const struct proc_instance *p, const char *filename);

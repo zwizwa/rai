@@ -2,6 +2,7 @@
 (require "tools.rkt"
          "ai-array-c.rkt"
          "libproc.rkt"
+         racket/runtime-path
          racket/file
          racket/system)
 
@@ -15,8 +16,10 @@
 ;; - Block parameters are not used: inputs are streams
 ;; - Only run once - don't keep track of state: allows to abstract away instantiation
 
+(define-runtime-path build-dir ".")
+
 (define (ai-sp proc)
-  (let* ((.g.h (make-temporary-file "proc-~a.g.h" #f "."))
+  (let* ((.g.h (make-temporary-file "proc-~a.g.h" #f build-dir))
          (.sp  (regexp-replace ".g.h" (path->string .g.h) ".sp")))
     (with-output-to-file .g.h
       (lambda ()
@@ -24,7 +27,8 @@
       #:exists 'truncate)
     (let ((compile-out
            (with-output-to-string
-             (lambda () (system (format "make ~a" .sp))))))
+             (lambda () (system (format "make -C ~a ~a" build-dir .sp))))))
+      ;; (display compile-out)
       (delete-file .g.h)
       .sp)))
 

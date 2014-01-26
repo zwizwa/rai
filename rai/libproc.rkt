@@ -18,7 +18,11 @@
 (define _uintptr-pointer       (_cpointer _uintptr))
 (define _int-pointer           (_cpointer _int))
 
-;; Note that these are float* and float**, but it's easier to drop the type here  (see rai.h)
+;; FIXME: make sure libproc.so is compiled with PROC_NUMBER_T = double
+(define _number                _double)
+
+;; We don't know the types at compile time.  It is necessary to proc.h
+;; metadata to reconstruct data layout information at run time.
 (define _proc_class_run
   (_fun (_or-null _pointer) ;; state (two concatentated copies for double buffering)
         (_or-null _pointer) ;; array of input arrays
@@ -26,28 +30,32 @@
         (_or-null _pointer) ;; array of output arrays
         (_or-null _pointer) ;; store
         _uint               ;; nb_samples
-        -> _void)) 
+        -> _void))
+
+(define _proc_type (_enum '(float32 = 0
+                            uint32  = 1
+                            int32   = 2)))
   
 (define-cstruct _proc_class_param
   ([name _string/utf-8]
    [dims _uintptr-pointer]
-   [type (_enum '(float32 = 0
-                  uint32  = 1
-                  int32   = 2))]
-   ))
+   [type _proc_type]))
+
+(define _proc_scale (_enum '(lin  = 0
+                             log  = 1
+                             slog = 2)))
 
 (define-cstruct _proc_class_control_map
   ([s0    _double]
    [s1    _double]
    [range _double]
-   [scale (_enum '(lin  = 0
-                   log  = 1
-                   slog = 2))]))
+   [scale _proc_scale]))
+
 
 (define-cstruct _proc_class_control
   ([desc  _string/utf-8]
    [unit  _string/utf-8]
-   [param _proc_class_param]
+   [param _proc_class_param-pointer]
    [map   _proc_class_control_map]))
 
 (define-cstruct _proc_class
@@ -81,11 +89,31 @@
 (define-proc proc_load_sp
   (_fun _string -> _proc_class-pointer))
 
+(define-proc proc_class_param_alloc_size (_fun _proc_class_param-pointer -> _int))
+(define-proc proc_class_param_list_size  (_fun _proc_class_param-pointer -> _int))
+
+
 (define-proc proc_instance_new
   (_fun _proc_class-pointer
         (_or-null _proc_instance-pointer)
         ->
         _proc_instance-pointer))
+
+(define-proc proc_instance_free          (_fun _proc_instance-pointer -> _void))
+(define-proc proc_instance_nb_control    (_fun _proc_instance-pointer -> _int))
+(define-proc proc_instance_reset_state   (_fun _proc_instance-pointer -> _void))
+(define-proc proc_instance_find_param    (_fun _proc_instance-pointer _string/utf-8 -> _int))
+(define-proc proc_instance_find_control  (_fun _proc_instance-pointer _int -> _int))
+
+(define-proc proc_instance_set_param     (_fun _proc_instance-pointer _int _number -> _void))
+(define-proc proc_instance_get_param     (_fun _proc_instance-pointer _int -> _number))
+
+(define-proc proc_instance_run
+  (_fun _proc_instance-pointer
+        (_or-null _void-pointer)
+        (_or-null _void-pointer)
+        _int -> _void))
+
 
 
 
@@ -115,20 +143,12 @@
         (scale . ,(proc_class_control_map-scale m))))))
 
 (define (info-io i info_param)
-  (let* ((s-offset 0)
-         (ips (array0->list (info_param i) _proc_class_param))
-         (pi
-          (for/list ((ip ips))
-            (let* ((dims (for/list ((dp (array0->list (proc_class_param-dims ip) _uintptr)))
-                           (ptr-ref dp _uintptr)))
-                   (offset s-offset))
-              (set! s-offset (+ s-offset (foldl * 1 dims)))
-              (list (string->symbol (proc_class_param-name ip))
-                    offset
-                    dims)))))
-    `((total . ,s-offset)
-      (info . ,pi))))
-
+  (let* ((ips (array0->list (info_param i) _proc_class_param)))
+    (for/list ((ip ips))
+      (let* ((dims (for/list ((dp (array0->list (proc_class_param-dims ip) _uintptr)))
+                     (ptr-ref dp _uintptr))))
+        (list (string->symbol (proc_class_param-name ip))
+              dims)))))
 
 (define (info-ios i)
   (for/list ((info_param (list proc_class-info_param
@@ -162,44 +182,28 @@
       d
       (rdict-ref (dict-ref d (car tags)) (cdr tags))))
 
-(define-struct proc (entry pinfo param state store nin pin nout pout) #:transparent)
+(define-struct proc (instance
+                     nin  pin
+                     nout pout) #:transparent)
 
-
-(define (proc-instantiate i [defaults '()])
-  (let* ((info (info i))
-         (total (lambda (tag) (rdict-ref info `(,tag total))))
-         (nin  (total 'in))
-         (nout (total 'out))
-         (param (make/init-f32vector (total 'param)))
-         (state (make/init-f32vector (* 2 (total 'state))))
-         (store (make/init-f32vector (total 'store)))
-         (p
-          (make-proc
-           (proc_class-entry i)
-           (rdict-ref info '(param info))
-           param state store
-           nin  (malloc _float-pointer nin)
-           nout (malloc _float-pointer nout))))
-    ;; (pretty-print p)
-    (for (((k v) (in-dict defaults)))
-      (proc-param-set! p k v))
-    p))
-       
-
-         
-;; FIXME: use librai methods.
-(define (proc-param-set! p param val)
-  (unless (number? param)
-    (set! param (car (dict-ref (proc-pinfo p) param))))
-  (when param
-    (f32vector-set! (proc-param p) param val)))
+(define (proc-set-param! p name value)
+  (let* ((instance (proc-instance p))
+         (index (proc_instance_find_param instance (symbol->string name))))
+    (when (< index 0) (error name))
+    (proc_instance_set_param instance index (+ 0.0 value))))
   
 
-(define (ptr-set-f32vectors! arr vs)
-  (for ((i (in-naturals)) (v vs))
-    (ptr-set! arr _pointer i (f32vector->cpointer v))))
+(define (proc-instantiate class [defaults '()])
+  (let* ((nin   (proc_class_param_list_size (proc_class-info_in  class)))
+         (nout  (proc_class_param_list_size (proc_class-info_out class)))
+         (p     (make-proc (proc_instance_new class #f)
+                           nin  (if (zero? nin)  #f (malloc _float-pointer nin))
+                           nout (if (zero? nout) #f (malloc _float-pointer nout)))))
+    (for (((name value) (in-dict defaults)))
+      (proc-set-param! p name value))
+    p))
 
-
+         
 
 (define (proc-run p ins/n [outs #f])
   (let-values
@@ -207,17 +211,13 @@
         (if (number? ins/n)
             (values ins/n '())
             (values (f32vector-length (car ins/n)) ins/n))))
-    (when (odd? n)
-      (error 'odd-run-not-supported)) ;; need to copy state buffer!
     (match p
-      ((struct proc (entry pinfo param state store nin pin nout pout))
+      ((struct proc (instance nin pin nout pout))
        (unless outs 
          (set! outs (for/list ((i nout)) (make-f32vector n))))
        (ptr-set-f32vectors! pin  ins)
        (ptr-set-f32vectors! pout outs)
-       (entry (f32vector->cpointer state) pin
-              (f32vector->cpointer param) pout
-              (f32vector->cpointer store) n)
+       (proc_instance_run instance pin pout n)
        outs))))
 
        
