@@ -126,19 +126,6 @@
 
 
 
-  
-
-;; Instantiate proc object.
-;; TODO
-
-;; How to find a good bridge between the special-cased param/buffer
-;; approach and a generic scheme approach?
-
-;; Concretely: what to do with the "param rate"?  Base "semantics"
-;; doesn't have this.
-
-;; Maybe it's best to keep this at C level?  Or maybe some duplication
-;; is unavoidable..
 
 (define (rdict-ref d tags)
   (if (null? tags)
@@ -193,11 +180,6 @@
 
 ;; Lists in proc.h are implemented using sentinel-terminated arrays,
 ;; where the sentinal is a 0-filled field the size of a pointer.
-
-;; Unpack sentinel-terminated array into a list of pointers.
-
-(begin
-
 (define (array0->list p0 ctype)
   (let loop ((ps '())
              (i 0))
@@ -224,6 +206,7 @@
       (let* ((dims (for/list ((dp (array0->list (proc_class_param-dims ip) _uintptr)))
                      (ptr-ref dp _uintptr))))
         (list (string->symbol (proc_class_param-name ip))
+              (proc_class_param-type ip)
               dims)))))
 
 (define (class-ios i)
@@ -240,4 +223,3 @@
    `((control . ,(class-control i)))
    (class-ios i)))
 
-)

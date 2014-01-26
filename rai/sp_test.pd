@@ -1,4 +1,4 @@
-#N canvas 720 254 718 194 10;
+#N canvas 0 479 718 194 10;
 #X obj 80 256 dac~;
 #X floatatom 112 190 5 0 0 0 - - -;
 #X obj 128 7 loadbang;
@@ -14,7 +14,7 @@
 -1 -1;
 #X obj 271 245 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#N canvas 0 29 718 869 rx 1;
+#N canvas 0 29 718 194 rx 1;
 #X obj 138 183 outlet;
 #X obj 52 15 ctlin;
 #X floatatom 48 54 5 0 0 0 - - -;
@@ -53,7 +53,7 @@
 #X msg 19 87 load synth.sp;
 #X msg 112 162 80;
 #X obj 79 225 vols~;
-#N canvas 720 29 718 194 sp 1;
+#N canvas 0 254 718 194 sp 1;
 #X obj 417 -66 inlet;
 #X obj 417 -17 outlet~;
 #X obj 417 -43 sp_host synth.sp;
@@ -134,6 +134,7 @@
 #X connect 12 0 13 0;
 #X connect 14 0 20 0;
 #X connect 15 0 20 0;
+#X connect 16 0 20 0;
 #X connect 17 0 20 0;
 #X connect 18 0 1 0;
 #X connect 19 0 0 0;

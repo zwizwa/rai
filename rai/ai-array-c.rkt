@@ -240,7 +240,7 @@
          (gen-node-inits inits si)
          (gen-node-inits '() store)  ;; FIXME: currently all 0
          
-         (line "void ~a (\n" (pfx "loop"))
+         (line "static void ~a (\n" (pfx "loop"))
          (with-nest
           (lambda ()
             (let ((arg

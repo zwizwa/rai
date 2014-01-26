@@ -33,22 +33,25 @@ LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 %.jack: %.g.h $(RAI)/prim.h $(RAI)/main_jack.c $(RAI)/proc.h $(LIBPROC_O) $(RKT)
 	gcc -DPROC_FILE=\"$<\" -DCLIENT_NAME=\"$*\" $(CFLAGS) $(RAI)/main_jack.c $(LIBPROC_O) $(LDFLAGS) `pkg-config jack --cflags --libs` -o $@
 
-# Ad-hoc binary format to work around libdl limitations.
-%.sp.o: %.g.h $(RAI)/prim.h $(RAI)/main_sp.c
-	gcc -DPROC_FILE=\"$<\" $(CFLAGS) -DPROC_BUILD_STAMP=$$(date "+%s" | tee $@.build_stamp)  -DPROC_VERSION=\"$$(date "+%Y%m%d-%H%M%S" | tee $@.version)\" -c $(RAI)/main_sp.c -o $@
+
+# Object files containing base name of the file as a global symbol
+# pointing to a struct proc_class.
+%.proc.o: %.g.h $(RAI)/prim.h $(RAI)/main_sp.c
+	gcc -DPROC_FILE=\"$<\" $(CFLAGS) -DPROC_BUILD_STAMP=$$(date "+%s" | tee $@.build_stamp) -DPROC_HEADER_NAME=$*  -DPROC_VERSION=\"$$(date "+%Y%m%d-%H%M%S" | tee $@.version)\" -c $(RAI)/main_sp.c -o $@
 	cat $@.build_stamp
 	cat $@.version
 
-%.a: %.g.h $(RAI)/prim.h $(RAI)/main_sp.c
-	gcc -S -DPROC_FILE=\"$<\" $(CFLAGS)  -c $(RAI)/main_sp.c -o $@
 
-%.sp.elf: %.sp.o
+
+# The .sp files are a dirty lowlevel hack.  Probably best to not
+# depend on these for serious work, and use proper .so objects
+# instead.
+%.sp.elf: %.proc.o
 	gcc -nostartfiles -T $(RAI)/sp.ld $< -o $@
 %.sp: %.sp.elf
 	objcopy --only-section=.text -O binary $< $@
 %.sp.pd: %.sp
 	chmod +x $(RAI)/pd_notify.sh ; $(RAI)/pd_notify.sh $< >$@
-
 
 
 # Scheme -> C code generation.

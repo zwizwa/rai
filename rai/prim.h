@@ -62,7 +62,7 @@
 
 #define p_floor_approx
 
-i_ p_ifloor(_ a) {
+INLINE i_ p_ifloor(_ a) {
     i_ i_negative = a < 0;
     i_ i_truncate = (i_)a;
     i_ i_floor = i_truncate + i_negative;

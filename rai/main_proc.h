@@ -17,10 +17,10 @@ proc_for_store (GEN_DIM_ARRAY)
         .type = proc_type_##__type,                       \
 },
 
-const struct proc_class_param info_in[]    = { proc_for_in    (GEN_INFO) {} };
-const struct proc_class_param info_out[]   = { proc_for_out   (GEN_INFO) {} };
-const struct proc_class_param info_state[] = { proc_for_si    (GEN_INFO) {} };
-const struct proc_class_param info_store[] = { proc_for_store (GEN_INFO) {} };
+static const struct proc_class_param info_in[]    = { proc_for_in    (GEN_INFO) {} };
+static const struct proc_class_param info_out[]   = { proc_for_out   (GEN_INFO) {} };
+static const struct proc_class_param info_state[] = { proc_for_si    (GEN_INFO) {} };
+static const struct proc_class_param info_store[] = { proc_for_store (GEN_INFO) {} };
 
 /* To allow element ref by name, info_param is a struct instead of an array. */
 #define PARAM_BY_NAME(__name, ...) const struct proc_class_param __name;
@@ -28,13 +28,13 @@ struct proc_class_param_by_name {
     proc_for_param(PARAM_BY_NAME)
     const struct proc_class_param _end_;
 };
-const struct proc_class_param_by_name info_param = {
+static const struct proc_class_param_by_name info_param = {
     proc_for_param (GEN_INFO)  {}
 };
 
 #define GEN_INIT(__name, ...) .__name = proc_##__name##_init,
-const struct proc_si    init_state = { proc_for_si    (GEN_INIT) };
-const struct proc_store init_store = { proc_for_store (GEN_INIT) };
+static const struct proc_si    init_state = { proc_for_si    (GEN_INIT) };
+static const struct proc_store init_store = { proc_for_store (GEN_INIT) };
 
 #define GEN_CONTROL(_param, _desc, _unit, _min, _max, _range, _curve) { \
             .desc = _desc,                                              \
@@ -45,14 +45,18 @@ const struct proc_store init_store = { proc_for_store (GEN_INIT) };
                      .range = _range,                                   \
                      .scale = proc_scale_##_curve }                     \
             },
-const struct proc_class_control info_control[] = { proc_for_control (GEN_CONTROL) {} };
+static const struct proc_class_control info_control[] = { proc_for_control (GEN_CONTROL) {} };
 
 #ifndef PROC_HEADER_ATTRIBUTE
 #define PROC_HEADER_ATTRIBUTE
 #endif
 
+#ifndef PROC_HEADER_NAME
+#define PROC_HEADER_NAME proc_info
+#endif
+
 /* Start of binary file. */
-const struct proc_class PROC_HEADER_ATTRIBUTE proc_info = {
+const struct proc_class PROC_HEADER_ATTRIBUTE PROC_HEADER_NAME = {
     .magic      = PROC_MAGIC,
     .entry      = (void*)proc_loop,
 

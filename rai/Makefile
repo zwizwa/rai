@@ -1,6 +1,7 @@
 .DELETE_ON_ERROR:
 
-ALL := \
+
+ALL_RUN := \
 	ai-array-scheme.rkt.run \
 	test-array-scheme.rkt.run \
 	test-delay.rkt.run \
@@ -8,31 +9,38 @@ ALL := \
 	test-type.rkt.run \
 	test-ai-array.rkt.run \
 	test-ai-stream.rkt.run \
-	sp_host.elf \
 	test-ai-taylor.rkt.run \
 	test-series.rkt.run \
 	test-ai-autodiff.rkt.run \
 	test-matrix-lib.rkt.run \
 	test-ai-linpar.rkt.run \
 	test-ai-freq.rkt.run \
-	test_pd.g.h test_pd.pd_linux  \
-	test_pd.sp test_pd.g.elf test_pd.g.run \
+	test_pd.g.run \
 	test-ai.rkt.run \
-	libproc.so \
 	compalg.rkt.run \
+	test-ai-proc.rkt.run \
+	test-libproc.rkt.run \
+
+ALL_BIN := \
+	sp_host.elf \
+	test_pd.g.h test_pd.pd_linux  \
+	test_pd.sp test_pd.g.elf \
+	libproc.so \
 	test_jack.g.h test_jack.jack \
 	sp_host.pd_linux \
 	test_pd.dll \
 	synth.sp \
-	test-ai-proc.rkt.run \
-	test-libproc.rkt.run \
 
-#	test_pd1.sp test_pd1.g.run \
+ALL :=  $(ALL_BIN) $(ALL_RUN)
+
 
 RAI := .
 
+
 all: $(ALL)
 	@echo '</home/tom/test.png>'
+
+all_bin: $(ALL_BIN)
 
 clean:
 	rm -rf $(ALL) *~ *.elf *.bin *.sp *.o *.sp.o.* *.g.h *.pd_linux *.run *.jack compiled *.dll *.exe

@@ -1208,3 +1208,30 @@ Date: Sun Jan 26 12:01:35 CET 2014
 Found one x vs. x-pointer mixup.
 
 It seems best to add compile time size to proc.h api.
+
+EDIT: most problems go away after plugging libproc.rkt into the
+methods of proc.h instead of working with the datastructure directly.
+Probably only for gui control meta-data.
+
+
+
+
+Entry: DSP interfaces for cortex
+Date: Sun Jan 26 18:22:37 CET 2014
+
+CMSIS - Cortex Microcontroller Software Interface Standard
+http://www.arm.com/products/processors/cortex-m/cortex-microcontroller-software-interface-standard.php\
+
+Audio Weaver™- the Only Cross-Platform Audio Design Tool for ARM
+http://www.dspconcepts.com/products/audio-weaver
+
+
+
+Entry: Next: pattern music
+Date: Sun Jan 26 19:13:34 CET 2014
+
+To further design synths and filters, it's necessary to connect them
+to a pattern sequencer with easy control.  That problem is one of
+organization..
+
+
