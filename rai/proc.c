@@ -211,7 +211,7 @@ int proc_instance_find_param(struct proc_instance *p, const char *name) {
 
 int proc_instance_find_control(struct proc_instance *p, int c) {
     if ((c < 0) || (c >= p->nb_control)) return -1;
-    return p->info->info_control[c].param - p->info->info_param;
+    return p->info->info_control[c].param;
 }
 
 /* Set will set the entire grid.  Get will only pick the first element. */

@@ -13,35 +13,40 @@
 
   (pp test.sp)
 
-  (define test_sp_info (proc_load_sp test.sp))
-  (define test_sp_proc (proc_instance_new test_sp_info #f))
+  (define test_sp_class (proc_load_sp test.sp))
 
+  (pp (proc-class->dict test_sp_class))
+
+  #;(begin
 
   (define v (make-f32vector 16))
   
-  (pp test_sp_proc)
 
-  (define test_param (proc_class-info_param test_sp_info))
+  (define test_param (proc_class-info_param test_sp_class))
 
   (pp test_param)
 
 
+  (define test_sp_proc (proc_instance_new test_sp_class #f))
+  (pp test_sp_proc)
+  
   (define (proc_class->name i n)
     (map proc_class_param-name (array0->list (proc_class-info_param i))))
 
 
   (define param-names
-    (map proc_class_param-name (array0->list (proc_class-info_param test_sp_info) _proc_class_param)))
+    (map proc_class_param-name (array0->list (proc_class-info_param test_sp_class) _proc_class_param)))
   
   (define control-names
-    (map proc_class_control-desc (array0->list (proc_class-info_control test_sp_info) _proc_class_control)))
+    (map proc_class_control-desc (array0->list (proc_class-info_control test_sp_class) _proc_class_control)))
 
   (pp param-names)
   (pp control-names)
 
-  (pp (info test_sp_info))
+  (pp (info test_sp_class))
+  )
 
-  test_sp_info)
+  test_sp_class)
 
 ;; FIXME: where to store the binaries? currently they're in the source dir.
 (define-runtime-path test_pd.sp "test_pd.sp")

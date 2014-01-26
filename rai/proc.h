@@ -115,8 +115,8 @@ struct proc_class_control_map {
 struct proc_class_control {
     const char *desc;
     const char *unit;
-    const struct proc_class_param *param;
     struct proc_class_control_map map;
+    int param;  // index into proc_class.info_param
 };
 
 

@@ -7,7 +7,14 @@
          ffi/unsafe/define
          "f32vector.rkt")
 
-(provide (all-defined-out))
+(provide
+ ;; Provide only safe ops
+ proc_load_sp
+ proc-instantiate
+ proc-run
+ proc-set-param!
+ proc-class->dict
+)
  
 (define-ffi-definer define-proc (ffi-lib "libproc"))
 
@@ -55,8 +62,9 @@
 (define-cstruct _proc_class_control
   ([desc  _string/utf-8]
    [unit  _string/utf-8]
-   [param _proc_class_param-pointer]
-   [map   _proc_class_control_map]))
+   [map   _proc_class_control_map]
+   [param _int]
+   ))
 
 (define-cstruct _proc_class
   ([magic        (_array _uint8 16)]
@@ -118,51 +126,6 @@
 
 
 
-;; Lists in proc.h are implemented using sentinel-terminated arrays,
-;; where the sentinal is a 0-filled field the size of a pointer.
-
-;; Unpack sentinel-terminated array into a list of pointers.
-(define (array0->list p0 ctype)
-  (let loop ((ps '())
-             (i 0))
-    (let ((p (ptr-add p0 i ctype)))
-      (if (= 0 (ptr-ref p _uintptr))
-          (reverse ps)
-          (loop (cons p ps) (add1 i))))))
-
-;; Convert info to s-expression.
-(define (info-control i)
-  (for/list ((p (array0->list (proc_class-info_control i) _proc_class_control)))
-    (let ((m (proc_class_control-map p)))
-      `((desc  . ,(proc_class_control-desc p))
-        (unit  . ,(proc_class_control-unit p))
-        (param . ,(proc_class_control-param p))   ;; FIXME: unpack?
-        (s0    . ,(proc_class_control_map-s0 m))
-        (s1    . ,(proc_class_control_map-s1 m))
-        (range . ,(proc_class_control_map-range m))
-        (scale . ,(proc_class_control_map-scale m))))))
-
-(define (info-io i info_param)
-  (let* ((ips (array0->list (info_param i) _proc_class_param)))
-    (for/list ((ip ips))
-      (let* ((dims (for/list ((dp (array0->list (proc_class_param-dims ip) _uintptr)))
-                     (ptr-ref dp _uintptr))))
-        (list (string->symbol (proc_class_param-name ip))
-              dims)))))
-
-(define (info-ios i)
-  (for/list ((info_param (list proc_class-info_param
-                               proc_class-info_in
-                               proc_class-info_out
-                               proc_class-info_state
-                               proc_class-info_store))
-             (tag '(param in out state store)))
-    `(,tag . ,(info-io i info_param))))
-
-(define (info i)
-  (append
-   `((control . ,(info-control i)))
-   (info-ios i)))
   
 
 ;; Instantiate proc object.
@@ -222,3 +185,59 @@
 
        
      
+
+
+
+;; For inspection: convert meta info to nested scheme dictionary.
+
+
+;; Lists in proc.h are implemented using sentinel-terminated arrays,
+;; where the sentinal is a 0-filled field the size of a pointer.
+
+;; Unpack sentinel-terminated array into a list of pointers.
+
+(begin
+
+(define (array0->list p0 ctype)
+  (let loop ((ps '())
+             (i 0))
+    (let ((p (ptr-add p0 i ctype)))
+      (if (= 0 (ptr-ref p _uintptr))
+          (reverse ps)
+          (loop (cons p ps) (add1 i))))))
+
+;; Convert info to s-expression.
+(define (class-control i)
+  (for/list ((p (array0->list (proc_class-info_control i) _proc_class_control)))
+    (let ((m (proc_class_control-map p)))
+      `((desc  . ,(proc_class_control-desc p))
+        (unit  . ,(proc_class_control-unit p))
+        (param . ,(proc_class_control-param p))
+        (s0    . ,(proc_class_control_map-s0 m))
+        (s1    . ,(proc_class_control_map-s1 m))
+        (range . ,(proc_class_control_map-range m))
+        (scale . ,(proc_class_control_map-scale m))))))
+
+(define (class-io i info_param)
+  (let* ((ips (array0->list (info_param i) _proc_class_param)))
+    (for/list ((ip ips))
+      (let* ((dims (for/list ((dp (array0->list (proc_class_param-dims ip) _uintptr)))
+                     (ptr-ref dp _uintptr))))
+        (list (string->symbol (proc_class_param-name ip))
+              dims)))))
+
+(define (class-ios i)
+  (for/list ((info_param (list proc_class-info_param
+                               proc_class-info_in
+                               proc_class-info_out
+                               proc_class-info_state
+                               proc_class-info_store))
+             (tag '(param in out state store)))
+    `(,tag . ,(class-io i info_param))))
+
+(define (proc-class->dict i)
+  (append
+   `((control . ,(class-control i)))
+   (class-ios i)))
+
+)

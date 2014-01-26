@@ -39,7 +39,7 @@ const struct proc_store init_store = { proc_for_store (GEN_INIT) };
 #define GEN_CONTROL(_param, _desc, _unit, _min, _max, _range, _curve) { \
             .desc = _desc,                                              \
             .unit = _unit,                                              \
-            .param = &info_param._param,                                \
+            .param = &info_param._param - (const struct proc_class_param *)&info_param, \
             .map = { .s0 = _min,                                        \
                      .s1 = _max,                                        \
                      .range = _range,                                   \

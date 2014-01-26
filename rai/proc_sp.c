@@ -26,7 +26,6 @@ static void link_info_control(struct proc_class *ri, struct proc_class_control *
     for (int i = 0; !proc_list_end(&rp[i]); i++) {
         link_ptr(ri, &(rp[i].desc));
         link_ptr(ri, &(rp[i].unit));
-        link_ptr(ri, &(rp[i].param));
     }
 }
 static void link_header(struct proc_class *ri) {
