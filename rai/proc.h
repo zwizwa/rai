@@ -242,7 +242,7 @@ void proc_voice_on(struct proc_voice *v, float freq);
 float proc_midi_to_freq(int midi);
 
 
-struct proc_class *proc_library_find(struct proc_class **library, const char *name);
+const struct proc_class *proc_library_find(const struct proc_class **library, const char *name);
 
 
 /* DEBUG */

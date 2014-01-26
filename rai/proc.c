@@ -338,8 +338,8 @@ float proc_class_control_interpolate(const struct proc_class_control_map *p, flo
 }
 
 
-struct proc_class *proc_library_find(struct proc_class **proc_library, const char *name) {
-    struct proc_class *c;
+const struct proc_class *proc_library_find(const struct proc_class **proc_library, const char *name) {
+    const struct proc_class *c;
     for (int i=0; proc_library[i]; i++) {
         c = proc_library[i];
         if (!strcmp(c->name, name)) return c;

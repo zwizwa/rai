@@ -11,7 +11,7 @@
 #include "prim.h"  // primitive functions
 #include "proc.h"
 
-#define ME "sp: "
+#define ME EXTERN_NAME ": "
 #define HAVE_SYNTH 1
 
 #include "m_pd.h"
@@ -23,7 +23,7 @@
 
 
 #ifdef PROC_LIBRARY
-extern proc_class *proc_library[];
+extern const struct proc_class *PROC_LIBRARY[];
 #endif
 
 
@@ -36,7 +36,7 @@ struct proc_pd {
     t_canvas *x_canvas;
     t_symbol *proc_name;
     struct proc_instance *proc_instance;
-    struct proc_class *proc_class;
+    const struct proc_class *proc_class;
     int nb_pd_in;  float **pd_in;
     int nb_pd_out; float **pd_out;
     struct proc_voice voice;
@@ -202,10 +202,10 @@ static void proc_pd_create_gui(struct proc_pd *x, float x_coord, float y_coord) 
    Note that libdl won't reload a library if it is opened somewhere else. */
 static void proc_pd_load(struct proc_pd *x, t_symbol *filename) {
 
-    struct proc_class *ri;
+    const struct proc_class *ri;
 #ifdef PROC_LIBRARY
     // From statically linked list of classes.
-    ri = proc_library_find(proc_library, filename->s_name);
+    ri = proc_library_find(PROC_LIBRARY, filename->s_name);
 #else
     // From .sp object on disk.
     ri = proc_load_sp(filename->s_name);
@@ -235,14 +235,14 @@ static void proc_pd_load(struct proc_pd *x, t_symbol *filename) {
         if (!((nb_in  <= x->nb_pd_in) &&
               (nb_out <= x->nb_pd_out))) {
             post(ME "Can't reload code from %s: I/O not compatible", filename->s_name);
-            free(ri);
+            free((void*)ri);
         }
         else {
             /* Replace code */
             struct proc_instance *proc = proc_instance_new(ri, x->proc_instance);
             if (x->proc_instance) proc_instance_free(x->proc_instance);
             x->proc_instance = proc;
-            if (x->proc_class) free(x->proc_class);
+            if (x->proc_class) free((void*)x->proc_class);
             x->proc_class = ri;
             x->proc_name = filename;
 
@@ -307,7 +307,9 @@ static void *proc_pd_new(t_symbol *filename) {
 
 static void proc_pd_free(struct proc_pd *x) {
     proc_instance_free(x->proc_instance);
-    free(x->proc_class);
+#ifndef PROC_LIBRARY
+    free((void*)x->proc_class);
+#endif
     if (x->pd_in)  free(x->pd_in);
     if (x->pd_out) free(x->pd_out);
 }

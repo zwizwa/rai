@@ -37,7 +37,7 @@ LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 # Object files containing base name of the file as a global symbol
 # pointing to a struct proc_class.
 %.proc.o: %.g.h $(RAI)/prim.h $(RAI)/main_sp.c
-	gcc -DPROC_FILE=\"$<\" $(CFLAGS) -DPROC_BUILD_STAMP=$$(date "+%s" | tee $@.build_stamp) -DPROC_HEADER_NAME=$(notdir $*)  -DPROC_VERSION=\"$$(date "+%Y%m%d-%H%M%S" | tee $@.version)\" -c $(RAI)/main_sp.c -o $@
+	gcc -DPROC_FILE=\"$<\" $(CFLAGS) -DPROC_BUILD_STAMP=$$(date "+%s" | tee $@.build_stamp) -DPROC_HEADER_NAME=$(notdir $*) -DPROC_NAME=\"$(notdir $*)\" -DPROC_VERSION=\"$$(date "+%Y%m%d-%H%M%S" | tee $@.version)\" -c $(RAI)/main_sp.c -o $@
 	cat $@.build_stamp
 	cat $@.version
 
@@ -60,8 +60,12 @@ LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 	RACKET=$(RACKET) ./stream2c.sh $< $@
 
 # Static Pd wrapper.  No reload of .sp files.
-%.pd_linux: %.g.h $(RAI)/prim.h $(RAI)/main_pd.c $(RAI)/proc.h $(LIBPROC_O)
-	gcc -DPROC_FILE=\"$<\" -DEXTERN_SETUP=$*_setup -DEXTERN_NAME=\"$*\" $(CFLAGS) $(RAI)/main_pd.c $(LIBPROC_O) $(LDFLAGS) -rdynamic -shared -o $@
+
+PROC_LIBRARY_O := proc_library.o synth.proc.o test_pd.proc.o
+
+proc.pd_linux: $(RAI)/prim.h $(RAI)/main_pd.c $(RAI)/proc.h $(LIBPROC_O) $(PROC_LIBRARY_O)
+	gcc -DEXTERN_SETUP=proc_setup -DEXTERN_NAME=\"proc\" -DPROC_LIBRARY=proc_library $(CFLAGS) $(RAI)/main_pd.c $(LIBPROC_O) $(PROC_LIBRARY_O) $(LDFLAGS) -rdynamic -shared -o $@
+
 
 # Dynamic Pd wrapper, supports re-loading of .sp files
 # See also sp_test.pd

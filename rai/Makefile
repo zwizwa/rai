@@ -23,11 +23,12 @@ ALL_RUN := \
 
 ALL_BIN := \
 	sp_host.elf \
-	test_pd.g.h test_pd.pd_linux  \
+	test_pd.g.h \
 	test_pd.sp test_pd.g.elf \
 	libproc.so \
 	test_jack.g.h test_jack.jack \
 	sp_host.pd_linux \
+	proc.pd_linux \
 	test_pd.dll \
 	synth.sp \
 
