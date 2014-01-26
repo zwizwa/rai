@@ -19,7 +19,7 @@
 (define-runtime-path build-dir ".")
 
 (define (ai-sp proc)
-  (let* ((.g.h (make-temporary-file "proc-~a.g.h" #f build-dir))
+  (let* ((.g.h (make-temporary-file "proc_~a.g.h" #f build-dir))
          (.sp  (regexp-replace ".g.h" (path->string .g.h) ".sp")))
     (with-output-to-file .g.h
       (lambda ()
