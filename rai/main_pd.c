@@ -22,6 +22,11 @@
 #include <ctype.h>
 
 
+#ifdef PROC_LIBRARY
+extern proc_class *proc_library[];
+#endif
+
+
 t_class *proc_pd_class;
 
 
@@ -196,7 +201,15 @@ static void proc_pd_create_gui(struct proc_pd *x, float x_coord, float y_coord) 
 /* Force code reload by loading stand-alone binary fPIC code.
    Note that libdl won't reload a library if it is opened somewhere else. */
 static void proc_pd_load(struct proc_pd *x, t_symbol *filename) {
-    struct proc_class *ri = proc_load_sp(filename->s_name);
+
+    struct proc_class *ri;
+#ifdef PROC_LIBRARY
+    // From statically linked list of classes.
+    ri = proc_library_find(proc_library, filename->s_name);
+#else
+    // From .sp object on disk.
+    ri = proc_load_sp(filename->s_name);
+#endif
     if (ri) {
 
         /* FIXME: typecheck.  Params and state can be anything, but
@@ -247,7 +260,7 @@ static void proc_pd_load(struct proc_pd *x, t_symbol *filename) {
         }
     }
     else {
-        post(ME "Can't load code from %s", filename->s_name);
+        post(ME "Can't load %s", filename->s_name);
     }
 }
 
@@ -364,9 +377,9 @@ void EXTERN_SETUP (void) {
     class_addmethod(proc_pd_class, (t_method)proc_pd_cc_map, gensym("cc_map"), A_GIMME, A_NULL);
     class_addmethod(proc_pd_class, (t_method)proc_pd_post_cc_map, gensym("post_cc_map"), A_GIMME, A_NULL);
     class_addmethod(proc_pd_class, (t_method)proc_pd_cc, gensym("cc"), A_FLOAT, A_FLOAT, A_NULL);
-#if !HAVE_STATIC
-    class_addmethod(proc_pd_class, (t_method)proc_pd_load, gensym("load"), A_SYMBOL, A_NULL);
     class_addmethod(proc_pd_class, (t_method)proc_pd_create_gui, gensym("create_gui"), A_DEFFLOAT, A_DEFFLOAT, A_NULL);
+#ifndef PROC_LIBRARY
+    class_addmethod(proc_pd_class, (t_method)proc_pd_load, gensym("load"), A_SYMBOL, A_NULL);
 #endif
     CLASS_MAINSIGNALIN(proc_pd_class, struct proc_pd, x_f);
 }

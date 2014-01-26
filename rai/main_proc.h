@@ -72,6 +72,8 @@ const struct proc_class PROC_HEADER_ATTRIBUTE PROC_HEADER_NAME = {
     .init_state = (void*)&init_state,
     .init_store = (void*)&init_store,
 
+    .name = #PROC_HEADER_NAME,
+
 #if defined(PROC_BUILD_STAMP)
     .build_stamp = PROC_BUILD_STAMP,
 #endif

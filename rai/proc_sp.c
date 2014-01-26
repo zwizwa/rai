@@ -39,6 +39,7 @@ static void link_header(struct proc_class *ri) {
     link_info_control(ri, (struct proc_class_control**)&ri->info_control);
     link_ptr(ri, &ri->init_state);
     link_ptr(ri, &ri->init_store);
+    link_ptr(ri, &ri->name);
 }
 
 struct proc_class *proc_load_sp(const char *filename) {
