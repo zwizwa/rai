@@ -1,30 +1,20 @@
 #lang racket/base
 
+;; Evaluate as rsound network? / signal?
+
 (require rsound  ;; Install via package manager
          "ai-proc.rkt"
          "libproc.rkt"
          ffi/vector
          "f32vector.rkt")
 
-;; Plug ai-proc / ai-stream into the signal? type.
+(provide ai-network)
 
-;; From looking at the code:
-;;
-;;  - A signal is a network witout inputs.
-;;
-;;  - A network is a function or a (in out maker) triplet.  The maker
-;;    returns a stateful procedure.
-;;
-;;  - Networks have one output.
-;;
+;; rsound:
+;;  - A signal? is a network witout inputs.
+;;  - A network? is a function or a (in out maker) triplet.
+;;    The maker returns a stateful procedure.
 
-(define test-signal
-  (let ((state 0))
-    (network/s 0 1
-               (lambda ()
-                 (lambda ()
-                   (set! state (+ state .01))
-                   (sin state))))))
 
 (define (ai-network f)
   (let* ((class (ai-proc f #:nsi #f))  ;; no param inputs
@@ -45,23 +35,4 @@
            (apply values
                   (for/list ((v vout))
                     (f32vector-ref v 0)))))))))
-
-
-;; Define some rai generators using the DSL.
-(begin
-  (module test-progs "stream.rkt"
-    (require "synth-lib.rkt") ;; saw-d1
-    (provide (all-defined-out))
-    (define (test-saw) (saw-d1 .001)))
-  (require 'test-progs))
-
-
-(define (test [s test-signal])
-  (signal-play s)
-  (sleep 1)
-  (stop))
-
-(test)
-
-
 
