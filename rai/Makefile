@@ -44,7 +44,7 @@ all: $(ALL)
 all_bin: $(ALL_BIN)
 
 clean:
-	rm -rf $(ALL) *~ *.elf *.bin *.sp *.o *.sp.o.* *.g.h *.pd_linux *.run *.jack compiled *.dll *.exe
+	rm -rf $(ALL) *~ *.elf *.bin *.sp *.o *.sp.o.* *.g.h *.pd_linux *.run *.jack compiled *.dll *.exe *.sp.pd *.il
 
 test: all
 	mzc -vk test-ai-scheme.rkt
