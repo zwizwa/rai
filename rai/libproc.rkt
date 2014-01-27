@@ -151,7 +151,7 @@
 
          
 
-(define (proc-run p ins/n [outs #f])
+(define (proc-run! p ins/n [outs #f])
   (let-values
       (((n ins)
         (if (number? ins/n)

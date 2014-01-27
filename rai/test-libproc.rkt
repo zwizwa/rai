@@ -60,7 +60,7 @@
                     '((samplerate . 1.0)
                       (voice_gate . 1.0)
                       (voice_freq . 0.2))))
-(map f32vector->list (proc-run test_pd_instance 10))
+(map f32vector->list (proc-run! test_pd_instance 10))
 
 
 ;; (test-run)
@@ -69,7 +69,7 @@
   (proc-instantiate test_synth_class
                     '((samplerate . 1)
                       (timestep   . 1))))
-(map f32vector->list (proc-run test_synth_instance 10))
+(map f32vector->list (proc-run! test_synth_instance 10))
 
 ;; (define i (proc-instantiate c))
 
