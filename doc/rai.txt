@@ -1220,7 +1220,11 @@ Entry: DSP interfaces for cortex
 Date: Sun Jan 26 18:22:37 CET 2014
 
 CMSIS - Cortex Microcontroller Software Interface Standard
-http://www.arm.com/products/processors/cortex-m/cortex-microcontroller-software-interface-standard.php\
+http://www.arm.com/products/processors/cortex-m/cortex-microcontroller-software-interface-standard.php
+
+CMSIS DSP Software Library 
+http://www.keil.com/pack/doc/CMSIS/DSP/html/index.html
+
 
 Audio Weaver™- the Only Cross-Platform Audio Design Tool for ARM
 http://www.dspconcepts.com/products/audio-weaver
@@ -1233,5 +1237,27 @@ Date: Sun Jan 26 19:13:34 CET 2014
 To further design synths and filters, it's necessary to connect them
 to a pattern sequencer with easy control.  That problem is one of
 organization..
+
+
+
+Entry: ai-stream.rkt replacement
+Date: Sun Jan 26 23:39:29 CET 2014
+
+So it's now possible to implement ai-stream in terms of ai-proc.rkt
+Is that a good idea?
+
+It might actualy be more interesting to tap into the compilation step
+right before generation of C code.  I've added an .il generation rule
+in rules.mk
+
+
+At this point it is too much duplication of effort.  Best to keep the
+C compiler in the loop.  Using rai without a working C compiler could
+be fixed later.
+
+Let's stick to building ai-stream.rkt on top of ai-proc.rkt, i.e. just
+adding a thin layer that does list <-> f32vector conversion, and
+possibly auto-lifting of constants, and unwinding of streams /
+sequences.
 
 

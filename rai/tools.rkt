@@ -254,6 +254,11 @@
           (if m (min m len) len))
         m)))
         
+
+(define (rdict-ref d tags)
+  (if (null? tags)
+      d
+      (rdict-ref (dict-ref d (car tags)) (cdr tags))))
             
             
       

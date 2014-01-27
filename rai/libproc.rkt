@@ -28,8 +28,8 @@
 ;; FIXME: make sure libproc.so is compiled with PROC_NUMBER_T = double
 (define _number                _double)
 
-;; We don't know the types at compile time.  It is necessary to proc.h
-;; metadata to reconstruct data layout information at run time.
+;; We don't know the types at compile time.  It is necessary to use
+;; proc.h metadata to reconstruct data layout information at run time.
 (define _proc_class_run
   (_fun (_or-null _pointer) ;; state (two concatentated copies for double buffering)
         (_or-null _pointer) ;; array of input arrays
@@ -126,12 +126,6 @@
 
 
 
-
-(define (rdict-ref d tags)
-  (if (null? tags)
-      d
-      (rdict-ref (dict-ref d (car tags)) (cdr tags))))
-
 (define-struct proc (instance
                      nin  pin
                      nout pout) #:transparent)
@@ -146,9 +140,11 @@
 (define (proc-instantiate class [defaults '()])
   (let* ((nin   (proc_class_param_list_size (proc_class-info_in  class)))
          (nout  (proc_class_param_list_size (proc_class-info_out class)))
-         (p     (make-proc (proc_instance_new class #f)
+         (inst  (proc_instance_new class #f))
+         (p     (make-proc inst
                            nin  (if (zero? nin)  #f (malloc _float-pointer nin))
                            nout (if (zero? nout) #f (malloc _float-pointer nout)))))
+    (register-finalizer inst proc_instance_free)
     (for (((name value) (in-dict defaults)))
       (proc-set-param! p name value))
     p))
@@ -160,7 +156,12 @@
       (((n ins)
         (if (number? ins/n)
             (values ins/n '())
-            (values (f32vector-length (car ins/n)) ins/n))))
+            (let ((n (f32vector-length (car ins/n))))
+              (for ((i (cdr ins/n)))
+                (unless (= n (f32vector-length i))
+                  (error 'length)))
+              (values n ins/n)))))
+      
     (match p
       ((struct proc (instance nin pin nout pout))
        (unless outs 

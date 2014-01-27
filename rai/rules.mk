@@ -59,6 +59,13 @@ LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 	chmod +x ./stream2c.sh
 	RACKET=$(RACKET) ./stream2c.sh $< $@
 
+# Scheme -> IL (intermediate language) code generation.
+%.il: %.rkt $(RKT)
+	chmod +x ./stream2il.sh
+	RACKET=$(RACKET) ./stream2il.sh $< $@
+
+
+
 # Static Pd wrapper.  No reload of .sp files.
 
 PROC_LIBRARY_O := proc_library.o synth.proc.o test_pd.proc.o

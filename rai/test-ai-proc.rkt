@@ -5,12 +5,19 @@
          ffi/vector
          "f32vector.rkt")
 
+(begin
+  (module test-progs "stream.rkt"
+    (provide (all-defined-out))
+    (define (sum a b) (+ a b)))
+  (require 'test-progs))
 
-(define proc-class (ai-proc integrate))
 
-(define ins  (list (make/init-f32vector 10 1.0)))
-(define outs (map f32vector->list (ai-proc-run-once proc-class ins)))
+(define vins  (list (make/init-f32vector 10 1.0)))
+(define vouts (ai-proc-run-once (ai-proc integrate) vins))
 
-outs
+(map f32vector->list vouts)
+
+(map f32vector->list (ai-proc-run-once (ai-proc sum)
+                                       (append vouts vouts)))
 
 

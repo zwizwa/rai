@@ -70,13 +70,14 @@
 (@ ((t test-time2) '(0 0 0 0 0 0 0)))
 
 
-(@ ((t test-tag) '( 0 0 0 )))
+;; FIXME: check if this is correct (arrays of input streams?)
+(@ ((t nphasor) (in-range 0 1 .125)))
+(@ ((t test-integrate-2D) (in-range 0 1 .125)))
 
 
 
-;; FIXME: to test for/n in ai-stram.rkt
-;; currently not implemented
+;; FIXME: tags only work when there are parameters.  ai-stream.rkt is
+;; on top of ai-proc.rkt which uses all stream inputs.
 
-;(@ ((t nphasor) (in-range 0 1 .125)))
-;(@ ((t test-integrate-2D) (in-range 0 1 .125)))
+;; (@ ((t test-tag) '( 0 0 0 )))
 

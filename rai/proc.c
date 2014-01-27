@@ -156,6 +156,7 @@ struct proc_instance *proc_instance_new(const struct proc_class *info,
     return p;
 }
 void proc_instance_free(struct proc_instance *p) {
+    // printf("proc_instance_free %p\n", p);
     free(p->param);
     free(p->param_offset);
     free(p->param_nb_el);
