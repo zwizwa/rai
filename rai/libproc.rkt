@@ -9,7 +9,7 @@
 
 (provide
  ;; Provide only safe ops
- proc_load_sp
+ proc-load-sp
  proc-instantiate
  proc-run!
  proc-run-once
@@ -99,6 +99,11 @@
 
 (define-proc proc_load_sp
   (_fun _string -> _proc_class-pointer))
+
+(define (proc-load-sp str)
+  (let ((p (proc_load_sp str)))
+    (register-finalizer p free)
+    p))
 
 (define-proc proc_class_param_alloc_size (_fun _proc_class_param-pointer -> _int))
 (define-proc proc_class_param_list_size  (_fun _proc_class_param-pointer -> _int))

@@ -13,7 +13,7 @@
 
   (pp test.sp)
 
-  (define test_sp_class (proc_load_sp test.sp))
+  (define test_sp_class (proc-load-sp test.sp))
 
   (pp (proc-class->dict test_sp_class))
 

@@ -35,7 +35,7 @@
 
 (define (ai-proc proc #:nsi [nsi #f])
   (let ((.sp (ai-sp proc nsi)))
-    (let ((proc-class (proc_load_sp .sp)))
+    (let ((proc-class (proc-load-sp .sp)))
       (delete-file .sp)
       proc-class)))
 
