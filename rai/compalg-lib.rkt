@@ -166,7 +166,7 @@
 (define plot-t
   (make-ai-function
    (lambda (sem n prog . args)
-     (let* ((seq  (apply (ai-stream prog) args))
+     (let* ((seq  (apply (ai-stream prog n) args))
             (table (for/list ((v seq)
                               (i (in-range n)))
                      (vector i v))))

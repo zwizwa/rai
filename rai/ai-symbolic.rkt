@@ -43,7 +43,7 @@
     (define (prim sym fn)
       (lambda (sem . expr)
         (->datum (peval ai-eval-semantics fn sym expr))))
-        
+
     (define ai-symbolic-semantics
       (make-ai #:default
                (lambda (sym fn)

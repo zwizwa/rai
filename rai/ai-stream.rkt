@@ -18,7 +18,7 @@
 
 
 ;; Guess the block size from a mix of lists and scalars.
-(define (guess-size ls [default 10])
+(define (guess-size ls default)
   (let ((n
     (for/fold
         ((n -1))
@@ -39,16 +39,18 @@
    ))
 
 
-(define (->f32vectors ls)
-  (map (->f32vector (guess-size ls)) ls))
+(define (->f32vectors ls size)
+  (map (->f32vector size) ls))
 
 
 
 
-(define (ai-stream f)
+(define (ai-stream f [unwind-default 10])
   (let ((class (ai-proc f)))
     (lambda args
-      (apply values
-             (map f32vector->list
-                  (ai-proc-run-once class (->f32vectors args)))))))
+      (let* ((size (guess-size args unwind-default))
+             (ins (->f32vectors args size)))
+        (apply values
+               (map f32vector->list
+                    (ai-proc-run-once class ins)))))))
 
