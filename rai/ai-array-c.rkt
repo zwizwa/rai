@@ -5,12 +5,15 @@
 (provide (all-defined-out))
 
 (define (c-initializer dims val)
-  (if (null? dims) val
-      (c-initializer
-       (cdr dims)
-       (format "{~a}"
-               (c-list 
-                (make-list (car dims) val))))))
+  (cond
+   ((null? dims) val)
+   ((zero? val) "{}") ;; prevents all-zero initializers to get too large
+   (else
+    (c-initializer
+     (cdr dims)
+     (format "{~a}"
+             (c-list 
+              (make-list (car dims) val)))))))
 
 
 
@@ -94,15 +97,23 @@
                         stream ;; t-indexed uses pointers
                         name
                         (arrayref (reverse dims))))))
-    (printf "};\n")
+    (printf "};\n"))
 
+
+  (define (gen-preproc tag nodes)
     
     ;; Some C preprocessor annotation for the i/o nodes.
+
+    ;; Per node define, useful for testing presence of a certain
+    ;; parameter at compile time.
     (for ((n nodes))
       (printf "#define ~a_~a ~a\n"
               (pfx tag)
               (node-name n)
               (node-kind n)))
+
+    ;; Iteration over all nodes, useful for building indexing
+    ;; structures and/or code.
     (printf "#define ~a_~a(m) \\\n" (pfx "for") tag)
     (for ((n nodes))
       ;; (pp n)
@@ -113,11 +124,8 @@
                         ,(node-kind n)
                         ,(foldr * 1 (node-dims n))
                         ,@(reverse (node-dims n))))))
-    (printf " \n")) ;; FIXME
+    (printf " \n"))
     
-
-  (define (gen-types lst)
-    (for ((t/n lst)) (apply gen-type t/n)))
 
   (define (ref expr)
     (match expr
@@ -215,10 +223,10 @@
            ;; Note this doesn't use the 'si' tag\.  Reason: reference
            ;; in main_sp.c is simpler by name only.  OK since name is
            ;; unique.
-           (printf "#define ~a_init ~a\n"
+           (line "#define ~a_init ~a\n"
                    (pfx name)
                    (c-initializer dims v))))))
-    (printf " \n"))
+    (line " \n"))
     
   (define (gen-code)
     (match expr
@@ -235,11 +243,24 @@
                          '(si so in param out store)
                          (list si so in param out store))))
          (register-nodes! nodes)
-         (gen-types nodes)
+
+         ;; C structs for si so in param out store
+         (for ((t/n nodes)) (apply gen-type t/n))
+
+         ;; Preprocessor meta info, useful for building structures and
+         ;; code at compile time.  
+         (for ((t/n nodes)) (apply gen-preproc t/n))
+
+         ;; GUI parameters
          (gen-node-units units)
+
+         ;; Note initializers.  Note that params don't have
+         ;; initializers = a pure input.  However, implementation is
+         ;; stateful, so they will be to 0 at in proc_instance_new().
          (gen-node-inits inits si)
          (gen-node-inits '() store)  ;; FIXME: currently all 0
-         
+
+         ;; Core routine
          (line "static void ~a (\n" (pfx "loop"))
          (with-nest
           (lambda ()

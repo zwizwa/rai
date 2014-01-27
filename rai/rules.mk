@@ -1,4 +1,4 @@
-RKT = $(shell ls $(RAI)/*.rkt *.rkt) 
+RKT := $(wildcard $(RAI)/*.rkt) $(wildcard *.rkt) 
 
 # RACKET := /usr/local/racket-5.3.4.7/bin/racket
 # RACO := /usr/local/racket-5.3.4.7/bin/raco
@@ -37,9 +37,7 @@ LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 # Object files containing base name of the file as a global symbol
 # pointing to a struct proc_class.
 %.proc.o: %.g.h $(RAI)/prim.h $(RAI)/main_sp.c
-	gcc -DPROC_FILE=\"$<\" $(CFLAGS) -DPROC_BUILD_STAMP=$$(date "+%s" | tee $@.build_stamp) -DPROC_HEADER_NAME=$(notdir $*) -DPROC_NAME=\"$(notdir $*)\" -DPROC_VERSION=\"$$(date "+%Y%m%d-%H%M%S" | tee $@.version)\" -c $(RAI)/main_sp.c -o $@
-	cat $@.build_stamp
-	cat $@.version
+	gcc -DPROC_FILE=\"$<\" $(CFLAGS) -DPROC_BUILD_STAMP=$$(date "+%s") -DPROC_HEADER_NAME=$(notdir $*) -DPROC_NAME=\"$(notdir $*)\" -DPROC_VERSION=\"$$(date "+%Y%m%d-%H%M%S")\" -c $(RAI)/main_sp.c -o $@
 
 
 

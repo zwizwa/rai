@@ -16,18 +16,26 @@
 ;; - Block parameters are not used: inputs are streams
 ;; - Only run once - don't keep track of state: allows to abstract away instantiation
 
-(define-runtime-path build-dir ".")
+
+(define-runtime-path rai-dir ".")
+(define-runtime-path rules.mk "rules.mk")
+(define build-dir (find-system-path 'temp-dir))
+
 
 (define (ai-sp proc)
   (let* ((.g.h (make-temporary-file "proc_~a.g.h" #f build-dir))
-         (.sp  (regexp-replace ".g.h" (path->string .g.h) ".sp")))
+         (.sp (regexp-replace ".g.h$" (path->string .g.h) ".sp")))
     (with-output-to-file .g.h
       (lambda ()
         (display (ai-array-c proc)))
       #:exists 'truncate)
     (let ((compile-out
            (with-output-to-string
-             (lambda () (system (format "make -C ~a ~a" build-dir .sp))))))
+             (lambda ()
+               (let ((cmd (format "make RAI=~a -f ~a -C ~a ~a"
+                                  rai-dir rules.mk build-dir .sp)))
+                 (printf "~a\n" cmd)
+                 (system cmd))))))
       ;; (display compile-out)
       (delete-file .g.h)
       .sp)))
