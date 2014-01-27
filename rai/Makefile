@@ -39,7 +39,7 @@ RAI := .
 
 
 all: $(ALL)
-	@echo '</home/tom/test.png>'
+	@echo "<$$(readlink -f test.png)>"
 
 all_bin: $(ALL_BIN)
 

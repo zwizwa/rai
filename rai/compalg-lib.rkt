@@ -13,11 +13,16 @@
  @ D
  _p _p1 _s _l _t
 
- ;; X/Y lin or log scales
- plot-bode
+ ;; Plot scalar function over range
  plot-lin/log
  plot-lin/lin
+ plot-log/log
+
+ ;; Plot system over time
  plot-t
+
+ ;; Frequency domain transfer function plot of a 1-1 linear system.
+ plot-bode
  )
 
            
@@ -114,6 +119,9 @@
    #'(n prog . args)))
 
 
+
+
+
 ;; RACKET PLOT
 
 (define plot-bode
@@ -133,6 +141,17 @@
    (lambda (_ prog l r)
      (parameterize
          ((plot-y-transform log-transform)
+          (plot-y-ticks (log-ticks)))
+       (plot (function (ai-eval prog) l r))))
+   #'(prog)))
+
+(define plot-log/log
+  (make-ai-function
+   (lambda (_ prog l r)
+     (parameterize
+         ((plot-x-transform log-transform)
+          (plot-y-transform log-transform)
+          (plot-x-ticks (log-ticks))
           (plot-y-ticks (log-ticks)))
        (plot (function (ai-eval prog) l r))))
    #'(prog)))

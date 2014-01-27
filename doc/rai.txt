@@ -1267,3 +1267,19 @@ Entry: Compiler temp dir
 Date: Mon Jan 27 11:51:39 CET 2014
 
 FIXED
+
+
+Entry: compalg.rkt
+Date: Mon Jan 27 13:40:39 CET 2014
+
+The file compalg.rkt is an example of a computer algebra worksheet.
+This is essentially a target language module:
+
+  #lang s-exp "stream.rkt"
+
+with some extra functions from the library:
+
+  (require "compalg-lib.rkt")
+
+This library overrides `ai-function-printer', printing all functions
+in symbolic form.
