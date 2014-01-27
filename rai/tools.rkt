@@ -261,5 +261,10 @@
       (rdict-ref (dict-ref d (car tags)) (cdr tags))))
             
             
-      
+#;(define-syntax-rule (begin-stream . forms)
+  (begin
+    (module stream-forms "stream.rkt" . forms)
+    (require 'stream-forms)))
+    
+         
              
