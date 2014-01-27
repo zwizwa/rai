@@ -6,7 +6,9 @@
          racket/file
          racket/system)
 
-(provide ai-proc)
+(provide
+ ai-proc
+ ai-sp)
 
 ;; Convert stream function to C code, compile and run.
 
@@ -15,9 +17,10 @@
 (define build-dir (find-system-path 'temp-dir))
 
 
-(define (ai-sp proc nsi)
+(define (ai-sp proc
+               #:nsi [nsi #f])
   (let* ((.g.h (make-temporary-file "proc_~a.g.h" #f build-dir))
-         (.sp (regexp-replace ".g.h$" (path->string .g.h) ".sp")))
+         (.sp  (regexp-replace ".g.h$" (path->string .g.h) ".sp")))
     (with-output-to-file .g.h
       (lambda ()
         (display (ai-array-c proc #:nsi nsi)))
@@ -34,7 +37,7 @@
       .sp)))
 
 (define (ai-proc proc #:nsi [nsi #f])
-  (let ((.sp (ai-sp proc nsi)))
+  (let ((.sp (ai-sp proc #:nsi nsi)))
     (let ((proc-class (proc-load-sp .sp)))
       (delete-file .sp)
       proc-class)))

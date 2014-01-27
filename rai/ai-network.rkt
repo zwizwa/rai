@@ -16,23 +16,27 @@
 ;;    The maker returns a stateful procedure.
 
 
-(define (ai-network f)
+(define (ai-network f [blocksize 1])
+  (printf "blocksize ~a\n" blocksize)
   (let* ((class (ai-proc f #:nsi #f))  ;; no param inputs
          (nin  (proc-class-nin  class))
          (nout (proc-class-nout class)))
     (network/s
      nin nout
      (lambda ()
-       (let ((inst (proc-instantiate class))
-             ;; Run at blocksize = 1
-             (vin  (for/list ((i (in-range nin)))  (make/init-f32vector 1)))
-             (vout (for/list ((i (in-range nout))) (make/init-f32vector 1))))
+       (let ((instance (proc-instantiate class))
+             (offset 0)
+             (vin  (for/list ((i (in-range nin)))  (make/init-f32vector blocksize)))
+             (vout (for/list ((i (in-range nout))) (make/init-f32vector blocksize))))
          (lambda args
-           (for ((a args) (v vin)) (f32vector-set! v 0 (+ 0.0 a)))
-           (proc-run! inst
-                      (if (zero? nin) 1 vin)
-                      vout) 
+           (for ((a args) (v vin))
+             (f32vector-set! v offset (+ 0.0 a)))
+           (set! offset (modulo (add1 offset) blocksize))
+           (when (zero? offset)
+             (proc-run! instance
+                        (if (zero? nin) blocksize vin)
+                        vout))
            (apply values
                   (for/list ((v vout))
-                    (f32vector-ref v 0)))))))))
+                    (f32vector-ref v offset)))))))))
 

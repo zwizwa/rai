@@ -155,7 +155,6 @@
          (p     (make-proc inst
                            nin  (if (zero? nin)  #f (malloc _float-pointer nin))
                            nout (if (zero? nout) #f (malloc _float-pointer nout)))))
-    ;; FIXME: this causes crashes  (test-ai-network.rkt)
     (register-finalizer inst proc_instance_free)
     (for (((name value) (in-dict defaults)))
       (proc-set-param! p name value))
