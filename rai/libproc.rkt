@@ -12,6 +12,7 @@
  proc_load_sp
  proc-instantiate
  proc-run!
+ proc-run-once
  proc-set-param!
  proc-class->dict
  proc-class-nin
@@ -177,7 +178,10 @@
        outs))))
 
        
-     
+;; Stateless single run.
+(define (proc-run-once proc-class ins/n [outs #f])
+  (let ((p (proc-instantiate proc-class)))
+    (proc-run! p ins/n outs)))
 
 
 

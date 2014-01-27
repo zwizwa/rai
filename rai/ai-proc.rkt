@@ -6,14 +6,9 @@
          racket/file
          racket/system)
 
-(provide 
- ai-proc
- ai-proc-run-once)
+(provide ai-proc)
 
-;; Convert stream function to C code, compile and run
-;; - Block parameters are not used: inputs are streams
-;; - Only run once - don't keep track of state: allows to abstract away instantiation
-
+;; Convert stream function to C code, compile and run.
 
 (define-runtime-path rai-dir ".")
 (define-runtime-path rules.mk "rules.mk")
@@ -44,10 +39,6 @@
       (delete-file .sp)
       proc-class)))
 
-;; Single run, don't keep state.
-(define (ai-proc-run-once proc-class ins/n [outs #f])
-  (let ((p (proc-instantiate proc-class)))
-    (proc-run! p ins/n outs)))
   
 
 

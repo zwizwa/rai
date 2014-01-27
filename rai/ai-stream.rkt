@@ -1,5 +1,6 @@
 #lang racket/base
 (require "ai-proc.rkt"
+         "libproc.rkt"
          "tools.rkt"
          ffi/vector
          "f32vector.rkt")
@@ -52,5 +53,5 @@
              (ins (->f32vectors args size)))
         (apply values
                (map f32vector->list
-                    (ai-proc-run-once class ins)))))))
+                    (proc-run-once class ins)))))))
 
