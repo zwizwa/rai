@@ -14,6 +14,8 @@
  proc-run!
  proc-set-param!
  proc-class->dict
+ proc-class-nin
+ proc-class-nout
 )
  
 (define-ffi-definer define-proc (ffi-lib "libproc"))
@@ -135,11 +137,14 @@
          (index (proc_instance_find_param instance (symbol->string name))))
     (when (< index 0) (error name))
     (proc_instance_set_param instance index (+ 0.0 value))))
-  
+
+
+(define (proc-class-nin  c) (proc_class_param_list_size (proc_class-info_in  c)))
+(define (proc-class-nout c) (proc_class_param_list_size (proc_class-info_out c)))
 
 (define (proc-instantiate class [defaults '()])
-  (let* ((nin   (proc_class_param_list_size (proc_class-info_in  class)))
-         (nout  (proc_class_param_list_size (proc_class-info_out class)))
+  (let* ((nin   (proc-class-nin  class))
+         (nout  (proc-class-nout class))
          (inst  (proc_instance_new class #f))
          (p     (make-proc inst
                            nin  (if (zero? nin)  #f (malloc _float-pointer nin))

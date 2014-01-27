@@ -7,10 +7,8 @@
          racket/system)
 
 (provide 
-         ai-proc
-         ai-proc-run-once
-         ;; ai-sp ;; FIXME: should this be exported?
-         )
+ ai-proc
+ ai-proc-run-once)
 
 ;; Convert stream function to C code, compile and run
 ;; - Block parameters are not used: inputs are streams
@@ -22,12 +20,12 @@
 (define build-dir (find-system-path 'temp-dir))
 
 
-(define (ai-sp proc)
+(define (ai-sp proc nsi)
   (let* ((.g.h (make-temporary-file "proc_~a.g.h" #f build-dir))
          (.sp (regexp-replace ".g.h$" (path->string .g.h) ".sp")))
     (with-output-to-file .g.h
       (lambda ()
-        (display (ai-array-c proc)))
+        (display (ai-array-c proc #:nsi nsi)))
       #:exists 'truncate)
     (let ((compile-out
            (with-output-to-string
@@ -40,10 +38,10 @@
       (delete-file .g.h)
       .sp)))
 
-(define (ai-proc proc)
-  (let ((.sp (ai-sp proc)))
+(define (ai-proc proc #:nsi [nsi #f])
+  (let ((.sp (ai-sp proc nsi)))
     (let ((proc-class (proc_load_sp .sp)))
-      (delete-file .sp) 
+      (delete-file .sp)
       proc-class)))
 
 ;; Single run, don't keep state.

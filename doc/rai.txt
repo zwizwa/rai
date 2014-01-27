@@ -1283,3 +1283,16 @@ with some extra functions from the library:
 
 This library overrides `ai-function-printer', printing all functions
 in symbolic form.
+
+
+
+Entry: In-image sequencer
+Date: Mon Jan 27 15:44:03 CET 2014
+
+So let's make a sequencer for .sp modules.  This would take Pd as a
+dependency out of the synth test loop.
+
+( Later the C compiler could be removed if the .il is interpreted /
+compiled to Scheme )
+
+

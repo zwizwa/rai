@@ -124,15 +124,21 @@
 
 ;; RACKET PLOT
 
+(define (log/log thunk)
+  (parameterize
+      ((plot-x-transform log-transform)
+       (plot-y-transform log-transform)
+       (plot-x-ticks (log-ticks))
+       (plot-y-ticks (log-ticks)))
+    (thunk)))
+  
+
 (define plot-bode
   (make-ai-function
    (lambda (_  prog l r)
-     (parameterize
-         ((plot-x-transform log-transform)
-          (plot-y-transform log-transform)
-          (plot-x-ticks (log-ticks))
-          (plot-y-ticks (log-ticks)))
-       (plot (function (ai-magnitude prog) l r))))
+     (log/log
+      (lambda ()
+        (plot (function (ai-magnitude prog) l r)))))
    #'(prog)))
      
 
@@ -148,12 +154,9 @@
 (define plot-log/log
   (make-ai-function
    (lambda (_ prog l r)
-     (parameterize
-         ((plot-x-transform log-transform)
-          (plot-y-transform log-transform)
-          (plot-x-ticks (log-ticks))
-          (plot-y-ticks (log-ticks)))
-       (plot (function (ai-eval prog) l r))))
+     (log/log
+      (lambda ()
+       (plot (function (ai-eval prog) l r)))))
    #'(prog)))
 
 
