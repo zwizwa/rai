@@ -11,7 +11,7 @@
  ;; Provide only safe ops
  proc_load_sp
  proc-instantiate
- proc-run
+ proc-run!
  proc-set-param!
  proc-class->dict
 )

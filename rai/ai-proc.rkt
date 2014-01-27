@@ -49,7 +49,7 @@
 ;; Single run, don't keep state.
 (define (ai-proc-run-once proc-class ins/n [outs #f])
   (let ((p (proc-instantiate proc-class)))
-    (proc-run p ins/n outs)))
+    (proc-run! p ins/n outs)))
   
 
 
