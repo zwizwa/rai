@@ -28,7 +28,7 @@
              (vin  (for/list ((i (in-range nin)))  (make/init-f32vector 1)))
              (vout (for/list ((i (in-range nout))) (make/init-f32vector 1))))
          (lambda args
-           (for ((a args) (v vin)) (f32vector-set! v (+ 0.0 a)))
+           (for ((a args) (v vin)) (f32vector-set! v 0 (+ 0.0 a)))
            (proc-run! inst
                       (if (zero? nin) 1 vin)
                       vout) 
