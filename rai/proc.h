@@ -63,12 +63,16 @@ typedef unsigned long word_t; // pointer-sized int
    proc_class is represented as structured data, where all pointers (to
    strings and substructures) are represented by a u64 file offset.
 
-   // FIXME: separate .sp loading from in-memory access
 */
 
 
 /* Lists in proc.h are implemented as sentinel-terminated arrays, where
-   the sentinel is a 0-filled field the size of a native pointer. */
+   the sentinel is a 0-filled field the size of a native pointer. 
+
+   FIXME: This is a bad idea.  It prevents backward compatibility.
+   Change this to use a single level of indirection using
+   zero-terminated arrays of pointers.
+*/
 
 static inline int proc_list_end(const void *x) {
     return *((const void**)x) == NULL;

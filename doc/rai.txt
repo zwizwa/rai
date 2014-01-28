@@ -1296,3 +1296,45 @@ dependency out of the synth test loop.
 compiled to Scheme )
 
 
+
+
+Entry: Prototyping & Production platforms
+Date: Tue Jan 28 12:41:33 CET 2014
+
+Time to fix the different target platforms.  I'd like to support:
+
+PROTOTYPING:
+
+- Racket through rsound `signal-play' (see test-ai-network.rkt)
+  Later this can have a VM interpretation in scheme, e.g. based on the
+  intermediate .il form.  For now straight C is good enough.
+
+  This isn't particularly fast, but probably good enough.  To speed
+  things up, code can run at larger blocksize, while blocksize = 1 is
+  a possibility for better interfacing with the rsound `network' DSL.
+
+- Pure Data:
+   + "production" object with statically linked proc classes
+   + dynamic loading of .sp class files
+   + Pd gui creation
+   + state-preserving reload
+
+- Jack stand-alone or in-image in Racket.  Should be the same as the
+  Pd module.  For in-image it might be interesting to add a Racket
+  gui.
+
+PRODUCTION:
+
+- VST & LV2.  Straightforward.  Probably best on top of libproc.c as
+  this allows more code reuse.  Static generation is not a problem.
+
+- Cortex M4F DSP.  Static generation with local variables as state.
+
+
+Entry: Next: isolated problems
+Date: Tue Jan 28 12:46:47 CET 2014
+
+- Add pointer indirection to array of objects.
+
+
+   
