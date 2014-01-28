@@ -18,7 +18,8 @@
     (values o o)))
 
 
-
+;; Note that floor(n) for n integer and n < 0 maps n -> n - 1.
+;; This means that wrap01 for n integer and n < 0 maps n -> 1
 (define (wrap01 x) (- x (floor x))) 
 
 ;; [min,max] phase oscillator update with increment stream.

@@ -1,6 +1,7 @@
 #lang racket/base
 
 (require rsound  ;; Install via package manager
+         "meta.rkt"
          "ai-network.rkt")
 
 
@@ -34,7 +35,7 @@
 (define sawtooth0_ (ai-network sawtooth0))
 (define vibrato-tone
   (network ()
-           [lfo (sine-wave 2)]
+           [lfo (sine-wave 5)]
            [sig (sawtooth0_ (* .01 lfo))]
            [out (* 0.5 sig)]))
 

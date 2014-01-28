@@ -1,5 +1,6 @@
 #lang racket/base
 (require "ai-stream.rkt"
+         "stream-syntax.rkt"
          "stream-lib.rkt"
          "test_pd.rkt"
          "tools.rkt"
@@ -11,6 +12,16 @@
     (display ";; ")
     (pretty-print '(t . a))
     (ai-stream . a)))
+
+;; Some stream functions
+(begin
+  (module dsp "stream.rkt"
+    (require "synth-lib.rkt") ;; saw-d1
+    (provide (all-defined-out))
+    ;;(define (fmod1 x) (fmod x 1))
+    )
+  (require 'dsp))
+
 
 ;; Transpose
 (define (@ x)
@@ -80,4 +91,11 @@
 ;; on top of ai-proc.rkt which uses all stream inputs.
 
 ;; (@ ((t test-tag) '( 0 0 0 )))
+
+
+(@ ((t wrap01)   '(-2 -1.9 -1 -0.9 0 0.9 1 1.9 2)))
+
+;; Prims.  These come from stream-syntax.rkt
+(@ ((t ai-floor) '(-2 -1.5 -1 -0.5 0 0.5 1 1.5 2)))
+
 

@@ -14,7 +14,7 @@
 #endif
 
 #ifndef i_
-#define i_ unsigned int
+#define i_ signed int
 #endif
 
 // Arrays of arrays of numeric type
@@ -53,29 +53,26 @@
    (i.e. accumulator results that are also outputs). */
 #define p_copy(a) (a)
 
+
+#define p_floor_approx
+
 /* Note that this is not correct for negative integers.
-   It maps n -> n + 1 for n < 0.
+   for n < 0, it maps n -> n - 1
 
    The purpose of this function is to provide a basis for floating
    point modulo, i.e. splitting a number into integer + remainder \in
    [0,1].  Most of these algorithms perform properly if remainder = 1. */
 
-#define p_floor_approx
 
 INLINE i_ p_ifloor(_ a) {
-    i_ i_negative = a < 0;
     i_ i_truncate = (i_)a;
-    i_ i_floor = i_truncate + i_negative;
+    i_ i_negative = a < 0;
+    i_ i_floor = i_truncate - i_negative;
     return i_floor;
 }
 
 OP p_floor(_ a) {
     _ f_floor = (_)p_ifloor(a);
-#ifndef p_floor_approx
-    // Correct operation for negative integers.
-    i_ i_negative_int = i_negative && ((a - f_floor) == 0);
-    f_floor += i_negative_int;
-#endif
     return f_floor;
 }
 

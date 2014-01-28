@@ -369,11 +369,11 @@
 
 ;; General remarks.
 
-;; What about turning ai-lambda into a tree walker which inserts a
-;; lexically bound `app' instead of relying on the module #%app?  This
-;; allows embedding processor code in scheme directly (locally)
-;; instead of requiring global bindings.
+;; * The idea is inspired by the implementation of Haskell type classes.
+;;   A more general approach is described in this paper:
+;;   http://repository.readscheme.org/ftp/papers/sw2005/garcia.pdf
 
-;; The idea is inspired by the implementation of Haskell type classes.
-;; A more general approach is described in this paper:
-;; http://repository.readscheme.org/ftp/papers/sw2005/garcia.pdf
+;; * What about turning ai-lambda into a tree walker which inserts a
+;;   lexically bound `app' instead of relying on the module #%app?
+;;   This allows embedding processor code in scheme directly (locally)
+;;   instead of requiring global bindings.
