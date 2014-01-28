@@ -22,18 +22,18 @@
             (namespace-variable-value 'main-nsi))))
 
 
-(define (recompile .rkt notify)
+(define (recompile .rkt)
   (let*-values
       (((_)        (printf "[.rkt] ~a\n" .rkt))
        ((proc nsi) (instantiate .rkt))
        ((_)        (printf "[proc]\n"))
        
-       ;; FIXME: rules.mk requires .rkt in same dir as .g.h
+       ;; rules.mk requires .rkt in same dir as .g.h
        ((.g.h)     (regexp-replace ".rkt$" .rkt ".g.h"))
        ((_)        (printf "[.g.h] ~a\n" .g.h))
        ((.sp)      (ai-sp/.g.h proc .g.h nsi))
        ((_)        (printf "[.sp]  ~a\n" .sp)))
-    (notify .sp)))
+    .sp))
 
 (define (monitor file notify)
   (define ft (fam-task-create))
@@ -45,7 +45,7 @@
              (case type
                ((fam-event-found
                  fam-event-modified)
-                (recompile path notify))))))
+                (notify (recompile path)))))))
     (fam-task-join ft)))
 
 (define (arg i)
