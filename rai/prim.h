@@ -56,13 +56,15 @@
 
 #define p_floor_approx
 
-/* Note that this is not correct for negative integers.
-   for n < 0, it maps n -> n - 1
+/* Note that this is based on float to int truncation, so is not the
+   same as the floor() function from math.h
 
-   The purpose of this function is to provide a basis for floating
-   point modulo, i.e. splitting a number into integer + remainder \in
-   [0,1].  Most of these algorithms perform properly if remainder = 1. */
+   For negative integers, the map is n -> n - 1.
 
+   In practical use in numerical algorithms this difference is OK.
+   Think of it this way: in the presence of noise, there is no real
+   difference between > and >=.
+*/
 
 INLINE i_ p_ifloor(_ a) {
     i_ i_truncate = (i_)a;

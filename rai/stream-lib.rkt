@@ -18,8 +18,15 @@
     (values o o)))
 
 
+;; Map phase value to the [0,1] representation interval.
+;;
 ;; Note that floor(n) for n integer and n < 0 maps n -> n - 1.
-;; This means that wrap01 for n integer and n < 0 maps n -> 1
+;; This means that wrap01 for n integer and n < 0 maps n -> 1.
+;;
+;; This is OK for "phase" values, i.e. those that are at some point
+;; inserted into cos(2*pi*phase) or sin(2*pi*phase), since all
+;; integers map to a single point.
+
 (define (wrap01 x) (- x (floor x))) 
 
 ;; [min,max] phase oscillator update with increment stream.
