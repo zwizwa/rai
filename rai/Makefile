@@ -67,7 +67,7 @@ zwizwa: ~/www/zwizwa.be/rai/index.html
 test-libproc.rkt.run: test_pd.sp synth.sp libproc.so
 
 livecode:
-	while sleep 1; do $(RACKET) livecode-synth.rkt; done
+	$(RACKET) fam-sp.rkt synth.rkt ./pd_notify.sh
 
 
 
