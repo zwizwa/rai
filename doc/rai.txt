@@ -1336,5 +1336,19 @@ Date: Tue Jan 28 12:46:47 CET 2014
 
 - Add pointer indirection to array of objects.
 
+- Jack
 
-   
+
+Entry: Pointer indirection
+Date: Tue Jan 28 19:41:06 CET 2014
+
+Currently doesn't work: access by name is used.
+
+I'm wondering, since all applications at this point:
+- either use the proc.h dynamic abstraction
+- or need to be done in a special way
+
+It might be best to generate the proc.h data structures from Scheme.
+It's probably easier to write a custom Scheme generator than to get
+creative with the C preprocessor.
+
