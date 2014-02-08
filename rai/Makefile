@@ -20,7 +20,8 @@ ALL_RUN := \
 	compalg.rkt.run \
 	test-ai-proc.rkt.run \
 	test-libproc.rkt.run \
-	test-ai-network.rkt.run \
+
+#	test-ai-network.rkt.run \
 
 ALL_BIN := \
 	sp_host.elf \
