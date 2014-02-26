@@ -1352,3 +1352,13 @@ It might be best to generate the proc.h data structures from Scheme.
 It's probably easier to write a custom Scheme generator than to get
 creative with the C preprocessor.
 
+EDIT: do this later - not essential.
+
+
+
+Entry: Next
+Date: Sun Feb 16 15:52:56 CET 2014
+
+Axo?  Cortex M4 DSP?  Fixed point analysis?  GUI?
+
+
