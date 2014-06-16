@@ -1362,3 +1362,15 @@ Date: Sun Feb 16 15:52:56 CET 2014
 Axo?  Cortex M4 DSP?  Fixed point analysis?  GUI?
 
 
+
+Entry: Porting analog
+Date: Fri Jun 13 09:16:12 EDT 2014
+
+Been working on analog circuits for a bit.  Very interesting, but also
+very messy.  Slow process.  I'd like to find a way to boost the
+process by formalizing at least the small-signal portion of a circuit.
+
+I wanted to get into spice but really it seems a bit awkward to me.
+Better to find a good way to express circuits as code/functions and
+then have it generate spice input?
+
