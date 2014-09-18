@@ -2,26 +2,7 @@
 import serial
 import sys
 
-def hexdump(bs):
-    count = 0
-    for b in bs:
-        sys.stdout.write('%02X ' % b)
-        if count == 3:
-            count = 0
-            sys.stdout.write('\n')
-        else:
-            count+=1
-    if count:
-        sys.stdout.write('\n')
 
-def axodump(bs):
-    last = []
-    for b in bs:
-        sys.stdout.write('%02X ' % b)
-        last += [b]
-        if last[-4:-1] == [0x41,0x78,0x6F]:
-            last = []
-            sys.stdout.write('\n')
 
 class axo:
     def __init__(self, port="/dev/ttyACM0"):
