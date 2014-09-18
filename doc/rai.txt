@@ -1374,3 +1374,31 @@ I wanted to get into spice but really it seems a bit awkward to me.
 Better to find a good way to express circuits as code/functions and
 then have it generate spice input?
 
+
+
+Entry: Axo reboot
+Date: Thu Sep 18 21:23:22 CEST 2014
+
+1. Making a patch: simple without paramter input.
+
+2. Uploading a patch on command line.  Where is the protocol defined?
+
+Header: "Axo" followed by:
+
+P6  # param change
+W8  # write
+w20 # write file to SD
+T0  # change preset
+M3  # midi command
+B12 # Virtual control buttons
+C4  # create sdcard fle
+A4  # append data to sdcard file
+
+S0 # stop patch
+D0 # goto dfu mode
+d0 # read directory listing
+s0 # start patch
+p0 # ping
+c0 # close sdcard file
+
+
