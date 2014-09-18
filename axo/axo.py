@@ -2,7 +2,17 @@
 import serial
 import sys
 
+def bytes2words(seq, byte_index_list):
+    s = (b for b in seq)  # need sequence api
+    while 1:
+        acc = 0
+        for i in byte_index_list:
+            acc = acc | ((0xFF & s.__next__()) << (8 * i))
+        yield (acc)
 
+def bytes2words_le(seq, bytes_per_word=2):
+    """Convert little endian byte stream to word stream."""
+    return bytes2words(seq, list(range(bytes_per_word)))
 
 class axo:
     def __init__(self, port="/dev/ttyACM0"):
@@ -23,12 +33,14 @@ class axo:
                         '8' : 128,
                         'd' : 12,  # sdinfo
                         'f' : 4, } # fileinfo
+        self._decode = { 'A' : self.decode_ack }
         self.dump()
 
     def dump(self):
         while True:
-            (hdr,data) = self.read_packet()
-            print(hdr,len(data))
+            rv = self.read_packet()
+            if rv:
+                print(rv)
 
     def read(self,n):
         return self._ser.read(n)
@@ -37,12 +49,25 @@ class axo:
         hdr = self.read(4)
         if hdr[0:3] != b'Axo':
             raise NameError("hdr = %s" % hdr)
-        size = self._sizes[chr(hdr[3])]
+        tag = chr(hdr[3])
+        size = self._sizes[tag]
         payload = self.read(size)
-        return (hdr,payload)
+        try:
+            rv = self._decode[tag](payload)
+        except Exception as e:
+            rv = False
+        return rv
         
     def ping(self):
         self._ser.write(b'Axop')
+
+    def decode_ack(self, data):
+        [FirmwareId, DSPLoad, PatchID] = bytes2words_le(data[:12], 4)
+        [CpuId] = bytes2words_le(data[12:],12)
+        return { 'FirmwareId' : FirmwareId,
+                 'DSPLoad'    : DSPLoad,
+                 'CpuId'      : CpuId, }
+                 
 
 if __name__ == '__main__':
     axo()
