@@ -14,10 +14,14 @@ def bytes2words_le(seq, bytes_per_word=2):
     """Convert little endian byte stream to word stream."""
     return bytes2words(seq, list(range(bytes_per_word)))
 
+def words2bytes_le(word_seq, bytes_per_word=2):
+    for word in word_seq:
+        for i in range(bytes_per_word):
+            yield(0xFF & (word >> (i * 8)))
+
 class axo:
     def __init__(self, port="/dev/ttyACM0"):
         self._ser = serial.Serial(port = port, timeout = 0.1)
-        self.ping()
         self._sizes = { 'P' : 8,   # paramchange
                         'A' : 24,  # ack
                         'D' : 8,   # display
@@ -34,13 +38,11 @@ class axo:
                         'd' : 12,  # sdinfo
                         'f' : 4, } # fileinfo
         self._decode = { 'A' : self.decode_ack }
-        self.dump()
+        self.stats = False
 
-    def dump(self):
-        while True:
-            rv = self.read_packet()
-            if rv:
-                print(rv)
+    def poll(self, condition = lambda: True):
+        while condition():
+            self.read_packet()
 
     def read(self,n):
         return self._ser.read(n)
@@ -60,14 +62,46 @@ class axo:
         
     def ping(self):
         self._ser.write(b'Axop')
+        self.wait_ack()
+        print(self.stats)
+
+    def wait_ack(self):
+        self.stats = False
+        self.poll(condition = lambda: not self.stats)
+
+    def load(self, filename, addr):
+        with open(filename, "rb") as f:
+            data = f.read(64*1024)
+        print("Loading %d bytes from %s at 0x%08X" % (len(data), filename, addr))
+        self._ser.write(b'AxoW')
+        self._ser.write(bytes(words2bytes_le([addr, len(data)], 4)))
+        self._ser.write(data)
+        self.wait_ack()
+        
+        
+        
 
     def decode_ack(self, data):
         [FirmwareId, DSPLoad, PatchID] = bytes2words_le(data[:12], 4)
         [CpuId] = bytes2words_le(data[12:],12)
-        return { 'FirmwareId' : FirmwareId,
-                 'DSPLoad'    : DSPLoad,
-                 'CpuId'      : CpuId, }
-                 
+        self.stats = { 'FirmwareId' : "%X" % FirmwareId,
+                       'DSPLoad'    : DSPLoad,
+                       'CpuId'      : "%X" % CpuId, }
+        return self.stats
 
+                 
 if __name__ == '__main__':
-    axo()
+    import argparse
+    parser = argparse.ArgumentParser(description='axocl')
+    parser.add_argument('--dev', nargs=1, default=['/dev/ttyACM0'], help='serial device')
+    parser.add_argument('--addr', nargs=1, default=['0x20010000'], help='patch load address')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--ping', action='store_true', help='ping & print ack stats')
+    group.add_argument('--load', nargs=1, help='upload patch binary')
+    args = parser.parse_args()
+    a = axo(port=args.dev[0])
+    if args.ping:
+        a.ping()
+    elif args.load:
+        a.load(args.load[0], addr=int(args.addr[0], 0))
+
