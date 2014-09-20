@@ -78,9 +78,11 @@ class axo:
 
     def start(self):
         self.ser.write(b'Axos')
+        self.wait_ack()
 
     def stop(self):
         self.ser.write(b'AxoS')
+        self.wait_ack()
 
     def dump(self):
         while True:

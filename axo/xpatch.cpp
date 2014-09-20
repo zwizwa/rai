@@ -35,66 +35,42 @@ public:
     PExModulationSources[NMODULATIONSOURCES][NMODULATIONTARGETS];
 /* modsource defines */
 /* parameter instance indices */
-  static const int PARAM_INDEX_square__1_pitch = 0;
+  static const int PARAM_INDEX_sine__1_pitch = 0;
 /* object classes */
-  class instancesquare__1
+  class instancesine__1
   {
   public:			// v1
     rootc * parent2;
-    KeyValuePair KVP_instancesquare__1_pitch;
-    int32_t osc_p;
-    static const int blepvoices = 4;
-    int16_t *oscp[blepvoices];
-    uint32_t nextvoice;
-
+    KeyValuePair KVP_instancesine__1_pitch;
+    uint32_t Phase;
   public:void Init (rootc * parent)
     {
       parent2 = parent;
       parent2->PExch[0].pfunction = pfun_signed_clamp;
       parent2->PExch[0].pfunction (&parent2->PExch[0]);
-      SetKVP_IPVP (&KVP_instancesquare__1_pitch, ObjectKvpRoot, "square_1",
+      SetKVP_IPVP (&KVP_instancesine__1_pitch, ObjectKvpRoot, "sine_1",
 		   &parent2->PExch[0], -134217728, 133169152);
-      KVP_RegisterObject (&KVP_instancesquare__1_pitch);
-      int j;
-      for (j = 0; j < blepvoices; j++)
-	  oscp[j] = &blept[BLEPSIZE - 1];
-        nextvoice = 0;
+      KVP_RegisterObject (&KVP_instancesine__1_pitch);
+      Phase = 0;
     }
   public:void Dispose ()
     {
     }
-  public:void dsp (const int32_t inlet_pitchm, int32buffer & outlet_wave)
+  public:void dsp (const int32_t inlet_pitchm,
+	      const int32buffer inlet_fm,
+	      const int32buffer inlet_pm, int32buffer & outlet_wave)
     {
       int32_t freq;
       MTOFEXTENDED (parent2->PExch[0].finalvalue + inlet_pitchm, freq);
-      int j;
-      int16_t *lastblep = &blept[BLEPSIZE - 1];
-      for (j = 0; j < BUFSIZE; j++)
+
+      int buffer_index;
+      for (buffer_index = 0; buffer_index < BUFSIZE; buffer_index++)
 	{
-	  int i;
-	  int p;
-	  p = osc_p;
-	  osc_p = p + freq;
-	  if ((osc_p > 0) && !(p > 0))
-	    {			// dispatch
-	      nextvoice = (nextvoice + 1) & (blepvoices - 1);
-	      int32_t x = osc_p / (freq >> 6);
-	      oscp[nextvoice] = &blept[x];
-	    }
-	  int32_t sum = 0;
-	  for (i = 0; i < blepvoices; i++)
-	    {			// sample
-	      int16_t *t = oscp[i];
-	      sum += *t;
-	      t += 64;
-	      if (t >= lastblep)
-		t = lastblep;
-	      oscp[i] = t;
-	    }
-	  sum = (16384 * blepvoices) - sum - 8192;
-	  uint32_t g = osc_p;
-	  sum = (g >> 5) + (sum << 13);
-	  outlet_wave[j] = sum;
+	  Phase += freq + inlet_fm[buffer_index];
+	  int32_t r;
+	  int32_t p2 = Phase + (inlet_pm[buffer_index] << 4);
+	  SINE2TINTERP (p2, r) outlet_wave[buffer_index] = (r >> 4);
+
 	}
     }
   }
@@ -127,13 +103,13 @@ public:
     }
   }
   ;				/* object instances */
-  instancesquare__1 instancesquare__1_i;
+  instancesine__1 instancesine__1_i;
   instancedac__1 instancedac__1_i;
 /* net latches */
   static const int32_t *GetInitParams (void)
   {
     static const int32_t p[1] = {
-      -50331648
+      0
     };
     return &p[0];
   }
@@ -453,7 +429,7 @@ public:
     displayVector[0] = 0x446F7841;
     displayVector[1] = 0;
     displayVector[2] = 2;
-    instancesquare__1_i.Init (this);
+    instancesine__1_i.Init (this);
     instancedac__1_i.Init (this);
   }
 
@@ -461,7 +437,7 @@ public:
   void Dispose ()
   {
     instancedac__1_i.Dispose ();
-    instancesquare__1_i.Dispose ();
+    instancesine__1_i.Dispose ();
   }
 
 /* krate */
@@ -483,7 +459,7 @@ public:
     int32buffer UNCONNECTED_OUTPUT_BUFFER;
 //--------- </zero> ----------//
 //--------- <object calls> ----------//
-    instancesquare__1_i.dsp (0, net0);
+    instancesine__1_i.dsp (0, zerobuffer, zerobuffer, net0);
     instancedac__1_i.dsp (net0, net0);
 //--------- </object calls> ----------//
 //--------- <net latch copy> ----------//
