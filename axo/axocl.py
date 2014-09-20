@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import serial
 import sys
+import time
 
 def bytes2words(seq, byte_index_list):
     s = (b for b in seq)  # need sequence api
@@ -93,7 +94,7 @@ class axo:
         self.stats = False
         self.poll(condition = lambda: not self.stats)
 
-    def load(self, filename, addr):
+    def write(self, filename, addr):
         with open(filename, "rb") as f:
             data = f.read(64*1024)
         print("Loading %d bytes from %s at 0x%08X" % (len(data), filename, addr))
@@ -101,6 +102,11 @@ class axo:
         self.ser.write(bytes(words2bytes_le([addr, len(data)], 4)))
         self.ser.write(data)
         self.wait_ack()
+
+    def load(self, filename, addr):
+        self.stop()
+        self.write(filename, addr)
+        self.start()
 
     def decode_ack(self, data):
         [FirmwareId, DSPLoad, PatchID] = bytes2words_le(data[:12], 4)
