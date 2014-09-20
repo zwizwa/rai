@@ -44,7 +44,7 @@ class axo:
         self.stats = False
 
     def poll(self, condition = lambda: True):
-        while condition(rv):
+        while condition():
             self.read_packet()
 
     def read(self,n):
@@ -52,8 +52,10 @@ class axo:
 
     def read_raw_packet(self):
         hdr = self.read(4)
-        if hdr[0:3] != b'Axo':
-            raise NameError("hdr = %s" % hdr)
+        while hdr[0:3] != b'Axo':
+            print("syncing...")
+            hdr = hdr[1:4] + self.read(1)
+
         tag = chr(hdr[3])
         size = self.sizes[tag]
         payload = self.read(size)
