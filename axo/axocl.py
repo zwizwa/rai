@@ -54,8 +54,8 @@ class axo:
     def read_raw_packet(self):
         hdr = self.read(4)
         while hdr[0:3] != b'Axo':
-            print("syncing...")
             hdr = hdr[1:4] + self.read(1)
+            print("syncing %s" % hdr)
 
         tag = chr(hdr[3])
         size = self.sizes[tag]
