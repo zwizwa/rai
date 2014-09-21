@@ -1401,4 +1401,226 @@ s0 # start patch
 p0 # ping
 c0 # close sdcard file
 
+EDIT:
+- axocl.py can start/stop, load, dump
+- minimal xpatch.cpp OK
+
+
+Entry: Axo floating point
+Date: Sat Sep 20 12:01:44 CEST 2014
+
+The STM32F405[1] has floating point, so let's try that first.
+
+[1] http://www.st.com/web/en/catalog/mmc/FM141/SC1169/SS1577/LN1035
+
+
+Entry: Axo Pex
+Date: Sat Sep 20 12:26:13 CEST 2014
+
+Actually to make this useful, first implement PEx and midi.
+
+
+Entry: john clemens, racketcon 2014 - sound, why is it so imperative
+Date: Sun Sep 21 00:09:22 CEST 2014
+
+BROKEN LINK from live event
+https://www.youtube.com/watch?v=ORQdUnUtgIA&feature=player_detailpage#t=8580
+
+look for part two here later
+https://www.youtube.com/watch?v=oe2tK5Lxybc
+
+
+Entry: Macros in low level languages
+Date: Sun Sep 21 00:33:04 CEST 2014
+
+http://www.brinckerhoff.org/blog/2014/06/25/macros-more-important-in-low-level-languages/
+
+
+
+
+Entry: Pickup
+Date: Sun Sep 21 10:25:24 CEST 2014
+
+Where did things get left last time?  IIRC there are some hard
+problems to solve at the language level.
+
+- Feldspar-like loop transformations, i.e. fold,spread operations (global->feature->global).
+- Initial values
+- Typing
+- bottom-up extending / machine mapping
+
+
+
+Entry: Bottom up for M4F
+Date: Sun Sep 21 10:33:07 CEST 2014
+
+Basically this means: represent the machine primitives and present a
+bridge between those and the (fixed) rai primitives.
+
+The interesting question here is machine mapping: replace the
+assembler programmer.
+
+
+So, it should be straightforward to support a M4F -> RAI prim mapping.
+Is it also possible to implement the inverse in a deterministic way.
+I.e. implement an instruction mapper that is guaranteed to recover
+native instructions?  If this is possible, it might be a better
+approach.
+
+Required knowledge: Muchnick's chapter on peeplhole optimizers[1].
+
+[1] http://www.amazon.com/Advanced-Compiler-Design-Implementation-Muchnick/dp/1558603204
+
+
+Entry: Reverse macros
+Date: Sun Sep 21 10:41:07 CEST 2014
+
+So, give an example.  The M4F intrinsic QADD for saturated add of two integers.
+
+The problem with this instruction is that it is very inefficient to
+implement using rai primitives.  Saturate on 31 bits might be more
+efficient since the overflow condition is not lost.
+
+So there is definitely a mismatch that makes it even impossible with
+the current set to implement any reverse matching.
+
+
+
+Entry: What is the real problem to solve?
+Date: Sun Sep 21 10:48:25 CEST 2014
+
+Writing safe machine code.
+What does this boil down to?
+
+- Safe memory and type management
+- Safe semantics
+
+The former isn't hard to do in generated code, though the latter is
+harder since there is only machine semantics.  Solution is to write an
+abstract interpretation of the machine code data processing primitives.
+
+
+How hard is it to generalize this?
+
+I can imagine working bottom-up, i.e. starting with the machine's
+computing primtives, and adding a semantics on top.
+
+Currently in rai, the primitives are too high level.  Too polite :)
+
+The problem I'm trying to solve is to write an "assisted assembler".
+
+
+
+
+Entry: Assisted assembler a.k.a. "smart emulators".
+Date: Sun Sep 21 10:59:47 CEST 2014
+
+So let's assume that machine mapping to a fixed set of primitives is
+too difficult.  Let's start out with a concrete machine.  I currently
+have 2 I care about:
+
+   - dsPIC33
+
+   - ARM Cortex M4F
+
+Let's build a tool that allows building checked assemblers for new
+targets.  A checked assembler allows construction of fully optimized
+assembly programs (manual resource allocation) while keeping semantic
+mapping in check.
+
+Essentially a semantic check is also ad-hoc specified, but some
+essential parts consist of transfer function computation, parameter
+sensitivity, noise levels, stability, ...
+
+
+What about making this into a live-coding instrument as well?
+
+
+Entry: Control and computation
+Date: Sun Sep 21 11:36:21 CEST 2014
+
+I don't want annotation to a standard assembler.  I do not want to do
+register allocation, just instruction selection.
+
+This is a DSL and has the bad selling points of a DSL that it's a new language...
+
+Maybe the problem in rai is that it needs a way to separate control
+from data.  Keep control as part of the language, but allow the
+primitive data flow set to be extensible.
+
+
+
+Entry: Too complicated
+Date: Sun Sep 21 11:47:51 CEST 2014
+
+So is there anything that can be done to make this incremental?
+First, let's fix the dataflow primitives.
+
+Just looking at the instructions available, the impression I have is
+that this problem is just too complicated: a machine's instruction set
+leaves a lot of room for specific optimization.
+
+So what is the process that a human assembly programmer is performing?
+Knowing the instruction set and knowing where the data is and how it
+needs to be programmed, find a way to do it with a minimal amount of
+"fuss".
+
+
+
+Entry: Goals, problems and orthogonality
+Date: Sun Sep 21 13:55:59 CEST 2014
+
+The problem domain for RAI is time-recursive algorithms.  The kind
+that does not map well onto parallelism, unless it is "dumb
+duplication" as parallel or pipelined serial filters.
+
+Most DSP algorithms in the field are probably time-block based, or if
+they are not, the operations at each control step are "wide" enough
+such that the core routines are still matrix routines.
+
+The problem I see is that vector instructions impose a lot of
+structure in the data layout.  The main problem is not doing the
+actual computation, but getting the data in the right spot.  DSP
+implementation is a *ROUTING PROBLEM*.
+
+And routing problems are combinatorial problems.
+
+What I really want is an algebra to express all these forms of routing
+and permutation.
+
+DSP is a *COMBINATOR PROBLEM*.
+
+The best way to go seems to pick a non-trivial problem and learn from
+it.
+
+I have one: pitch/timbre controlled dynamic wavetable synthesis.  It's
+sufficiently ad-hoc to not fit a particular mold.
+
+
+
+Entry: Primitive pool
+Date: Sun Sep 21 14:04:56 CEST 2014
+
+What is needed is a primitive pool.  A collection of primitives that
+can be implemented in terms of each other.
+
+This allows the interface to remain the same: simply add primitives,
+but add a mechanism for "default implementations".
+
+In first iteration this can be directed, but later might be optimized
+differently.
+
+
+Put it differently:
+
+Add primitives to the language whenever they are supported on a
+particular platform, then allow for them to be implemented by a
+library function whenver they are encountered.
+
+This allows:
+  - target compilation to use native instruction
+  - abstract interpretation to use the library functions
+
+
+
 

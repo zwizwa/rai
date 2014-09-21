@@ -3,7 +3,9 @@
 
 #include <stdio.h>
 
+#ifndef INLINE
 #define INLINE static inline __attribute__((always_inline))
+#endif
 
 // Primitive declaration
 #define OP INLINE _

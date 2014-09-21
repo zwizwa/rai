@@ -86,6 +86,14 @@ sp_host.pd_linux: $(RAI)/prim.h $(RAI)/main_pd.c $(RAI)/proc.h $(LIBPROC_O)
 %.lv2: %.g.h $(RAI)/prim.h $(RAI)/main_lv2.c $(RAI)/proc.h $(LIBPROC_O)
 	gcc -DPROC_FILE=\"$<\" -DPROC_NAME=\"$*\" $(CFLAGS) $(RAI)/main_lv2.c $(LIBPROC_O) $(LDFLAGS) -rdynamic -shared -o $@
 
+# Axoloti patch
+AXO_PATCH := $(shell readlink -f /home/tom/git/AxoStudio/patch)
+%.xpatch: %.g.h $(RAI)/prim.h $(RAI)/main_axo.cpp
+	@echo installing into $(AXO_PATCH)
+	ln -fs $$(readlink -f $*.g.h) $(AXO_PATCH)/xpatch.g.h
+	ln -fs $$(readlink -f $(RAI)/main_axo.cpp) $(AXO_PATCH)/xpatch.cpp
+	ln -fs $$(readlink -f $(RAI)/prim.h) $(AXO_PATCH)/
+	make -C $(AXO_PATCH)
 
 %.o: %.c $(RAI)/proc.h
 	gcc $(CFLAGS) $(LDFLAGS) -o $@ -c $<
