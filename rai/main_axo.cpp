@@ -47,11 +47,14 @@ void PatchProcess (int32_t * inbuf, int32_t * outbuf) {
   // Convert to fixed point
   int i;
   for (i = 0; i < BUFSIZE; i++) {
-    int32_t v = 0x40000000 * b_out[i];
-    outbuf[i * 2]     = v;
-    outbuf[i * 2 + 1] = v;
+    float32_t f_v = ((float32_t)0x40000000) * b_out[i];
+    int32_t i_v = (int32_t)f_v;
+    outbuf[i * 2]     = i_v;
+    outbuf[i * 2 + 1] = i_v;
   }
 }
+
+void PatchDispose() {}
 
 void PatchMidiInHandler (uint8_t status, uint8_t data1, uint8_t data2) {} 
 
@@ -64,6 +67,7 @@ void xpatch_init2 (void) {
   patchMeta.numPEx = 0;
   patchMeta.fptr_dsp_process = PatchProcess;
   patchMeta.fptr_MidiInHandler = PatchMidiInHandler;
-  patchMeta.fptr_patch_dispose = NULL; //PatchDispose;
+  patchMeta.fptr_patch_dispose = PatchDispose;
   patchMeta.fptr_applyPreset = NULL; //ApplyPreset;
+  memset(&p_state, 0, sizeof(p_state));
 }

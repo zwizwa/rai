@@ -1624,3 +1624,34 @@ This allows:
 
 
 
+Entry: Dataflow explorer
+Date: Sun Sep 21 14:33:37 CEST 2014
+
+So, let's try to build something to explore an instruction set.
+Essentially, an assembler + simulator + primitive allocator.
+Something to explore the building of core routines to gain intuition
+for a new architecture.
+
+
+Entry: Cortex M4F Fixed point and Floating Point Unit : ARM online docs
+Date: Sun Sep 21 14:46:59 CEST 2014
+
+Floating [1][2]
+- 32 single precision registers
+- mode settings for subnormals and NaN
+- instructions and cycle counts [2]
+  - 1 extra pipeline delay if result is used in next instruction
+  - convert float/int = 1 cycle
+  - ADD, MUL = 1 cycle, MAC = 3 cycles
+  - DIV, SQRT = 14 cycles  (slots can be filled up with integer instructions)
+  
+
+Fixed [3]:
+- 16 registers
+- all instructions single cycle except divide (2-12)
+- no pipeline delay when result is used in next instruction (??)
+
+
+[1] http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0439d/BEHFGGGE.html
+[2] http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0439d/BEHFGGGE.html
+[3] http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0439d/BEHFGGGE.html

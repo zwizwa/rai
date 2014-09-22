@@ -94,6 +94,8 @@ AXO_PATCH := $(shell readlink -f /home/tom/git/AxoStudio/patch)
 	ln -fs $$(readlink -f $(RAI)/main_axo.cpp) $(AXO_PATCH)/xpatch.cpp
 	ln -fs $$(readlink -f $(RAI)/prim.h) $(AXO_PATCH)/
 	make -C $(AXO_PATCH)
+	arm-none-eabi-objdump -d $(AXO_PATCH)/xpatch.elf
+	../bin/axocl.py --load $(AXO_PATCH)/xpatch.bin
 
 %.o: %.c $(RAI)/proc.h
 	gcc $(CFLAGS) $(LDFLAGS) -o $@ -c $<
