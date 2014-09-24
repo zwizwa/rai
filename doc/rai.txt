@@ -1655,3 +1655,68 @@ Fixed [3]:
 [1] http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0439d/BEHFGGGE.html
 [2] http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0439d/BEHFGGGE.html
 [3] http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0439d/BEHFGGGE.html
+
+
+Entry: Fixed point
+Date: Mon Sep 22 15:48:13 CEST 2014
+
+So, go over the M4F fixed point instructions and see how it best maps
+to existing rai functions.  Then extend the primitives to a sensible
+goldielocks subset.
+
+- saturation
+- count leading zeros
+- mac
+- mul w x w-> w (same-wordsize multiplication)
+- pack / unpack
+- extend
+- bitfield
+
+
+Notes:
+
+- selecting multiplications: sign, top/bottom, accumulate,
+- additions: 
+  - Q / GE setting?
+  - halved results (is this for FFT?)
+  - exchange
+- dual
+
+
+So apart from saturation these are all easily expressed as
+combinations of primitives.
+
+Most of the effort in the DSP instructions is in routing operands and
+results.  Moving stuff around...
+
+So the question:
+
+- how much of this can practically be done by the compiler?  are there
+  any compilers accessible to me at this point that actually do a good
+  job at this?
+
+- if the "routing optimization" problem is in need for human
+  assistance, maybe best to start from that point: make things into a
+  "puzzle" that automates most of the red tape, but leaves the
+  cleverness to the human operator.
+
+
+Practically, for getting fixed point things to run on the axo, it's
+probably best to work with what's there and add saturation, bit count
+(rounded log 2).  then see if a postprocessing step can insert
+intrinsics or leave it entirely up to the compiler.
+
+i'm interested in the idea of "augmented assembler" but not sure if i
+want to get into general compiler things like register allocation and
+instruction selection.
+
+
+
+Entry: Testing ARM fixpoint
+Date: Mon Sep 22 18:32:22 CEST 2014
+
+Using arm-linux-eabi-gcc and qemu-arm-static.
+Maybe this can even hook into jack?
+If not, use TCP to decouple archs.
+
+
