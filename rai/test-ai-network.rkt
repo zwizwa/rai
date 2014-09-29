@@ -4,7 +4,6 @@
          "meta.rkt"
          "ai-network.rkt")
 
-
 ;; A raw rsound signal? as a reference point.
 (define reference
   (let ((state 0))
@@ -31,14 +30,12 @@
   (sleep 1)
   (stop))
 
-
 (define sawtooth0_ (ai-network sawtooth0))
 (define vibrato-tone
   (network ()
            [lfo (sine-wave 5)]
            [sig (sawtooth0_ (* .01 lfo))]
            [out (* 0.5 sig)]))
-
 
 (define (test)
   (test-play reference)
