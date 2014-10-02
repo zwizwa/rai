@@ -81,7 +81,7 @@ sp_host.pd_linux: $(RAI_SRC)/prim.h $(RAI_SRC)/main_pd.c $(RAI_SRC)/proc.h $(LIB
 
 # Stand-alone test for generated C.  This is run without optimization to facilitate a GDB run.
 %.g.elf: %.g.h $(RAI_SRC)/prim.h $(RAI_SRC)/main_test.c
-	gcc -DPROC_FILE=\"$<\" $(CFLAGS_DEBUG) $(RAI_SRC)/main_test.c $(LDFLAGS) -I$(RAI_SRC) -o $@
+	gcc -DPROC_FILE=\"$<\" $(CFLAGS_DEBUG) $(RAI_SRC)/main_test.c $(LDFLAGS) -I$(RAI_SRC) -I. -o $@
 
 
 # LV2 wrapper.
