@@ -1826,3 +1826,28 @@ Something like these new-old acoustics fwd by Antti [1][2][3][4].
 [2] https://www.youtube.com/watch?v=xSsXihuHcoo
 [3] https://www.youtube.com/watch?v=EDQgU1CPpis
 [4] https://www.youtube.com/watch?v=Kh1KMvyer4E
+
+
+Entry: tree reorg
+Date: Thu Oct  2 15:41:22 CEST 2014
+
+moving rai/rai/* to rai/*
+
+-> something changed in the default directory structure of packages.
+   not sure what/why - this is all trial and error.
+
+[master] tom@tx:~/rai$ ls -al
+total 60
+drwxr-xr-x  8 tom tom  4096 Oct  2 15:40 .
+drwxr-xr-x 42 tom tom  4096 Sep 25 15:38 ..
+drwxr-xr-x  2 tom tom  4096 Sep 22 13:26 bin
+drwxr-xr-x  2 tom tom  4096 Oct  2 15:08 doc
+drwxr-xr-x  8 tom tom  4096 Oct  2 15:40 .git
+-rw-r--r--  1 tom tom   104 Sep 28  2013 .gitignore
+drwxr-xr-x  2 tom tom  4096 Oct  2 15:08 gui
+-rw-r--r--  1 tom tom   517 May 31  2013 info.rkt
+-rw-r--r--  1 tom tom  1533 Jun 12  2013 LICENSE
+-rw-r--r--  1 tom tom   216 Sep 27 14:07 Makefile
+drwxr-xr-x  3 tom tom 12288 Oct  2 15:40 rai
+-rw-r--r--  1 tom tom   199 May 31  2013 README.md
+drwxr-xr-x  2 tom tom  4096 Oct  2 15:40 slv2
