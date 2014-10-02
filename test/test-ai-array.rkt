@@ -1,18 +1,17 @@
 #lang racket/base
-(require "tools.rkt"
-         "ai-array.rkt"
-         "ai-array-c.rkt"
-         "ai-symbolic.rkt"
-         "stream-syntax.rkt"
-         "stream-lib.rkt"
-         "stream-meta.rkt"
-         "test_pd.rkt"
-         "test-lang.rkt")
+(require rai/tools
+         rai/ai-array
+         rai/ai-array-c
+         rai/ai-symbolic
+         rai/stream-syntax
+         rai/stream-lib
+         rai/stream-meta
+         "test_pd.rkt")
 
 
-(module test-progs "stream.rkt"
- (require "stream-lib.rkt"
-          "stream-meta.rkt")
+(module test-progs rai/stream
+ (require rai/stream-lib
+          rai/stream-meta)
  (provide (all-defined-out))
  (define (test-if< a b)  (if (< a b) b a))
  (define (test-if c a b) (if c a b))

@@ -1,14 +1,14 @@
 #lang racket/base
 (require
- "tools.rkt"
- "ai-array-scheme.rkt"
+ rai/tools
+ rai/ai-array-scheme
 
  ;; Transformer environment references to abstract programs passed to
  ;; ai-array-scheme.
  (for-syntax
   racket/base
-  "stream-lib.rkt"
-  "test-lang.rkt"))
+  rai/stream-lib
+  rai/test/test-lang))
 
 
     

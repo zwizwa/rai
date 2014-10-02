@@ -1,15 +1,15 @@
 #lang racket/base
-(require "tools.rkt"
-         "stream-syntax.rkt"
-         "ai-array.rkt"
-         "ai-array-c.rkt"
+(require rai/tools
+         rai/stream-syntax
+         rai/ai-array
+         rai/ai-array-c
          (for-syntax racket/base))
 
 
 
-(module test "stream.rkt"
- (require "stream-lib.rkt"
-          "stream-meta.rkt")
+(module test rai/stream
+ (require rai/stream-lib
+          rai/stream-meta)
  (provide (all-defined-out))
   
  (define (test-delay (dl) (x))

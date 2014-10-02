@@ -1,6 +1,6 @@
-#lang s-exp "stream.rkt"
-(require "stream-lib.rkt"
-         "synth-lib.rkt")
+#lang s-exp rai/stream
+(require rai/stream-lib
+         rai/synth-lib)
 (provide (all-defined-out))
 
 (define main-nsi 0)
