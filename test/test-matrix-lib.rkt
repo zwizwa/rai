@@ -1,6 +1,6 @@
 #lang racket/base
-(require "matrix-lib.rkt"
-         "ai-eval.rkt")
+(require rai/matrix-lib
+         rai/ai-eval)
 
 (define X '((1 1)
             (0 1)))

@@ -1,11 +1,11 @@
 #lang racket/base
 (require
- "tools.rkt"
- "stream-lib.rkt"
- "stream-syntax.rkt"
- "ai-array.rkt"
- "ai-autodiff.rkt"
- "ai-eval.rkt"
+ rai/tools
+ rai/stream-lib
+ rai/stream-syntax
+ rai/ai-array
+ rai/ai-autodiff
+ rai/ai-eval
  "test-lang.rkt")
 
 ;; Simple evaluator

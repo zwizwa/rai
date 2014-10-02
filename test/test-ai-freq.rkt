@@ -1,21 +1,19 @@
 #lang racket/base
 (require
  ;; Compiler macro
- "tools.rkt"
- "ai-freq.rkt"
- "ai-linpar.rkt"
- "ai-eval.rkt"
- "stream-syntax.rkt"
-
- "stream-lib.rkt"
+ rai/tools
+ rai/ai-freq
+ rai/ai-linpar
+ rai/ai-eval
+ rai/stream-syntax
+ rai/stream-lib
  "test-lang.rkt"
-
  "test_pd.rkt"
  )
 
-(module test-progs "stream.rkt"
- (require "stream-lib.rkt"
-          "stream-meta.rkt")
+(module test-progs rai/stream
+ (require rai/stream-lib
+          rai/stream-meta)
  (provide (all-defined-out))
  
  (define (test-if< x)

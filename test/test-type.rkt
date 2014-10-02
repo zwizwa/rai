@@ -1,8 +1,8 @@
 #lang racket/base
-(require "tools.rkt"
-         "type.rkt"
-         "ai-array.rkt"
-         "ai-array-c.rkt"
+(require rai/tools
+         rai/type
+         rai/ai-array
+         rai/ai-array-c
          "test-lang.rkt")
 
 (define t1 (make-type 'Array 10 (list (make-base-type 'Float))))

@@ -2,7 +2,6 @@
 (require "tools.rkt"
          "prim.rkt"
          "stream-syntax.rkt"
-         "test-lang.rkt"
          racklog)
 (provide ai-linpar)
 

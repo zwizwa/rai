@@ -1,13 +1,13 @@
 #lang racket
 
-(require "ai-proc.rkt"
-         "libproc.rkt"
-         "stream-lib.rkt" ;; integrate
+(require rai/ai-proc
+         rai/libproc
+         rai/stream-lib ;; integrate
          ffi/vector
-         "f32vector.rkt")
+         rai/f32vector)
 
 (begin
-  (module test-progs "stream.rkt"
+  (module test-progs rai/stream
     (provide (all-defined-out))
     (define (sum a b) (+ a b)))
   (require 'test-progs))

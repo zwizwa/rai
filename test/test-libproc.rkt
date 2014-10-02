@@ -1,6 +1,6 @@
 #lang racket/base
-(require "tools.rkt"
-         "libproc.rkt"
+(require rai/tools
+         rai/libproc
          racket/runtime-path
          ffi/vector
          ffi/unsafe

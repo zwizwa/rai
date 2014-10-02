@@ -6,6 +6,7 @@
          rai/stream-syntax
          rai/stream-lib
          rai/stream-meta
+         "test-lang.rkt"
          "test_pd.rkt")
 
 

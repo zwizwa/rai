@@ -1,12 +1,12 @@
 #lang racket/base
-(require "tools.rkt"
-         "ai-autodiff.rkt"
-         "ai-array.rkt"
-         "ai-array-c.rkt"
-         "ai-symbolic.rkt"
-         "stream-syntax.rkt"
-         "stream-lib.rkt"
-         "stream-meta.rkt"
+(require rai/tools
+         rai/ai-autodiff
+         rai/ai-array
+         rai/ai-array-c
+         rai/ai-symbolic
+         rai/stream-syntax
+         rai/stream-lib
+         rai/stream-meta
          "test-lang.rkt")
 
 (define (test program #:tc [tc '()] #:nsi [nsi 0])

@@ -1,6 +1,6 @@
 #lang racket/base
-(require "tools.rkt"
-         "ai-linpar.rkt"
+(require rai/tools
+         rai/ai-linpar
          "test-lang.rkt")
 
 (define (t . a)

@@ -14,7 +14,7 @@
 ;; Convert stream function to C code, compile and run.
 
 (define-runtime-path rai-dir ".")
-(define-runtime-path rules.mk "rules.mk")
+(define-runtime-path rules.mk "src/rules.mk")
 (define build-dir (find-system-path 'temp-dir))
 
 

@@ -8,7 +8,7 @@
  (for-syntax
   racket/base
   rai/stream-lib
-  rai/test/test-lang))
+  "test-lang.rkt"))
 
 
     

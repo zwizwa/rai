@@ -1,9 +1,9 @@
 #lang racket/base
-(require "ai-stream.rkt"
-         "stream-syntax.rkt"
-         "stream-lib.rkt"
+(require rai/ai-stream
+         rai/stream-syntax
+         rai/stream-lib
+         rai/tools
          "test_pd.rkt"
-         "tools.rkt"
          "test-lang.rkt")
 
 ;; Simple test macro.
@@ -15,8 +15,8 @@
 
 ;; Some stream functions
 (begin
-  (module dsp "stream.rkt"
-    (require "synth-lib.rkt") ;; saw-d1
+  (module dsp rai/stream
+    (require rai/synth-lib) ;; saw-d1
     (provide (all-defined-out))
     ;;(define (fmod1 x) (fmod x 1))
     )

@@ -1,10 +1,10 @@
 #lang racket/base
-(require "tools.rkt"
-         "ai-taylor.rkt"
-         "ai-symbolic.rkt"
-         "stream-syntax.rkt"
-         "stream-lib.rkt"
-         "stream-meta.rkt"
+(require rai/tools
+         rai/ai-taylor
+         rai/ai-symbolic
+         rai/stream-syntax
+         rai/stream-lib
+         rai/stream-meta
          "test-lang.rkt")
 
 

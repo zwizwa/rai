@@ -1,6 +1,6 @@
 #lang racket/base
-(require "tools.rkt"
-         "ai-eval.rkt"
+(require rai/tools
+         rai/ai-eval
          "test-lang.rkt")
 
 (define (test desired approx input
