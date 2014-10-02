@@ -1720,3 +1720,109 @@ Maybe this can even hook into jack?
 If not, use TCP to decouple archs.
 
 
+
+Entry: algebra
+Date: Sun Sep 28 15:51:30 CEST 2014
+
+Next?  Work on the language part.  Find a closer link between idea and
+expression of idea.  That's where the beef is.
+
+It's always possible to fill more time with low-level optimizations..
+This is better left to experts.
+Let's make some noise.
+
+
+Entry: Live coding assembler
+Date: Sun Sep 28 19:09:32 CEST 2014
+
+Basically, how short can the type-to-sound delay be made?
+
+It seems to always be important here to separate algorithm design from
+efficient implementation.
+
+Optimization costs time.
+
+Optimized compilation can not be instantaneous.
+
+So a live coding instrument is necessarily an interpreter.
+
+What if the interpreter is the CPU?  Live code assembly?
+
+
+
+Since making music goes better for me when I limit myself, maybe the
+same goes for writing code?  Start with M4F fixed point assembly, and
+build a live coding language on top of that.
+
+The end result will be useful, working, optimal code.
+
+So the idea is to make this work first for raw assembly with
+instantaneous response.  Then to build abstractions on top of it.
+
+Fast DSP code is register-optimized DSP code, so that's what this
+does.  Since it is dataflow, maybe do this as a graphical language?
+
+
+
+Entry: Live editor
+Date: Sun Sep 28 19:28:02 CEST 2014
+
+Fluxus would probably be a good platform to do this.  Though emacs
+should work as well.  Every key stroke should be doing something.
+
+No, not every keystroke. It should be possible to edit a number
+without having the intermediate steps be visible, so at least it
+should be possible to turn live on/off easily.
+
+frtime?
+
+
+
+Entry: Editor
+Date: Sun Sep 28 19:43:41 CEST 2014
+
+Lighttable has some of these features, but damn it depends on a lot of
+stuff.  I want something simple to start with.
+
+So start from scratch.  As usual.  What is currently the easiest way
+to have a racket program update a text display?
+
+Let's just try curses and see where that goes.
+
+Start with a structured editor on curses[1].
+
+racket -pm neil/charterm/demo
+
+But that's not all.  I also want graphics with fast updates.  Looks
+like openGL[2] is what is needed.
+
+
+[1] http://www.neilvandyke.org/racket-charterm/
+[2] http://docs.racket-lang.org/sgl/main.html
+
+
+
+Entry: LLVM
+Date: Sun Sep 28 21:11:43 CEST 2014
+
+The thing to focus on for rai is LLVM.  I'd like to use rai for
+data-intensive modeling as well.  Something that needs horsepower on
+the host cpu.  Most of these things do not need "structural"
+flexibility that racket offers.  The result is state machines
+performing math ops.  Let's find something that does that.
+
+
+
+
+Entry: Purpose - something new
+Date: Tue Sep 30 15:34:13 CEST 2014
+
+Yeah eventually I'll get to building that awesome 303 / 808 clone but
+let's face it, not much novelty in there..
+
+Something like these new-old acoustics fwd by Antti [1][2][3][4].
+
+[1] https://www.youtube.com/watch?v=c0xxnFqdBCE
+[2] https://www.youtube.com/watch?v=xSsXihuHcoo
+[3] https://www.youtube.com/watch?v=EDQgU1CPpis
+[4] https://www.youtube.com/watch?v=Kh1KMvyer4E
