@@ -1799,3 +1799,30 @@ like openGL[2] is what is needed.
 
 [1] http://www.neilvandyke.org/racket-charterm/
 [2] http://docs.racket-lang.org/sgl/main.html
+
+
+
+Entry: LLVM
+Date: Sun Sep 28 21:11:43 CEST 2014
+
+The thing to focus on for rai is LLVM.  I'd like to use rai for
+data-intensive modeling as well.  Something that needs horsepower on
+the host cpu.  Most of these things do not need "structural"
+flexibility that racket offers.  The result is state machines
+performing math ops.  Let's find something that does that.
+
+
+
+
+Entry: Purpose - something new
+Date: Tue Sep 30 15:34:13 CEST 2014
+
+Yeah eventually I'll get to building that awesome 303 / 808 clone but
+let's face it, not much novelty in there..
+
+Something like these new-old acoustics fwd by Antti [1][2][3][4].
+
+[1] https://www.youtube.com/watch?v=c0xxnFqdBCE
+[2] https://www.youtube.com/watch?v=xSsXihuHcoo
+[3] https://www.youtube.com/watch?v=EDQgU1CPpis
+[4] https://www.youtube.com/watch?v=Kh1KMvyer4E
