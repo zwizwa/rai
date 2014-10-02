@@ -1,43 +1,16 @@
 .DELETE_ON_ERROR:
 
 
-ALL_RUN := \
-	ai-array-scheme.rkt.run \
-	test-array-scheme.rkt.run \
-	test-delay.rkt.run \
-	test-map.rkt.run \
-	test-type.rkt.run \
-	test-ai-array.rkt.run \
-	test-ai-stream.rkt.run \
-	test-ai-taylor.rkt.run \
-	test-series.rkt.run \
-	test-ai-autodiff.rkt.run \
-	test-matrix-lib.rkt.run \
-	test-ai-linpar.rkt.run \
-	test-ai-freq.rkt.run \
-	test_pd.g.run \
-	test-ai.rkt.run \
-	compalg.rkt.run \
-	test-ai-proc.rkt.run \
-	test-libproc.rkt.run \
-
-#	test-ai-network.rkt.run \
-
 ALL_BIN := \
 	sp_host.elf \
-	test_pd.g.h \
-	test_pd.sp test_pd.g.elf \
 	libproc.so \
-	test_jack.g.h test_jack.jack \
 	sp_host.pd_linux \
-	proc.pd_linux \
-	test_pd.dll \
-	synth.sp \
-
-ALL :=  $(ALL_BIN) $(ALL_RUN)
 
 
-RAI := .
+ALL :=  $(ALL_BIN)
+
+
+RAI := ../
 
 
 all: $(ALL)

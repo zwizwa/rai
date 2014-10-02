@@ -1,5 +1,7 @@
 RKT := $(wildcard $(RAI)/*.rkt) $(wildcard *.rkt) 
 
+RAI_SRC := $(RAI)/src
+
 # RACKET := /usr/local/racket-5.3.4.7/bin/racket
 # RACO := /usr/local/racket-5.3.4.7/bin/raco
 
@@ -9,7 +11,7 @@ RACO := raco
 LIBPROC_O := proc.o proc_sp.o
 
 CFLAGS_OPTI  := -ffast-math -O3
-CFLAGS_BASE  := -g -Wall -Wno-unused-variable -I. -I$(RAI) -I../copy
+CFLAGS_BASE  := -g -Wall -Wno-unused-variable -I. -I$(RAI_SRC) -I../copy
 CFLAGS_DEBUG := -fPIC -std=gnu99 
 CFLAGS_PD    := -I/usr/local/pd/src   # FIXME: g_canvas.h is usually not exported?
 LDFLAGS      := -lm
@@ -30,14 +32,14 @@ LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 	cat $@
 
 # Jack wrapper, standalone ELF
-%.jack: %.g.h $(RAI)/prim.h $(RAI)/main_jack.c $(RAI)/proc.h $(LIBPROC_O) $(RKT)
-	gcc -DPROC_FILE=\"$<\" -DCLIENT_NAME=\"$*\" $(CFLAGS) $(RAI)/main_jack.c $(LIBPROC_O) $(LDFLAGS) `pkg-config jack --cflags --libs` -o $@
+%.jack: %.g.h $(RAI_SRC)/prim.h $(RAI_SRC)/main_jack.c $(RAI_SRC)/proc.h $(LIBPROC_O) $(RKT)
+	gcc -DPROC_FILE=\"$<\" -DCLIENT_NAME=\"$*\" $(CFLAGS) $(RAI_SRC)/main_jack.c $(LIBPROC_O) $(LDFLAGS) `pkg-config jack --cflags --libs` -o $@
 
 
 # Object files containing base name of the file as a global symbol
 # pointing to a struct proc_class.
-%.proc.o: %.g.h $(RAI)/prim.h $(RAI)/main_sp.c
-	gcc -DPROC_FILE=\"$<\" $(CFLAGS) -DPROC_BUILD_STAMP=$$(date "+%s") -DPROC_HEADER_NAME=$(notdir $*) -DPROC_NAME=\"$(notdir $*)\" -DPROC_VERSION=\"$$(date "+%Y%m%d-%H%M%S")\" -c $(RAI)/main_sp.c -o $@
+%.proc.o: %.g.h $(RAI_SRC)/prim.h $(RAI_SRC)/main_sp.c
+	gcc -DPROC_FILE=\"$<\" $(CFLAGS) -DPROC_BUILD_STAMP=$$(date "+%s") -DPROC_HEADER_NAME=$(notdir $*) -DPROC_NAME=\"$(notdir $*)\" -DPROC_VERSION=\"$$(date "+%Y%m%d-%H%M%S")\" -c $(RAI_SRC)/main_sp.c -o $@
 
 
 
@@ -45,17 +47,17 @@ LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 # depend on these for serious work, and use proper .so objects
 # instead.
 %.sp.elf: %.proc.o
-	gcc -nostartfiles -T $(RAI)/sp.ld $< -o $@
+	gcc -nostartfiles -T $(RAI_SRC)/sp.ld $< -o $@
 %.sp: %.sp.elf
 	objcopy --only-section=.text -O binary $< $@
 %.sp.pd: %.sp
-	chmod +x $(RAI)/pd_notify.sh ; $(RAI)/pd_notify.sh $< >$@
+	chmod +x $(RAI_SRC)/pd_notify.sh ; $(RAI_SRC)/pd_notify.sh $< >$@
 
 
 # Scheme -> C code generation.
 %.g.h: %.rkt $(RKT)
-	chmod +x ./stream2c.sh
-	RACKET=$(RACKET) ./stream2c.sh $< $@
+	chmod +x $(RAI_SRC)/stream2c.sh
+	RACKET=$(RACKET) $(RAI_SRC)/stream2c.sh $< $@
 
 # Scheme -> IL (intermediate language) code generation.
 %.il: %.rkt $(RKT)
@@ -68,38 +70,38 @@ LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 
 PROC_LIBRARY_O := proc_library.o synth.proc.o test_pd.proc.o
 
-proc.pd_linux: $(RAI)/prim.h $(RAI)/main_pd.c $(RAI)/proc.h $(LIBPROC_O) $(PROC_LIBRARY_O)
-	gcc -DEXTERN_SETUP=proc_setup -DEXTERN_NAME=\"proc\" -DPROC_LIBRARY=proc_library $(CFLAGS) $(RAI)/main_pd.c $(LIBPROC_O) $(PROC_LIBRARY_O) $(LDFLAGS) -rdynamic -shared -o $@
+proc.pd_linux: $(RAI_SRC)/prim.h $(RAI_SRC)/main_pd.c $(RAI_SRC)/proc.h $(LIBPROC_O) $(PROC_LIBRARY_O)
+	gcc -DEXTERN_SETUP=proc_setup -DEXTERN_NAME=\"proc\" -DPROC_LIBRARY=proc_library $(CFLAGS) $(RAI_SRC)/main_pd.c $(LIBPROC_O) $(PROC_LIBRARY_O) $(LDFLAGS) -rdynamic -shared -o $@
 
 
 # Dynamic Pd wrapper, supports re-loading of .sp files
 # See also sp_test.pd
-sp_host.pd_linux: $(RAI)/prim.h $(RAI)/main_pd.c $(RAI)/proc.h $(LIBPROC_O)
-	gcc -DEXTERN_SETUP=sp_host_setup -DEXTERN_NAME=\"sp_host\" $(CFLAGS) $(RAI)/main_pd.c $(LIBPROC_O) $(LDFLAGS) -rdynamic -shared -o $@
+sp_host.pd_linux: $(RAI_SRC)/prim.h $(RAI_SRC)/main_pd.c $(RAI_SRC)/proc.h $(LIBPROC_O)
+	gcc -DEXTERN_SETUP=sp_host_setup -DEXTERN_NAME=\"sp_host\" $(CFLAGS) $(RAI_SRC)/main_pd.c $(LIBPROC_O) $(LDFLAGS) -rdynamic -shared -o $@
 
 # Stand-alone test for generated C.  This is run without optimization to facilitate a GDB run.
-%.g.elf: %.g.h $(RAI)/prim.h $(RAI)/main_test.c
-	gcc -DPROC_FILE=\"$<\" $(CFLAGS_DEBUG) $(RAI)/main_test.c $(LDFLAGS) -I$(RAI) -o $@
+%.g.elf: %.g.h $(RAI_SRC)/prim.h $(RAI_SRC)/main_test.c
+	gcc -DPROC_FILE=\"$<\" $(CFLAGS_DEBUG) $(RAI_SRC)/main_test.c $(LDFLAGS) -I$(RAI_SRC) -o $@
 
 
 # LV2 wrapper.
-%.lv2: %.g.h $(RAI)/prim.h $(RAI)/main_lv2.c $(RAI)/proc.h $(LIBPROC_O)
-	gcc -DPROC_FILE=\"$<\" -DPROC_NAME=\"$*\" $(CFLAGS) $(RAI)/main_lv2.c $(LIBPROC_O) $(LDFLAGS) -rdynamic -shared -o $@
+%.lv2: %.g.h $(RAI_SRC)/prim.h $(RAI_SRC)/main_lv2.c $(RAI_SRC)/proc.h $(LIBPROC_O)
+	gcc -DPROC_FILE=\"$<\" -DPROC_NAME=\"$*\" $(CFLAGS) $(RAI_SRC)/main_lv2.c $(LIBPROC_O) $(LDFLAGS) -rdynamic -shared -o $@
 
 # Axoloti patch
 AXO_PATCH := $(shell readlink -f /home/tom/git/AxoStudio/patch)
-%.xpatch: %.g.h $(RAI)/prim.h $(RAI)/main_axo.cpp
+%.xpatch: %.g.h $(RAI_SRC)/prim.h $(RAI_SRC)/main_axo.cpp
 	@echo installing into $(AXO_PATCH)
 	ln -fs $$(readlink -f $*.g.h) $(AXO_PATCH)/xpatch.g.h
-	ln -fs $$(readlink -f $(RAI)/main_axo.cpp) $(AXO_PATCH)/xpatch.cpp
-	ln -fs $$(readlink -f $(RAI)/prim.h) $(AXO_PATCH)/
+	ln -fs $$(readlink -f $(RAI_SRC)/main_axo.cpp) $(AXO_PATCH)/xpatch.cpp
+	ln -fs $$(readlink -f $(RAI_SRC)/prim.h) $(AXO_PATCH)/
 	make -C $(AXO_PATCH)
 	arm-none-eabi-objdump -d $(AXO_PATCH)/xpatch.elf
 	../bin/axocl.py --load $(AXO_PATCH)/xpatch.bin
 
-%.o: %.c $(RAI)/proc.h
+%.o: %.c $(RAI_SRC)/proc.h
 	gcc $(CFLAGS) $(LDFLAGS) -o $@ -c $<
-%.o: $(RAI)/%.c $(RAI)/proc.h
+%.o: $(RAI_SRC)/%.c $(RAI_SRC)/proc.h
 	gcc $(CFLAGS) $(LDFLAGS) -o $@ -c $<
 
 %.g.run: %.g.elf
@@ -107,7 +109,7 @@ AXO_PATCH := $(shell readlink -f /home/tom/git/AxoStudio/patch)
 	cat $@
 
 # Stand alone c program.
-%.elf: %.c $(LIBPROC_O) proc.h
+%.elf: %.c $(LIBPROC_O) $(RAI_SRC)/proc.h
 	gcc $(CFLAGS) $(LDFLAGS) -o $@ $< $(LIBPROC_O)
 
 
@@ -116,9 +118,9 @@ AXO_PATCH := $(shell readlink -f /home/tom/git/AxoStudio/patch)
 
 # FIXME: This is for compiling a .dll on unix.
 # This should be a separate platform
-%.dll: %.g.h $(RAI)/main_vst.cpp $(LICENSE_DEPS) $(RAI)/win_debug.h $(RAI)/proc.c
-	$(MINGW)gcc $(CFLAGS) -c $(RAI)/proc.c -o mingw_proc.o
-	$(MINGW)g++ $(CFLAGS_DLL) $(LICENSE_CFLAGS) -DPROC_FILE=\"$<\" $(RAI)/main_vst.cpp mingw_proc.o $(LDFLAGS_DLL) -shared -o $@
+%.dll: %.g.h $(RAI_SRC)/main_vst.cpp $(LICENSE_DEPS) $(RAI_SRC)/win_debug.h $(RAI_SRC)/proc.c
+	$(MINGW)gcc $(CFLAGS) -c $(RAI_SRC)/proc.c -o mingw_proc.o
+	$(MINGW)g++ $(CFLAGS_DLL) $(LICENSE_CFLAGS) -DPROC_FILE=\"$<\" $(RAI_SRC)/main_vst.cpp mingw_proc.o $(LDFLAGS_DLL) -shared -o $@
 	rm mingw_proc.o
 	$(MINGW)strip $@ ; ls -l $@
 
@@ -137,9 +139,9 @@ BCR2000 := make -C $(RAI) bcr2000 && $(RAI)/bcr2000 </dev/midi3 |
 	$(BCR2000) $(DTACH) $$(readlink -f $<) $(JACK_SECONDS)
 
 
-libproc.so: $(RAI)/proc.h $(LIBPROC_O)
+libproc.so: $(RAI_SRC)/proc.h $(LIBPROC_O)
 	gcc $(LIBPROC_O) $(LDFLAGS) -rdynamic -shared -o $@
 
 
-bcr2000: $(RAI)/bcr2000.c
+bcr2000: $(RAI_SRC)/bcr2000.c
 	gcc -o $@ $<
