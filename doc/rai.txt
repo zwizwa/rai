@@ -1928,3 +1928,11 @@ drwxr-xr-x  2 tom tom  4096 Oct  2 15:40 slv2
  rename rai/type.rkt => type.rkt (100%)
  rename rai/yield.rkt => yield.rkt (100%)
 [master] tom@tx:~/rai$ 
+
+
+Entry: restructure
+Date: Fri Oct  3 18:36:21 CEST 2014
+
+rai/*.rkt -> simple require path
+rai/src   -> *.h *.c
+rai/test  -> test in terms of rai/...
