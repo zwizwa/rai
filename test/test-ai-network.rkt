@@ -1,8 +1,8 @@
 #lang racket/base
 
 (require rsound  ;; Install via package manager
-         "meta.rkt"
-         "ai-network.rkt")
+         rai/meta
+         rai/ai-network)
 
 ;; A raw rsound signal? as a reference point.
 (define reference
@@ -15,8 +15,8 @@
 
 ;; Some signal generators using the stream DSL.
 (begin
-  (module test-generators "stream.rkt"
-    (require "synth-lib.rkt") ;; saw-d1
+  (module test-generators rai/stream
+    (require rai/synth-lib) ;; saw-d1
     (provide (all-defined-out))
     (define sawtooth0 saw-d1)
     (define (sawtooth1) (saw-d1 .001))
@@ -31,11 +31,17 @@
   (stop))
 
 (define sawtooth0_ (ai-network sawtooth0))
+;(define vibrato-tone
+;  (network ()
+;           [lfo (sine-wave 5)]
+;           [sig (sawtooth0_ (* .01 lfo))]
+;           [out (* 0.5 sig)]))
+
 (define vibrato-tone
   (network ()
-           [lfo (sine-wave 5)]
-           [sig (sawtooth0_ (* .01 lfo))]
-           [out (* 0.5 sig)]))
+           [lfo = (sine-wave 5)]
+           [sig = (sawtooth0_ (* .01 lfo))]
+           [out = (* 0.5 sig)]))
 
 (define (test)
   (test-play reference)
@@ -47,8 +53,8 @@
   )
 
 
-
-(test)
+;; FIXME: rsound api changed..
+;; (test)
 
 
 

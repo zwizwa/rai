@@ -1,12 +1,12 @@
 #lang racket/base
-(require "ai-array-c.rkt")
+(require rai/ai-array-c)
 
 (provide (all-defined-out))
 
 (define (reload)
   (define ns (make-base-namespace))
   (eval `(begin
-           (require "ai-array-c.rkt")
+           (require rai/ai-array-c)
            (require (file "synth.rkt"))
            (display (ai-array-c main #:nsi main-nsi)))
         ns))

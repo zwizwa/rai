@@ -5,24 +5,32 @@
 #	compalg.rkt.run \
 
 ALL_RUN := \
-	test-array-scheme.rkt.run \
-	test-delay.rkt.run \
-	test-map.rkt.run \
-	test-type.rkt.run \
+	synth.rkt.run \
 	test-ai-array.rkt.run \
-	test-ai-taylor.rkt.run \
-	test-series.rkt.run \
 	test-ai-autodiff.rkt.run \
-	test-matrix-lib.rkt.run \
-	test-ai-linpar.rkt.run \
+	test-ai-c.rkt.run \
 	test-ai-freq.rkt.run \
-	test_pd.g.run \
-	test-ai.rkt.run \
-	test-libproc.rkt.run \
-	test-ai-stream.rkt.run \
+	test-ai-linpar.rkt.run \
+	test-ai-network.rkt.run \
 	test-ai-proc.rkt.run \
+	test-ai.rkt.run \
+	test-ai-stream.rkt.run \
+	test-ai-taylor.rkt.run \
+	test-array-scheme.rkt.run \
+	test-axo.rkt.run \
+	test_benchmark.rkt.run \
+	test-delay.rkt.run \
+	test_jack.rkt.run \
+	test-lang.rkt.run \
+	test-lc2.rkt.run \
+	test-libproc.rkt.run \
+	test-map.rkt.run \
+	test-matrix-lib.rkt.run \
+	test_pd1.rkt.run \
+	test_pd.rkt.run \
+	test-series.rkt.run \
+	test-type.rkt.run \
 
-#	test-ai-network.rkt.run \
 
 ALL_BIN := \
 	test_pd.g.h \

@@ -1,7 +1,7 @@
 #lang racket
 (require portaudio
-         "ai-proc.rkt"
-         "libproc.rkt"
+         rai/ai-proc
+         rai/libproc
          ffi/vector)
 
 ;; Second generation livecoding environment.  Based on
@@ -11,8 +11,8 @@
 ;; It's probably best to use jack directly, since the code is C and
 ;; can run in real time.
 
-(module dsp "stream.rkt"
-  (require "synth-lib.rkt")
+(module dsp rai/stream
+  (require rai/synth-lib)
   (provide (all-defined-out))
 
   (define (main-generator)

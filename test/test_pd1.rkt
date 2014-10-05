@@ -1,5 +1,5 @@
-#lang s-exp "stream.rkt"
-(require "stream-lib.rkt")
+#lang s-exp rai/stream
+(require rai/stream-lib)
 (provide (all-defined-out))
 
 (define main-nsi 1)
