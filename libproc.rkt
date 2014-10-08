@@ -7,6 +7,9 @@
          ffi/unsafe/define
          "f32vector.rkt")
 
+(require racket/runtime-path)
+(define-runtime-path libproc-path "src/libproc")
+
 (provide
  ;; Provide only safe ops
  proc-load-sp
@@ -18,8 +21,14 @@
  proc-class-nin
  proc-class-nout
 )
- 
-(define-ffi-definer define-proc (ffi-lib "libproc"))
+
+
+
+
+(define-ffi-definer define-proc
+  (ffi-lib libproc-path)
+  ;; (ffi-lib "libproc")
+  )
 
 (define _void-pointer          (_cpointer _void))
 (define _float-pointer         (_cpointer _float))
