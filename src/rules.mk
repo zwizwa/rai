@@ -120,7 +120,7 @@ AXO_PATCH := $(shell readlink -f /home/tom/git/AxoStudio/patch)
 # This should be a separate platform
 %.dll: %.g.h $(RAI_SRC)/main_vst.cpp $(LICENSE_DEPS) $(RAI_SRC)/win_debug.h $(RAI_SRC)/proc.c
 	$(MINGW)gcc $(CFLAGS) -c $(RAI_SRC)/proc.c -o mingw_proc.o
-	$(MINGW)g++ $(CFLAGS_DLL) $(LICENSE_CFLAGS) -DPROC_FILE=\"$<\" $(RAI_SRC)/main_vst.cpp mingw_proc.o $(LDFLAGS_DLL) -shared -o $@
+	$(MINGW)g++ $(CFLAGS_DLL) $(LICENSE_CFLAGS) -Wno-main -Wno-narrowing -DPROC_FILE=\"$<\" $(RAI_SRC)/main_vst.cpp mingw_proc.o $(LDFLAGS_DLL) -shared -o $@
 	rm mingw_proc.o
 	$(MINGW)strip $@ ; ls -l $@
 
