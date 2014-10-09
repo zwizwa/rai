@@ -29,9 +29,6 @@ include config.mk
 include rules.mk
 
 
-%.html: %.scrbl
-	cd $(dir $<) ; scribble --htmls $(notdir $<)
-
 zwizwa: ~/www/zwizwa.be/rai/index.html
 
 ~/www/zwizwa.be/rai/index.html: doc/rai.scrbl

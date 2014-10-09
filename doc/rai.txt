@@ -1936,3 +1936,8 @@ Date: Fri Oct  3 18:36:21 CEST 2014
 rai/*.rkt -> simple require path
 rai/src   -> *.h *.c
 rai/test  -> test in terms of rai/...
+
+
+Entry: Remove the s-exp thing
+Date: Thu Oct  9 08:44:36 CDT 2014
+

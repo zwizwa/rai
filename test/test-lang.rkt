@@ -1,4 +1,5 @@
-#lang s-exp rai/stream
+#lang rai/stream
+;;#lang s-exp rai/stream
 (require rai/stream-lib
          rai/type
          rai/stream-meta)
