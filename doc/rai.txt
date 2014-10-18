@@ -1941,3 +1941,23 @@ rai/test  -> test in terms of rai/...
 Entry: Remove the s-exp thing
 Date: Thu Oct  9 08:44:36 CDT 2014
 
+(module reader syntax/module-reader
+  #:language `rai/stream)
+
+
+
+Entry: Writing a circuit simulator
+Date: Thu Oct 16 16:20:05 EDT 2014
+
+Mostly to gain some insight into discretization + some practical
+incentive to do "boutique" analog design.
+
+ - Set point analysis
+ - Linearized impedance / transfer functions
+
+How to make this work?  One thing that seems important is to figure
+out how to remove infinities due to ideal components.  E.g. opamps
+with finite gain and GBW.
+
+Can this be done through abstract interpretation?
+
