@@ -4,7 +4,7 @@ RACO=raco
 all:
 	make -C rai all
 remove:
-	$(RACO) pkg remove rai
+	$(RACO) pkg remove rai || echo not installed
 github: remove
 	$(RACO) pkg install github://github.com/zwizwa/rai/master
 link: remove
