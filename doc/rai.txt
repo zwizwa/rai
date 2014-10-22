@@ -1998,6 +1998,78 @@ source.
 Entry: Circuit editor
 Date: Tue Oct 21 18:47:10 EDT 2014
 
-It would be so cool to make this into a real-time circuit editor.
+It would be so cool to make this into a real-time circuit editor that
+produces sound on the fly.
 
 
+Entry: Specification language
+Date: Tue Oct 21 20:19:11 EDT 2014
+
+A first draft: an RC filter.
+All nodes are explicit.  It is up to the user to not connect them.
+A non-connected node is a node connected to a 0 current source.
+Current flows into the node from the outside of the n-port.
+
+n-ports do not have hidden supply nodes, so \sum I = 0 always holds.
+Does it need to be explicit? (1)
+
+  (nport
+   (terminals
+    (v_in  i_in)
+    (v_out i_out)
+    (v_gnd i_gnd))
+   (parameters
+    (R C))
+   (equations
+    (+ i_gnd i_in i_out)  ;; (1)
+    (+ i_gnd (* C (d/dt (- v_out v_gnd))))
+    (- i_in  (* R (- v_in v_out)))
+    ))
+
+
+6 unknowns, 3 degrees of freedom left.
+A full connection would be:
+
+  v_in  = x   input voltage
+  v_gnd = 0   common ground
+  i_out = 0   no output load
+
+
+TODO: identify state variables.
+
+A problem is expressions like (d/dt (- v1 v2)).  Those need to be made
+explicit, probably by adding extra unknowns.
+
+
+
+Entry: Serializing equations
+Date: Wed Oct 22 09:16:10 EDT 2014
+
+Given a set of equations:
+
+- For each d/dt, make sure the variable is naked.  Otherwise add new
+  variables and an extra equation.
+
+- Equations have a set of inputs.  Separate parameters from variables.
+
+- Solve set of equations
+
+- Repeat
+
+
+
+Looks like this will need some appropriate data structure traversals.
+Tree processing is always the big hurdle, so let's do it right this
+time.
+
+mapAccum[1] seems appropriate: process datastructure + update
+accumulator.  however, when this is a tree, there seems to be a
+conflict between substitution and traversal.  i.e. when a node
+processing function prunes a subtree, should the old one be traversed
+still?
+
+Let's bypass the d/dt rewriting and just assume d/dt operates on naked
+variables first.
+
+
+[1] http://www.haskell.org/hoogle/?hoogle=mapAccum
