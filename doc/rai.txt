@@ -1961,3 +1961,43 @@ with finite gain and GBW.
 
 Can this be done through abstract interpretation?
 
+
+
+Entry: Circuit simulation
+Date: Tue Oct 21 11:04:44 EDT 2014
+
+Been thinking about impedance and circuits.  Some conclusions:
+
+- It's possible to move nonlinearities into the temporal domain as
+  long as they are smooth enough.  I.e. a diode becomes (d = unit delay):
+
+  I[k]/I_s = e(V[k-1]/V_T) {1 + (V[k]-V[k-1])/V_T}
+  
+  I.e. the nonlinear relation is past->now, not now<->now.
+
+
+- For circuits, nonlinearity is essential (cannot be decoupled).
+  I.e. we need to keep that matrix and solve it.
+
+Open questions:
+
+- In what form should equations be specified?
+
+- How to translate equations into matrix form, i.e. separate variables
+  from coefficients and linearize nonlinear components.
+
+- Should voltages be floating or is a common ground assumed? -> NO
+
+
+Start with abstraction! Equations should be specified as n-ports.  A
+system that is solvable is a 0-port.  E.g. system of interest + input
+source.
+
+
+
+Entry: Circuit editor
+Date: Tue Oct 21 18:47:10 EDT 2014
+
+It would be so cool to make this into a real-time circuit editor.
+
+
