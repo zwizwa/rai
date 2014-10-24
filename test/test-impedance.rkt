@@ -16,7 +16,30 @@
 
 ;;   Id/Is = e(Vx0/VT) (1 + [Vx-Vx0]/VT)
 
+
+;; Code object
 (define-syntax-rule (nport . fms) 'fms)
+(define (nport-equations p)     (dict-ref p 'equations))
+(define (nport-terminals p)     (dict-ref p 'terminals))
+(define (nport-parameters p)    (dict-ref p 'parameters))
+(define op? pair?)
+(define op-rator car)
+(define op-rands cdr)
+
+;; Traverseal
+(define (fold-subexpressions equation fn [s '()])
+  (let ((s (fn equation s)))
+    (if (not (op? equation)) s
+        (for/fold
+            ((s s))
+            ((expr (op-rands equation)))
+          ;;(pretty-print expr)
+          (fold-subexpressions expr fn s)))))
+(define (fold-equations-subexpressions eqs fn [s '()])
+  (for/fold
+      ((s s))
+      ((eq eqs))
+    (fold-subexpressions eq fn s)))
 
 ;; Equations in normalized form: (equations eq eq ...) where eq = 0
 
@@ -41,12 +64,8 @@
     (v_in  i_in)
     (v_out i_out)
     (v_gnd i_gnd))
-   ;; Intermediate variables used to factor equations.
-   (intermediates
-    (v_c))
    ;; Externally specified parameters, i.e. matrix coefficients.
-   (parameters
-    (R C))
+   (parameters R C)
    ;; System equations
    (equations
     (- v_c (- v_out v_gnd))
@@ -63,33 +82,51 @@
 
 ;; mapaccum?
 
-(define (fold-subexpressions equation fn [s '()])
-  (if (not (pair? equation)) s
-      (for/fold
-          ((s (fn equation s)))
-          ((expr (cdr equation)))
-        (pretty-print expr)
-        (fold-subexpressions expr fn s))))
 
-(define (fold-equations-subexpressions eqs fn [s '()])
-  (for/fold
-      ((s s))
-      ((eq eqs))
-    
-    (fold-subexpressions eq fn s)))
 
-(define (nport-equations p) (dict-ref p 'equations))
-
+;; TOOLS
 (define (collect fn)
   (lambda (expr s)
-    (let ((v (fn expr)))
+    (let ((v (fn expr s)))
       (if v (cons v s) s))))
-  
+
+(define (collect/set fn)
+  (lambda (expr s)
+    (let ((v (fn expr)))
+      (if (and v (not (memv v s)))
+          (cons v s) s))))
+
+;; Collect all arguments of d/dt
 (define (derivatives p)
   (fold-equations-subexpressions
    (nport-equations p)
-   (collect
+   (collect/set
     (lambda (expr)
-      (and (pair? expr)
-           (eq? 'd/dt (car expr))
-           (cadr expr))))))
+      (and
+       (op? expr)
+       (eq? 'd/dt (op-rator expr))
+       (car (op-rands expr)))))))
+
+
+(define (variables p)
+  (define pars (nport-parameters p))
+  (fold-equations-subexpressions
+   (nport-equations p)
+   (collect/set
+    (lambda (expr)
+      ;; (pretty-print expr)
+      (and
+       (not (or (op?  expr)
+                (memv expr pars)))
+       expr)))))
+       
+         
+
+;; Collect variables in a matrix
+(define (info p)
+  (pretty-print
+   `((variables   ,(variables p))
+     (derivatives ,(derivatives p)))))
+
+(info p)
+
