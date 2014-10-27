@@ -2073,3 +2073,76 @@ variables first.
 
 
 [1] http://www.haskell.org/hoogle/?hoogle=mapAccum
+
+
+
+Entry: Splitting d/dt
+Date: Fri Oct 24 13:36:21 EDT 2014
+
+This equation expression
+
+    (+ i_gnd (* C (d/dt v_c)))  ;; = 0
+
+needs to be transformed into an update.  The update comes straight
+from the naked expression for the derivative so to normalize, expand
+everything to sum of products and bring the d/dt term to the other side.
+
+to solve the other equations, simply do not take this into account
+
+
+This is what comes out atm
+
+racket@test-impedance.rkt> (info p)
+((variables (i_out v_in i_in i_gnd v_gnd v_out v_c))
+ (derivatives (v_c))
+ (equations
+  ((algebraic
+    ((- v_c (- v_out v_gnd))
+     (- i_in (* R (- v_in v_out)))
+     (+ i_in i_out i_gnd)))
+   (diff
+    ((+ i_gnd (* C (d/dt v_c))))))))
+
+
+So.. for the algebraic instantaneous equations, the variables that
+have differentials are actually parameters.
+
+
+Now it might be easier to start with normal forms.  Later maybe add
+sugar on top but that's probably not necessary if the NFs are clear.
+
+Something like this
+
+dif:  (v e)            -> (= (d/dt v) e)           ;; e is any function of vars, params
+alg:  (c (c1 x1) ...)) -> (= c (+ (* c1 x1) ...))  ;; c, c1, ... are coefficients (can not depend on x1 ...)
+
+  (nport
+
+   (terminals
+    (v_in  i_in)
+    (v_out i_out)
+    (v_gnd i_gnd))
+
+   (parameters R C)
+   
+   (differential
+    (v_c (/ (- i_gnd) C)))
+
+   (algebraic
+    (0 (-1 v_c) (1 v_out) (-1 v_gnd))
+    (0 (-1 i_in) ((* -1 R) v_in) (* R v_out))
+    (0 (1 i_in) (1 i_out) (i_gnd))))
+
+
+
+So basic idea is that:
+- all linear variables are exposed 
+- all differential variables are exposed
+
+For non-linearity, it seems that just computing the coefficients
+through automatic differentiation is already enough to perform
+linearized approximation.
+
+I wonder if the whole thing can then be solved using iterative methods
+as well, since the solution doesn't change much from point to point.
+I.e. no matrix inversion.

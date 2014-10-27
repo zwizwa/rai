@@ -85,48 +85,70 @@
 
 
 ;; TOOLS
-(define (collect fn)
-  (lambda (expr s)
-    (let ((v (fn expr s)))
-      (if v (cons v s) s))))
 
-(define (collect/set fn)
+(define (collect maybe-value
+                 #:contains? [contains? memv]
+                 #:insert    [insert    cons])
   (lambda (expr s)
-    (let ((v (fn expr)))
-      (if (and v (not (memv v s)))
-          (cons v s) s))))
+    (let ((v (maybe-value expr)))
+      (if (and v (not (contains? v s)))
+          (insert v s)
+          s))))
 
+
+;; FIXME: use normal form instead?
 ;; Collect all arguments of d/dt
 (define (derivatives p)
-  (fold-equations-subexpressions
-   (nport-equations p)
-   (collect/set
-    (lambda (expr)
-      (and
-       (op? expr)
-       (eq? 'd/dt (op-rator expr))
-       (car (op-rands expr)))))))
+ (fold-equations-subexpressions
+  (nport-equations p)
+  (collect
+   (lambda (expr)
+     (and
+      (op? expr)
+      (eq? 'd/dt (op-rator expr))
+      (car (op-rands expr)))))))
 
-
+;; Collect all equation variables = non-parameter leaf nodes
 (define (variables p)
   (define pars (nport-parameters p))
   (fold-equations-subexpressions
    (nport-equations p)
-   (collect/set
+   (collect
     (lambda (expr)
       ;; (pretty-print expr)
       (and
-       (not (or (op?  expr)
-                (memv expr pars)))
+       (not (op?  expr))
+       (not (memv expr pars))
        expr)))))
-       
-         
 
-;; Collect variables in a matrix
+(define (diff? eq)
+  (not
+   (null?
+    (fold-subexpressions
+     eq
+     (collect
+      (lambda (expr)
+        (and (op? expr)
+             (eq? (op-rator expr) 'd/dt)
+             expr)))))))
+                       
+
+(define (split-eq p)
+  (define eqs (nport-equations p))
+  `((algebraic ,(filter (lambda (eq) (not (diff? eq))) eqs))
+    (diff ,(filter diff? eqs))))
+
+
 (define (info p)
   (pretty-print
    `((variables   ,(variables p))
-     (derivatives ,(derivatives p)))))
+     (derivatives ,(derivatives p))
+     (equations ,(split-eq p)))))
+
+
 
 (info p)
+
+;; - separate differential updates  (separate diff eqs from other)
+;; - flatten remainer into matrix.
 
