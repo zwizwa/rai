@@ -2146,3 +2146,30 @@ linearized approximation.
 I wonder if the whole thing can then be solved using iterative methods
 as well, since the solution doesn't change much from point to point.
 I.e. no matrix inversion.
+
+
+Entry: Rethinking circuit representation
+Date: Wed Nov  5 10:25:45 EST 2014
+
+I'm starting to understand the spice rationale[1].  The basic model is
+that of a resistive network with one node dedicated as ground node.
+Equations are set up using KCL for each non-ground node.  This gives a
+relation between node voltages and currents flowing into each node:
+
+    G V = I
+
+This is just a relation.  It can be interpreted as currents drawn from
+voltage sources, or node voltages caused by current sources.
+
+The matrix G is symmetric, positive definite.
+- symmetric: a resistor has no directionality
+- positive definite: V^T G V = V^T I = P, total power is always > 0
+
+Starting from this basic model, SPICE linearizes the equations and
+performs NR iterations at a particular time instance, and uses one of
+several integration methods to move forward in time.
+
+The structure of G allows for Krylov subspace methods (conjugate
+gradient, lanczos)
+
+[1] entry://../math/20141105-000511
