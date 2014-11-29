@@ -2,7 +2,8 @@ MZSCHEME=mzscheme
 RACO=raco
 
 all:
-	make -C rai all
+	make -C src
+	make -C test
 remove:
 	$(RACO) pkg remove rai || echo not installed
 github: remove
