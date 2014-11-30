@@ -7,9 +7,12 @@
          racket/system)
 
 (provide
+ ai-proc-debug
  ai-proc
  ai-sp
  ai-sp/.g.h)
+
+(define ai-proc-debug (make-parameter #f))
 
 ;; Convert stream function to C code, compile and run.
 
@@ -32,7 +35,7 @@
                                   rai-dir rules.mk build-dir .sp)))
                  (printf "~a\n" cmd)
                  (system cmd))))))
-      (when #f ;; debug
+      (when (ai-proc-debug)
         (display compile-out)
         (system (format "cat ~a" .g.h)))
       (delete-file .g.h)

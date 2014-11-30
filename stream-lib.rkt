@@ -61,8 +61,7 @@
          (if expired
              0 (+ count 1))
          count)
-     (float expired)
-     ;; (if (and gate expired) 1 0)
+     (if (and gate expired) 1 0)
      )))
 
 (define (positive-edge (last) (input))
@@ -70,7 +69,7 @@
 (define (negative-edge (last) (input))
   (values input (< input last)))
 
-(define (clocked-timer (count) (period clock))
+(define (clocked-timer period clock)
   (gated-timer period (positive-edge clock)))
   
 

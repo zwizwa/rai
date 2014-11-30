@@ -43,14 +43,18 @@
 
 #define p_integer(op,a,b) (((i_ )(a)) op ((i_)(b)))
 
-#define p_and(a,b)  p_integer(&,a,b)
-#define p_or(a,b)   p_integer(|,a,b)
-#define p_xor(a,b)  p_integer(&,a,b)
+// logic
+#define p_and(a,b)  p_integer(&&,a,b)
+#define p_or(a,b)   p_integer(||,a,b)
+#define p_not(a)    (!((i_)(a)))
+
+// bitwise
+#define p_xor(a,b)  p_integer(^,a,b)
+
 #define p_mod(a,b)  p_integer(%,a,b)
 #define p_quot(a,b) p_integer(/,a,b)
 #define p_sal(a,b)  p_integer(<<,a,b)
 #define p_sar(a,b)  p_integer(>>,a,b)
-#define p_not(a)    (!((i_)(a)))
 
 
 #define p_lt(a,b)  ((a) < (b))

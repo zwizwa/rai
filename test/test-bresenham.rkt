@@ -38,4 +38,6 @@
 (@ ((t pose) '(1 1 1 0 0 0 1 1 1 0 0 0)))
 (@ ((t nege) '(1 1 1 0 0 0 1 1 1 0 0 0)))
 
-(@s ((t gated-timer) (l 2) (l 1)))
+(@ ((t gated-timer) (l 2) (l '(1 0))))
+(@ ((t clocked-timer) (l 2) (l '(1 0))))
+
