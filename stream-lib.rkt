@@ -41,6 +41,9 @@
             (+ min (* range phase)))))
 
 
+;; Same, but output 1 on transition, 0 otherwise.  Roll this into
+;; phasor as second output?
+
 
 ;; 1st order discrete differentiator
 (define (diff i)

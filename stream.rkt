@@ -53,6 +53,11 @@
   (ai-atan  atan)
   (ai-floor floor)
 
+  (ai-and   and)
+  (ai-or    or)
+  (ai-not   not)
+  (ai-xor   xor)
+  
   (ai-lt    <)
   
   (ai-if    if)

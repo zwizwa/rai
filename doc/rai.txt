@@ -2173,3 +2173,119 @@ The structure of G allows for Krylov subspace methods (conjugate
 gradient, lanczos)
 
 [1] entry://../math/20141105-000511
+
+
+
+Entry: Moving things forward
+Date: Sat Nov 29 13:27:41 EST 2014
+
+Haven't had a lot of clarity lately - life taking too much energy.
+Looks like the coming week will be open to get some things out of the
+way and make some noise!
+
+Thigs to do:
+- Pattern sequencer / rhythm generator
+- OSC frontend
+
+
+Entry: 4 on the floor
+Date: Sat Nov 29 13:34:59 EST 2014
+
+Let's get a simple bass drum working.  Involves the whole chain:
+- sequencer
+- OSC or MIDI
+- bass drum synth
+- audio output
+
+
+Entry: Sequencer from first principle
+Date: Sat Nov 29 14:13:43 EST 2014
+
+Basically what I'm working towards anyway is analog synthesis, so
+let's make a sequencer as such.
+
+What is a sequencer?  A cyclic array with a phase.  So it can be
+driven as a phasor.  Really, that's all there is to it.
+
+From the system's point of view, this is a table playback synth.
+
+I'm re-inventing Pd..
+
+How to make table playback work in RAI?
+
+Maybe it's easier to start algorythmically first.
+
+
+Entry: Bresenham's Algorithm
+Date: Sat Nov 29 14:28:49 EST 2014
+
+Basically I'm thinking about the Euclidian Rhythms idea[1].
+Is there a way to express this directly?
+
+It seems looking at it from a Bresenham's line drawing pov. removes
+the "off-line" part of the algorithm and turns it into an incremental
+process.
+
+Let's see.
+
+The basic idea[2] is to make a decision each time to jump or not jump.
+This is done based on phase.  At each step an increment is added to
+the phase (the slope of the line) and every time we pass through 0, a
+jump is made.
+
+Essentially, this is the same as an integrating delta/sigma modulator.
+
+I believe this is also mentioned in [1]?  No in [3].  So it seems
+Euclid, Bresenham and SD are all related[4].
+
+[1] http://cgm.cs.mcgill.ca/~godfried/publications/banff.pdf
+[2] http://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+[3] http://en.wikipedia.org/wiki/Delta-sigma_modulation
+[4] http://www.cs.tau.ac.il/~nachum/calendar-book/papers/bresenham.pdf
+
+
+Entry: Bresenham phasor/pulsor?
+Date: Sat Nov 29 16:13:30 EST 2014
+
+Is a phasor enough?  No.  What is needed is a pulsor: something that
+sends a 1 on transition and 0 otherwise.  Let's add that to the
+library.
+
+What this needs is a different primitive.  `wrap01' as used in phasor
+is not primitive, or "primitive enough".  There needs to be a wrap01
+that also produces the carry bit.  I.e. div/rem.
+
+I'm already using:
+
+(define (wrap01 x) (- x (floor x))) 
+
+
+
+Entry: Using integers
+Date: Sat Nov 29 16:37:41 EST 2014
+
+In practice, using just floating point is too limiting.  Is there a
+way to introduce integers without making the core language typed?
+
+Typing can easily be inferred, so is there a way to fake the use of
+integers?
+
+Is typing actually necessary at that level?  Why can't a number just
+be a number, leaving the float/int distinction to compile time?
+
+Let's try that first.
+
+
+Entry: Core language
+Date: Sat Nov 29 18:17:35 EST 2014
+
+The dataflow primitives should be optional: they do not require
+"machinery".
+
+One of the major problems is to implement a set of N operators out of
+P primitives, where N > P, and there are many sets of P of different
+sizes.  Algorithms written in set of N should be implementable in
+terms of a wide set of different P without too much trouble.
+
+
+

@@ -40,10 +40,13 @@
 #define p_mul(a,b) ((a) * (b))
 #define p_div(a,b) ((a) / (b))
 
-#define p_and(a,b) ((a) & (b))
-#define p_or(a,b)  ((a) | (b))
-#define p_xor(a,b) ((a) ^ (b))
-#define p_mod(a,b) ((a) % (b))
+
+#define p_integer(op,a,b) (((i_ )(a)) op ((i_)(b)))
+
+#define p_and(a,b) p_integer(&,a,b)
+#define p_or(a,b)  p_integer(|,a,b)
+#define p_xor(a,b) p_integer(&,a,b)
+#define p_mod(a,b) p_integer(%,a,b)
 
 #define p_lt(a,b)  ((a) < (b))
 
