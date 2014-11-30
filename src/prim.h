@@ -50,6 +50,7 @@
 #define p_quot(a,b) p_integer(/,a,b)
 #define p_sal(a,b)  p_integer(<<,a,b)
 #define p_sar(a,b)  p_integer(>>,a,b)
+#define p_not(a)    (!((i_)(a)))
 
 
 #define p_lt(a,b)  ((a) < (b))

@@ -41,14 +41,38 @@
             (+ min (* range phase)))))
 
 
-;; Same, but output 1 on transition, 0 otherwise.  Roll this into
-;; phasor as second output?
-
-
 ;; 1st order discrete differentiator
 (define (diff i)
   (- i (z^-1 i)))
 
+
+;;; Discrete timers
+
+(define (timer (count) (period))
+  (let* ((not-expired (< count period)))
+    (values
+     (if not-expired (+ count 1) 0)
+     (if not-expired 0           1))))
+
+(define (gated-timer (count) (period gate))
+  (let* ((expired (not (< count period))))
+    (values
+     (if gate
+         (if expired
+             0 (+ count 1))
+         count)
+     ;; expired
+     (if (and gate expired) 1 0)
+     )))
+
+(define (positive-edge (last) (input))
+  (values input (< last input)))
+(define (negative-edge (last) (input))
+  (values input (< input last)))
+
+(define (clocked-timer (count) (period clock))
+  (gated-timer period (positive-edge clock)))
+  
 
 
 ;; ** SCALAR OPS **

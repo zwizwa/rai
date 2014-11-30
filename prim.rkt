@@ -12,6 +12,7 @@
 (define (p_and a b) (bitwise-and a b))
 (define (p_or  a b) (bitwise-ior a b))
 (define (p_xor a b) (bitwise-xor a b))
+(define (p_not a)   (if a 0 1))
 
 
 (define (p_div a b)

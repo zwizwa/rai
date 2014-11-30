@@ -251,6 +251,7 @@
   (define e-and  (e-prim 'p_and  p_and))
   (define e-or   (e-prim 'p_or   p_or))
   (define e-xor  (e-prim 'p_xor  p_xor))
+  (define e-not  (e-prim 'p_not  p_not))
   (define e-quot (e-prim 'p_quot p_quot))
   (define e-mod  (e-prim 'p_mod  p_mod))
   (define e-sal  (e-prim 'p_sal  p_sal))
@@ -407,6 +408,12 @@
         (apply values
                (append accus outs/a)))))
    
+  ;; Why is cast/n a lazy operation?  What about e-cast here?
+  ;(define (e-cast type)
+  ;  (lambda (sem val)
+  ;    (let ((b ((e-copy/cast sem) val)))
+  ;      (unify! (node-type b) type)
+  ;      b))
 
   (define (cast/n sem T in-node)
     (if (number? in-node)
@@ -568,6 +575,8 @@
         (unify! (node-type b) Int)  ;; Booleans are integer bitmasks
         b)))
 
+
+
   (define e-lt (e-prim-pred 'p_lt p_lt))
   
   (define (e-if sem c a b)
@@ -615,6 +624,7 @@
              #:and        e-and
              #:or         e-or
              #:xor        e-xor
+             #:not        e-not
              #:mod        e-mod
              #:quot       e-quot
 

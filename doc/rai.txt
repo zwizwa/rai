@@ -2302,3 +2302,43 @@ Date: Sat Nov 29 22:46:02 EST 2014
 
 This is most likely due to 'm' being used in one of the C macros.
 Yep.
+
+
+
+Entry: Rhythms
+Date: Sat Nov 29 22:56:42 EST 2014
+
+So bresenham sequence is done.  How to "oversample" it?
+Simple: add a clock input.  This needs a timer abstraction.
+
+
+Entry: Timers
+Date: Sun Nov 30 09:37:04 EST 2014
+
+Needed: an abstraction to implement (clocked) timers without doing div/mod.
+
+It is currently very awkward to express conditional statements.
+Probably because they are dataflow, not control flow..
+
+One problem is that `values' cannot be used inside of `if'.  
+Maybe that should be changed?
+
+The other is that I find it very hard to express the logic of a
+clocked timer: i.e. only do somthing when clock is high.
+
+
+
+Entry: Float / Int
+Date: Sun Nov 30 10:31:31 EST 2014
+
+Time to fix it properly.
+Where is the typing happening?
+
+Time to decouple that?  Probably not.. Very interwoven and would
+require a separate representation - possibly making things more
+complicated.
+
+It seems that the primitives just need to be typed properly.  Maybe
+best to add some explicit conversions?
+
+In order to do this properly, first set up a test.
