@@ -1,40 +1,26 @@
 #lang racket/base
 (require rai/ai-stream
          rai/tools
+         rai/test-tools
 ;         rai/stream-syntax
 ;         rai/stream-lib
 ;         "test_pd.rkt"
 ;         "test-lang.rkt"
          )
 
-;; Simple test macro.
-(define-syntax-rule (t . a)
-  (begin
-    (display ";; ")
-    (pretty-print '(t . a))
-    (ai-stream . a)))
 
 ;; Some stream functions
-(begin
-  (module dsp rai/stream
-    (provide (all-defined-out))
-    (define (test (s) ())
-      (values (and (+ s 1) #xF) s))
-    )
-  (require 'dsp))
+(module dsp rai/stream
+  (provide (all-defined-out))
+  (define (bres (s) (i m))
+    (let ((next (+ s i)))
+      (values (mod  next m)
+              (quot next m)
+              ))))
+(require 'dsp)
 
+(define (l x) (make-list 20 x))
 
-;; Transpose
-(define (@ x)
-  (apply values
-         (transpose
-          (sequence-take
-           (sequence-map list x)
-           20))))
-;; Multi-valued
-(define-syntax-rule (@s . e)
-  (apply values (map @ (values-list . e))))
+; (t bres)
 
-(define res
-  (@ ((t test) (make-list 20 0))))
-res
+(@ ((t bres) (l 3) (l 8)))

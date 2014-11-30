@@ -278,8 +278,16 @@
     (or  2)
     (xor 2)
     (not 1)
-    
+
+    ;; Racket doesn't have a logic shift, probably because bignums
+    ;; have "infinite bitdepth" so sign bit is always there.  Is a
+    ;; logic shift really necessary?
+    (sal 2)
+    (sar 2)
+
+    (quot 2)
     (mod 2)
+    
     (floor 1)        ;; integer s.t. 0 <= x - floor(x) <= 1  (not "< 1" !!!)
     (sin 1)
     (cos 1)

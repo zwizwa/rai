@@ -22,7 +22,12 @@
 (define (p_pow a b) (expt a b))
 
 
-(define (p_mod a b) (remainder a b))
+(define (p_mod a b)  (remainder a b))
+(define (p_quot a b) (quotient a b))
+
+(define (p_sal a b) (arithmetic-shift a b))
+(define (p_sar a b) (arithmetic-shift a (- b)))
+
 
 (define (p_floor x) (floor x))
 

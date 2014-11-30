@@ -114,10 +114,11 @@
 
     ;; Iteration over all nodes, useful for building indexing
     ;; structures and/or code.
-    (printf "#define ~a_~a(m) \\\n" (pfx "for") tag)
+    ;; FIXME: the parameter name can conflict with a variable name.
+    (printf "#define ~a_~a(__macro__) \\\n" (pfx "for") tag)
     (for ((n nodes))
       ;; (pp n)
-      (printf "~am(~a) \\\n"
+      (printf "~a__macro__(~a) \\\n"
               tab-string
               (c-list `(,(node-name n)
                         ,(ctype (node-base-type n))

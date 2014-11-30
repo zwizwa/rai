@@ -57,6 +57,12 @@
   (ai-or    or)
   (ai-not   not)
   (ai-xor   xor)
+
+  (ai-quot  quot)
+  (ai-mod   mod)
+
+  (ai-sar   >>)
+  (ai-sal   <<)
   
   (ai-lt    <)
   

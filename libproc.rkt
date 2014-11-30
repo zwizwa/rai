@@ -172,6 +172,10 @@
          
 
 (define (proc-run! p ins/n [outs #f])
+  (when (null? ins/n)
+    (let ((n 10))
+    (printf "FIXME: running proc without inputs.  Setting length to ~s\n" n)
+    (set! ins/n n)))
   (let-values
       (((n ins)
         (if (number? ins/n)

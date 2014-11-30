@@ -2289,3 +2289,16 @@ terms of a wide set of different P without too much trouble.
 
 
 
+Entry: bug: 'm' as variable name causes problems
+Date: Sat Nov 29 22:46:02 EST 2014
+
+(module dsp rai/stream
+  (provide (all-defined-out))
+  (define (bres (s) (inc m))
+    (let ((next (+ s inc)))
+      (values (mod  next m)
+              (quot s    m)
+              ))))
+
+This is most likely due to 'm' being used in one of the C macros.
+Yep.

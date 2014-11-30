@@ -244,14 +244,17 @@
              (node/lit (expr->node/lit fn expr unify?)))
         node/lit)))
 
-  (define e-mul (e-prim 'p_mul p_mul))
-  (define e-div (e-prim 'p_div p_div))
-  (define e-add (e-prim 'p_add p_add))
-  (define e-sub (e-prim 'p_sub p_sub))
-  (define e-and (e-prim 'p_and p_and))
-  (define e-or  (e-prim 'p_or  p_or))
-  (define e-xor (e-prim 'p_xor p_xor))
-  (define e-mod (e-prim 'p_mod p_mod))
+  (define e-mul  (e-prim 'p_mul  p_mul))
+  (define e-div  (e-prim 'p_div  p_div))
+  (define e-add  (e-prim 'p_add  p_add))
+  (define e-sub  (e-prim 'p_sub  p_sub))
+  (define e-and  (e-prim 'p_and  p_and))
+  (define e-or   (e-prim 'p_or   p_or))
+  (define e-xor  (e-prim 'p_xor  p_xor))
+  (define e-quot (e-prim 'p_quot p_quot))
+  (define e-mod  (e-prim 'p_mod  p_mod))
+  (define e-sal  (e-prim 'p_sal  p_sal))
+  (define e-sar  (e-prim 'p_sar  p_sar))
   
 
   
@@ -613,6 +616,10 @@
              #:or         e-or
              #:xor        e-xor
              #:mod        e-mod
+             #:quot       e-quot
+
+             #:sal        e-sal
+             #:sar        e-sar
 
              #:exp        (e-prim 'p_exp   p_exp)
              #:log        (e-prim 'p_log   p_log)

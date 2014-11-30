@@ -3,15 +3,10 @@
          rai/stream-syntax
          rai/stream-lib
          rai/tools
+         rai/test-tools
          "test_pd.rkt"
          "test-lang.rkt")
 
-;; Simple test macro.
-(define-syntax-rule (t . a)
-  (begin
-    (display ";; ")
-    (pretty-print '(t . a))
-    (ai-stream . a)))
 
 ;; Some stream functions
 (begin
@@ -22,17 +17,6 @@
     )
   (require 'dsp))
 
-
-;; Transpose
-(define (@ x)
-  (apply values
-         (transpose
-          (sequence-take
-           (sequence-map list x)
-           20))))
-;; Multi-valued
-(define-syntax-rule (@s . e)
-  (apply values (map @ (values-list . e))))
 
 ;; To identify dimensions:
 ;; 1 - number of inputs
