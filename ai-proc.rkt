@@ -32,7 +32,9 @@
                                   rai-dir rules.mk build-dir .sp)))
                  (printf "~a\n" cmd)
                  (system cmd))))))
-      ;; (display compile-out)
+      (when #f ;; debug
+        (display compile-out)
+        (system (format "cat ~a" .g.h)))
       (delete-file .g.h)
       .sp)))
 

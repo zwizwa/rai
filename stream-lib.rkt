@@ -61,8 +61,8 @@
          (if expired
              0 (+ count 1))
          count)
-     ;; expired
-     (if (and gate expired) 1 0)
+     (float expired)
+     ;; (if (and gate expired) 1 0)
      )))
 
 (define (positive-edge (last) (input))
@@ -181,6 +181,8 @@
 ;; unification completely.
 (define-syntax-rule (::Float x) (cast 'ignored x))
 
+(define (int x)   (cast Int x))
+(define (float x) (cast Float x))
 
 
 ;; TO DECIDE:
