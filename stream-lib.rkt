@@ -27,6 +27,8 @@
 ;; inserted into cos(2*pi*phase) or sin(2*pi*phase), since all
 ;; integers map to a single point.
 
+;; FIXME: remove 'floor' from primitives and do the Int/Float thing here.
+
 (define (wrap01 x) (- x (floor x))) 
 
 ;; [min,max] phase oscillator update with increment stream.
@@ -44,6 +46,15 @@
 ;; 1st order discrete differentiator
 (define (diff i)
   (- i (z^-1 i)))
+
+;; Ordinary binary clocked state machines are a useful class of
+;; primitives.
+
+(define (positive-edge (last) (input))
+  (values input (> input last)))
+(define (negative-edge (last) (input))
+  (values input (< input last)))
+
 
 
 ;;; Discrete timers
@@ -63,11 +74,6 @@
          count)
      (if (and gate expired) 1 0)
      )))
-
-(define (positive-edge (last) (input))
-  (values input (< last input)))
-(define (negative-edge (last) (input))
-  (values input (< input last)))
 
 (define (clocked-timer period clock)
   (gated-timer period (positive-edge clock)))
@@ -111,41 +117,6 @@
 
 ;; For binding, type and loop manipulation, Scheme surface syntax is required.
 
-;; (define-syntax bus1
-;;   (syntax-rules ()
-;;     ((_ T l () e)       (bus1 T l e))
-;;     ((_ T l (c . cs) e) (bus1 T l cs (let ((c (const T c))) e)))
-;;     ((_ T (i) e)        (bus1 T (i n) e))
-;;     ((_ T () e)         (bus1 T (i n) e))
-;;     ((_ T (i n) e)      (reduce T reduce-+ init-0 (i n) e))
-;;     ))
-
-;; ;; Old syntax.  Default to array.
-;; (define-syntax bus
-;;   (syntax-rules ()
-;;     ((_ (ctor . ca) . a) (bus1 (ctor . ca)  . a))
-;;     ((_ size . a)        (bus1 (Array 'size) . a))  
-;;     ))
-
-
-;; ;; Use syntax-case: the ... pattern in the expansion doesn't seem to
-;; ;; work with syntax-rules.
-;; (define-syntax (bus__ stx)
-;;   (syntax-case stx ()
-;;     ((_ bus-size
-;;         ()
-;;         (c ...)
-;;         body)
-;;      #`(ai-for (Array 'bus-size)
-;;                (lambda (s) ;; FIXME: use vector state for multiple summation
-;;                  (+ s
-;;                     (let ((c (const (Array 'bus-size) c)) ...)
-;;                       body)))
-;;                (0)
-;;                ()))))
-
-
-
 (define-syntax mix
   (syntax-rules ()
     ((_ (i ...) ;; same as `loop' index spec
@@ -180,12 +151,11 @@
 ;; unification completely.
 (define-syntax-rule (::Float x) (cast 'ignored x))
 
+
+;; Shortcuts
 (define (int x)   (cast Int x))
 (define (float x) (cast Float x))
+(define (> a b)   (not (< a b)))
 
 
-;; TO DECIDE:
-;; There is a lot of useful closed code in the Kmook project.
-;; Some of that might be opened up.
-;; Drop me a line if you're interested.
-;; - Tom
+

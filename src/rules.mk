@@ -35,6 +35,10 @@ LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 %.jack: %.g.h $(RAI_SRC)/prim.h $(RAI_SRC)/main_jack.c $(RAI_SRC)/proc.h $(LIBPROC_O) $(RKT)
 	gcc -DPROC_FILE=\"$<\" -DCLIENT_NAME=\"$*\" $(CFLAGS) $(RAI_SRC)/main_jack.c $(LIBPROC_O) $(LDFLAGS) `pkg-config jack --cflags --libs` -o $@
 
+# Pulseaudio wrapper, standalone ELF
+%.pulse: %.g.h $(RAI_SRC)/prim.h $(RAI_SRC)/main_pulse.c $(RAI_SRC)/proc.h $(LIBPROC_O) $(RKT)
+	gcc -DPROC_FILE=\"$<\" -DCLIENT_NAME=\"$*\" $(CFLAGS) $(RAI_SRC)/main_pulse.c $(LIBPROC_O) $(LDFLAGS) `pkg-config libpulse-simple --cflags --libs` -o $@
+
 
 # Object files containing base name of the file as a global symbol
 # pointing to a struct proc_class.

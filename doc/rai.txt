@@ -2342,3 +2342,79 @@ It seems that the primitives just need to be typed properly.  Maybe
 best to add some explicit conversions?
 
 In order to do this properly, first set up a test.
+
+EDIT: Was already there in the form of cast/n primitive.  However,
+that isn't correct: it decouples unification completely.  It works in
+some cases because there is enough type information coming in before
+the cast.  Fix this when it becomes a problem?
+
+
+Entry: Envelopes
+Date: Mon Dec  1 11:44:08 EST 2014
+
+Rewrite envelopes in terms of "digital logic" primitives?
+
+
+Entry: Generative Piece
+Date: Mon Dec  1 11:53:35 EST 2014
+
+There is enough infrastructure now to make a generative piece.
+Start with the livecode patch?
+
+Comments in test-lc2.rkt say it doesn't work well and should probably
+use jack directly.
+
+I'm more inclined to use pd.  IIRC that did work last time.
+
+Try src/sp_test.pd
+
+This needs src/sp_host.pd_linux
+
+.pdrc:
+-path /home/tom/git/rai/src
+
+Can't load synth.sp which is part of kmook project.
+
+Shall I just include the synth in rai?  No let's keep that separate
+for now.  Later move demo into rai project.
+
+pd.local sp_test.pd 
+
+
+Entry: Not Pd
+Date: Mon Dec  1 19:01:17 EST 2014
+
+I want to just run it on the command line.
+Probably best to start with pulseaudio.
+
+
+Entry: pulseaudio and jack
+Date: Mon Dec  1 19:15:39 EST 2014
+
+The short of it seems to be: don't[1].
+
+Maybe add a pulseaudio transport.  rsound already has this?  I believe
+it worked before but no longer does..  Maybe that was just jack.
+
+
+[1] http://jackaudio.org/faq/pulseaudio_and_jack.html
+[2] http://freedesktop.org/software/pulseaudio/doxygen/pacat-simple_8c-example.html
+
+
+Entry: linux and audio
+Date: Mon Dec  1 19:26:39 EST 2014
+
+Looks like this just got more and more messy..
+Stick to one thing?  That would be jack.
+
+rsound tries:
+- pcm_dsnoop
+- pcm_dmix
+- pulse
+- jack
+
+
+Entry: native pulseaudio
+Date: Mon Dec  1 19:33:00 EST 2014
+
+Is it hard to just connect to pulse?

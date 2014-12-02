@@ -1,0 +1,11 @@
+
+- ai-array.rkt:
+
+  - cast/n just decouples type inference.  needs base type
+    unification.  not a problem in many cases because there is enough
+    information to "fill" the unification graph.
+
+
+- type.rkt:
+
+  - add base type unification
