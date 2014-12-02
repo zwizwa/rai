@@ -128,6 +128,21 @@
     ((_ size streams body)
      (mix size () streams body))))
 
+;; Find a way to make mix, mix2 more general.
+(define-syntax mix2
+  (syntax-rules ()
+    ((_ (i ...) ;; same as `loop' index spec
+        vs body)
+     (loop (i ...)
+           ((accuL 0)
+            (accuR 0))
+           vs
+           (let-values (((L R) body))
+             (values (+ accuL L)
+                     (+ accuR R)))))
+    ((_ size streams body)
+     (mix size () streams body))))
+
 
 
 ;; Annotated parameters

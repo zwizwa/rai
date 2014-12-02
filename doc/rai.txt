@@ -2434,3 +2434,113 @@ being problematic for other reasons though..
 This is what I mean.  Why is this line commented out?
          ;; (out-nodes (copy-nodes semantics out-nodes-packed))
 
+
+
+Entry: Integers
+Date: Tue Dec  2 11:26:42 EST 2014
+
+Trying to make a 32bit overflowing phasor and it seems the typig falls
+short here.  Can't express it such that state is integer.
+
+(define (phasor32 (s) (period32))
+  (let* ((s_next (+ s period32)))
+    (* (/ 1 #x7FFFFFF)
+       (float s))))
+
+
+Entry: 1 - 1 ?
+Date: Tue Dec  2 11:41:49 EST 2014
+
+I don't remember what this is about:
+
+        float32_t r3 = p_copy(1.0);
+        float32_t r4 = p_sub(r3,1.0);
+
+It's part of the delay nodes - used for modulo 2^n indexing.
+
+
+
+Entry: Types..
+Date: Tue Dec  2 11:49:17 EST 2014
+
+So there is a problem.  Because of the implicit nature of state, I've
+opted to use an ad-hoc typing method[1].  However this seems to make
+it impossible to express certain constraints.
+
+Currently still lacking insight to tackle this.
+
+E.g. I want to express that a base type is Int, while it might be
+eventually typed as a grid.
+
+This seemingly needs some more infrastructure in the unification.
+I.e. some dormant annotation that kicks in when the recursive
+unification makes it to the leaf nodes of the type graph.
+
+
+
+[1] entry://20140114-160405
+
+
+Entry: Grid types explained (again) - Where is my morphism?
+Date: Tue Dec  2 13:35:16 EST 2014
+
+The `traditional' way of typing in a functional language is to
+deconstruct containers, i.e. a type (C t) will yield values of t that
+can be individually presented to a mapped or folded function.
+
+In RAI, the loop operator "unpacks" values, but their types are kept
+as grids.  Some magic happens whichs lifts all operations and values
+from scalars to grids of dimension d to dimension d+1.
+
+This is done in order to make it simpler to construct state associated
+to causal sequence processors.
+
+
+
+Somehow this representation encodes the morphism between (abstract)
+causal stream operators and programs implementing those in terms of
+iterated functions.
+
+But it is weird and inconsistent in the way I word it.  However it
+works fine to express what I want, which is to track the coordinates
+and dimensionality associated to each (named) node, in order to add
+hidden nodes to contain state.
+
+I find myself swimming in confusion about how to make this more
+concrete or formal.  It feels that I discovered something that already
+exists, but in a slightly different form and I don't recognize it.
+
+
+
+
+So what is wrong with this picture?
+
+Why are there two sides to this: scalars (there is an "unpack"
+operation as in:)
+
+
+
+Entry: loop and values should commute
+Date: Tue Dec  2 14:15:52 EST 2014
+
+I have a feeling this is currently an arbitrary limitation.
+
+The problem seems to be the (+ accu body) in the `mix' macro:
+
+(define-syntax mix
+  (syntax-rules ()
+    ((_ (i ...) ;; same as `loop' index spec
+        vs body)
+     (loop (i ...)
+           ((accu 0))
+           vs
+           (+ accu body)))
+    ((_ size streams body)
+     (mix size () streams body))))
+
+
+I have a feeling I'm going to keep running into special cases like
+this until there is a more formal way of thinking about grids..
+
+Solve it with a mix2 form for now..
+

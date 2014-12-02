@@ -164,6 +164,11 @@
 (define p_set #f)
 
 
+(define-syntax-rule (@ . expr)
+  (let ((vs (values-list expr)))
+    (pretty-print `(expr ,vs))
+    (apply values vs)))
+
 ;; (define a0 'a0)
 ;; (define a1 (index-permute a0 reverse))
 ;; (define a2 (index-permute a1 reverse))
