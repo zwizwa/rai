@@ -49,6 +49,22 @@
             (* g (saw-d3 (* f (+ 1 v1 v2))))
             (* g (saw-d3 (* f (+ 1 v3 v4)))))))))
 
+;; Saw decorrelation over time.
+;; Might be interesting to run this in reverse!
+(define (megasaw4)
+  (let ((f .001))
+    (mix2 (v (nb_osc 50))
+         ()
+         (let* ((v1 (* 0.001 (float v)))
+                (v2 (* v1 v1))
+                (v3 (* 0.0011 (float v)))
+                (v4 (* v3 v3))
+                (g 0.0005)
+                )
+           (values
+            (* g (saw-d3 (* f (+ 1 v1 v2))))
+            (* g (saw-d3 (* f (+ 1 v3 v4)))))))))
+
 (define (main samplerate)
   (megasaw3))
 

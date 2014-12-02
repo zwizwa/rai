@@ -2544,3 +2544,17 @@ this until there is a more formal way of thinking about grids..
 
 Solve it with a mix2 form for now..
 
+
+
+The problem seems to be that there are two mechanisms at work here:
+grids and the `values' construct.
+
+Again the packed vs. unpacked thing...
+Jumping between levels of abstraction.
+
+
+
+Entry: Stereo as grids?
+Date: Tue Dec  2 14:48:12 EST 2014
+
+Is there even a way to express this?
