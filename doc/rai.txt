@@ -2648,3 +2648,57 @@ Make this explicit.
 
 
 
+Entry: Big problem?
+Date: Tue Dec  2 16:25:40 EST 2014
+
+So to keep this realistic: how to fix this without doing a full
+rewrite?  The only thing that needs to be figured out is how to type a
+node.
+
+More precisely: the explicit types are available.  The question is:
+which storage dimensions can be optimized?
+
+E.g. giv a node type   (a b Int)
+
+Which one of the the dimensions can be condensed?
+
+none: (a b Int)
+b:    (a Int)
+a:    (b Int)
+both: Int
+
+
+The problem is that loop transformations can influence this.
+
+E.g. loop merging.
+
+
+
+Entry: How to think about loops?
+Date: Tue Dec  2 16:32:07 EST 2014
+
+This problem has been bugging me for what... 20 years?
+
+It looks like I've reached a point where I can't ignore it any more.
+
+There are no hacks that can solve this..  It needs insight..
+
+I need a loop transformation algebra.
+
+In Feldspar this is called Vector Fusion[1].  Maybe a good way to move
+forward is to express the feedback generation part in Feldspar?
+
+[1] http://www.cse.chalmers.se/~ms/MemoCode.pdf
+
+
+Entry: Next: two loop problems
+Date: Tue Dec  2 17:20:21 EST 2014
+
+- Incorrect references for the stereo grid.
+
+- Problems with intermediate results I ran into while doing reverbs.
+
+Both need a smarter way to determine what parts of a grid node can be
+re-used.
+
+

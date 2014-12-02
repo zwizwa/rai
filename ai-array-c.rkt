@@ -287,6 +287,10 @@
   ;; (stderr (gen-code))
   (with-output-to-string gen-code))
 
+(define-syntax-rule (@ . expr)
+  (let ((vs (values-list expr)))
+    (pretty-print `(expr ,vs))
+    (apply values vs)))
 
 ;; Compiler driver.
 (define (ai-array-c program

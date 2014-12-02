@@ -847,7 +847,9 @@
          `(! ,v ,@index ,@(time-coords v)))
         (v
          (if (external-node? v)
-             `(! ,v ,@(time-coords v))
+             `(! ,v
+                 ;; ,@(loop-context-indices lc)
+                 ,@(time-coords v))
              `(,(node-base-type v) ,v))))))
   
   (define (annotate-ref lc)
@@ -857,7 +859,9 @@
          `(@ ,v ,@index ,@(time-coords v)))
         (v
          (if (external-node? v)
-             `(@ ,v ,@(time-coords v))
+             `(@ ,v
+                 ;; ,@(loop-context-indices lc)
+                 ,@(time-coords v))
              v)))))
   
   (define (annotate-statement lc)
@@ -888,7 +892,6 @@
   
   (define (annotate-binding lc)
     (lambda (binding)
-      ;; (pp binding)
       (match binding
         ((list vars expr)
          (if (not (in-phase? vars))
