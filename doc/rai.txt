@@ -2418,3 +2418,19 @@ Entry: native pulseaudio
 Date: Mon Dec  1 19:33:00 EST 2014
 
 Is it hard to just connect to pulse?
+Nope.  See main_pulse.c and the %.pulse rule.
+
+No more excuses!
+
+EDIT: No more inspiration either..  So let's fix some bugs.
+
+
+Entry: Duplicating outputs
+Date: Tue Dec  2 11:11:41 EST 2014
+
+Fix by adding another copy operation?  I have a faint memory if this
+being problematic for other reasons though..
+
+This is what I mean.  Why is this line commented out?
+         ;; (out-nodes (copy-nodes semantics out-nodes-packed))
+

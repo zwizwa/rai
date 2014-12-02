@@ -705,7 +705,9 @@
          
          (all-in (append (state-in) (state-out) in-nodes))
          (out-nodes (map (unique-node semantics all-in) out-nodes-packed))
-         ;; (out-nodes (copy-nodes semantics out-nodes-packed))
+
+         ;; This makes all output nodes unique.
+         (out-nodes (copy-nodes semantics out-nodes-packed))
          )
 
       ;; Output base type constraint

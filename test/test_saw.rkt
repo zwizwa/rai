@@ -13,7 +13,8 @@
        ((t)     (* isr (nats)))
        ((f_osc) (* t 1000 isr))
        ((p)     (* .25 (phasor f_osc -.5 .5))))
-    (values p (+ 0.01 p))))
+    (values p p)))
+
 
 
   
