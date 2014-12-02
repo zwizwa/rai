@@ -2558,3 +2558,93 @@ Entry: Stereo as grids?
 Date: Tue Dec  2 14:48:12 EST 2014
 
 Is there even a way to express this?
+
+(define (main samplerate)
+  (loop (c (nb_channels 2))
+        ()
+        ()
+        (float c)))
+
+
+While it does actually see there are two channels through
+#define proc_size_out     PROC_NB_EL(struct proc_out,   float*)
+
+There is a crash because the array doesn't get indexed properly:
+
+        for (int i0 = 0; i0 < 2; i0 ++) {
+            out->r10[t] = p_copy(r9);
+        }
+
+Instead of:
+
+        for (int i0 = 0; i0 < 2; i0 ++) {
+            out->r10[i0][t] = p_copy(r9[i0]);
+        }
+
+Also the buffer allocation doesn't work either.
+
+
+There are a bunch of ad-hoc assumptions that make this not work out.
+
+It seems that all transformation happen in ai-array.rkt  (before ai-array-c)
+
+
+  (define (annotate-def lc)
+    (lambda (v)
+      (match v
+        ((list-rest '! v index)
+         `(! ,v ,@index ,@(time-coords v)))
+        (v
+         (if (external-node? v)
+             `(! ,v ,@(time-coords v))  ;; ***
+             `(,(node-base-type v) ,v))))))
+  
+  (define (annotate-ref lc)
+    (lambda (v)
+      (match v
+        ((list-rest '@ v index)
+         `(@ ,v ,@index ,@(time-coords v)))
+        (v
+         (if (external-node? v)
+             `(@ ,v ,@(time-coords v)) ;; ***
+             v)))))
+
+
+My guess is that the lines marked *** should also have
+(loop-context-indices lc).
+
+So that works for the output, but it turns out that the
+`internal-node?` hack is actually not consistent.
+
+        float32_t r9[2];
+        for (int r7 = 0; r7 < 2; r7 ++) {
+            float32_t r8 = p_copy(r7);
+            r9[r7] = p_copy(r8);
+        }
+        for (int i0 = 0; i0 < 2; i0 ++) {
+            out->r10[i0][t] = p_copy(r9);
+        }
+
+Not all internal nodes are scalars.
+Which is something I already ran into at another point.
+
+
+I'm thinking that it might be better to avoid this kind of condensed
+hack and just make the loop transformations explicit.
+
+Try to solve that as a separate problem.
+
+Or leave it to something like LLVM.
+
+The insight I'm really missing is these loop transformations.
+
+In the end, RAI array compiler does only two things:
+
+- Insert state storate and updates.
+- Eliminate temporary storage through reuse (internal nodes hack).
+
+
+Make this explicit.
+
+
+
