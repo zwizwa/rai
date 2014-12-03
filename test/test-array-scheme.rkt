@@ -6,7 +6,7 @@
  ;; Transformer environment references to abstract programs passed to
  ;; ai-array-scheme.
  (for-syntax
-  racket/base
+  ;; racket/base
   rai/stream-lib
   "test-lang.rkt"))
 
