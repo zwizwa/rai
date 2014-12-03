@@ -2702,3 +2702,13 @@ Both need a smarter way to determine what parts of a grid node can be
 re-used.
 
 
+
+Entry: Fixing array annotation
+Date: Wed Dec  3 11:27:38 EST 2014
+
+- add `imptype' dictionary
+
+- for each definition (through `annotate-def') add an element to this
+  dictionary.
+
+- for each reference (through `annotate-ref') refer to the dictionary

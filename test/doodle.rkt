@@ -65,15 +65,25 @@
             (* g (saw-d3 (* f (+ 1 v1 v2))))
             (* g (saw-d3 (* f (+ 1 v3 v4)))))))))
 
-(define (main samplerate)
-  (megasaw3))
+;(define (main samplerate)
+;  (megasaw3))
 
-;; (define (_main samplerate)
+;; (define (main samplerate)
 ;;   (loop (c (nb_channels 2))
 ;;         ()
 ;;         ()
 ;;         (float c)))
 
+
+(define (megasaw5)
+  (let ((f 0.002))
+    (loop (c (nb_channels 2))
+          ()
+          ()
+          (saw-d1 (* f (+ 1 (* 0.01 (float c))))))))
+
+(define (main samplerate)
+  (megasaw5))
 
 
   

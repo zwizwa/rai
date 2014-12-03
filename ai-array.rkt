@@ -95,6 +95,10 @@
 (define vbuf-out  (make-parameter* '()))
 (define vbuf-attr (make-parameter* '()))
 
+(define full-intl   (make-parameter* '()))  ;; Internal nodes of full type
+(define (full-intl! t) (full-intl (cons t (full-intl))))
+(define (full-intl? t) (memq t (full-intl)))
+
 ;; (define temp-dims (make-parameter* '()))  ;; Temp var dimensions.
 
 ;; Per node information.
@@ -116,6 +120,7 @@
                     (vbuf-in   '())
                     (vbuf-out  '())
                     (vbuf-attr '())
+                    (full-intl '())
 ;;                    (temp-dims '())
                     )
        (fn)))))
@@ -839,16 +844,23 @@
     (if (temporal-node? v) (list 't) '()))
 
   (define (node-base-type v) (type-base (node-type v)))
-  
+
+  ;; This is tricky and probably not completely consistent.  There are
+  ;; two paths here depending on whether explicit indexing was added
+  ;; in the first pass.
   (define (annotate-def lc)
     (lambda (v)
       (match v
         ((list-rest '! v index)
-         `(! ,v ,@index ,@(time-coords v)))
-        (v
+         (begin
+           ;; Register for proper dereference in `annotate-ref'
+           (pp `(full-intl! ,v))
+           (full-intl! v)  
+           `(! ,v ,@index ,@(time-coords v))))
+        (else
          (if (external-node? v)
              `(! ,v
-                 ;; ,@(loop-context-indices lc)
+                 ,@(loop-context-indices lc)
                  ,@(time-coords v))
              `(,(node-base-type v) ,v))))))
   
@@ -858,9 +870,10 @@
         ((list-rest '@ v index)
          `(@ ,v ,@index ,@(time-coords v)))
         (v
-         (if (external-node? v)
+         (if (or (external-node? v)
+                 (full-intl? v))
              `(@ ,v
-                 ;; ,@(loop-context-indices lc)
+                 ,@(loop-context-indices lc)
                  ,@(time-coords v))
              v)))))
   
