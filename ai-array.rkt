@@ -99,7 +99,6 @@
 (define (full-intl! t) (full-intl (cons t (full-intl))))
 (define (full-intl? t) (memq t (full-intl)))
 
-;; (define temp-dims (make-parameter* '()))  ;; Temp var dimensions.
 
 ;; Per node information.
 (define names  (make-parameter '()))  ;; Original state node names from source.  Debug - Not unique!
@@ -121,7 +120,6 @@
                     (vbuf-out  '())
                     (vbuf-attr '())
                     (full-intl '())
-;;                    (temp-dims '())
                     )
        (fn)))))
 
