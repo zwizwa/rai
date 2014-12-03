@@ -95,9 +95,12 @@
 (define vbuf-out  (make-parameter* '()))
 (define vbuf-attr (make-parameter* '()))
 
-(define full-intl   (make-parameter* '()))  ;; Internal nodes of full type
-(define (full-intl! t) (full-intl (cons t (full-intl))))
-(define (full-intl? t) (memq t (full-intl)))
+;; Record indexing size for special internal nodes.  This makes sure
+;; that ! and @ use the same kind of indexing.  Note that loop indices
+;; might change if loops are distinct, so always take from lc.
+(define spec-intl-dict   (make-parameter* (make-hasheq)))
+(define (spec-intl! t is) (dict-set! (spec-intl-dict) t (length is)))
+(define (spec-intl  t)    (dict-ref  (spec-intl-dict) t (lambda _ #f)))
 
 
 ;; Per node information.
@@ -119,7 +122,7 @@
                     (vbuf-in   '())
                     (vbuf-out  '())
                     (vbuf-attr '())
-                    (full-intl '())
+                    (spec-intl-dict (make-hasheq))
                     )
        (fn)))))
 
@@ -852,8 +855,7 @@
         ((list-rest '! v index)
          (begin
            ;; Register for proper dereference in `annotate-ref'
-           (pp `(full-intl! ,v))
-           (full-intl! v)  
+           (spec-intl! v index)  
            `(! ,v ,@index ,@(time-coords v))))
         (else
          (if (external-node? v)
@@ -861,19 +863,29 @@
                  ,@(loop-context-indices lc)
                  ,@(time-coords v))
              `(,(node-base-type v) ,v))))))
-  
+
+  ;; FIXME: The * below is a horrible hack.  For current use cases it
+  ;; seems to work, but it might break for higher-dimension loops.
+  ;; The right solution is an explicit way to represent internal node
+  ;; implementation types and a formalism that decides how grid types
+  ;; and implementation types are related.
   (define (annotate-ref lc)
     (lambda (v)
       (match v
         ((list-rest '@ v index)
          `(@ ,v ,@index ,@(time-coords v)))
         (v
-         (if (or (external-node? v)
-                 (full-intl? v))
-             `(@ ,v
-                 ,@(loop-context-indices lc)
-                 ,@(time-coords v))
-             v)))))
+         (cond
+          ((external-node? v)
+           `(@ ,v ,@(time-coords v)))
+
+          ((spec-intl v) =>
+           (lambda (spec-len)
+             (let* ((index (loop-context-indices lc))
+                    (index (take index spec-len))) ;; *
+               `(@ ,v ,@index ,@(time-coords v)))))
+
+          (else v))))))
   
   (define (annotate-statement lc)
     (match-lambda

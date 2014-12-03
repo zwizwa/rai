@@ -82,8 +82,33 @@
           ()
           (saw-d1 (* f (+ 1 (* 0.01 (float c))))))))
 
+(define (megasaw6)
+  (let ((f .001))
+    (loop (c (nb_channels 2))
+          ()
+          ()
+          (mix (v (nb_osc 50))
+               ()
+               (let* ((v1 (* 0.001 (float v)))
+                      (v2 (* v1 v1))
+                      (v3 (* 0.02 (float c)))
+                      (g 0.0005)
+                      )
+                 (* g (saw-d3 (* f (+ 1 v1 v2 v3)))))))))
+
+(define (test6)
+  (loop (c (nb_channels 2))
+        ()
+        ()
+        (mix (v (nb_osc 50))
+             ()
+             (float v))))
+
+
 (define (main samplerate)
-  (megasaw5))
+  (megasaw6)
+  ;;(test6)
+  )
 
 
   

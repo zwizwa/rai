@@ -2712,3 +2712,68 @@ Date: Wed Dec  3 11:27:38 EST 2014
   dictionary.
 
 - for each reference (through `annotate-ref') refer to the dictionary
+
+
+
+Entry: Still not fixed..
+Date: Wed Dec  3 12:30:15 EST 2014
+
+
+(define (megasaw6)
+  (let ((f .001))
+    (loop (c (nb_channels 2))
+          ()
+          ()
+          (mix (v (nb_osc 50))
+               ()
+               (let* ((v1 (* 0.001 (float v)))
+                      (v2 (* v1 v1))
+                      (v3 (* 0.02 (float c)))
+                      (g 0.0005)
+                      )
+                 (* g (saw-d3 (* f (+ 1 v1 v2 v3)))))))))
+
+(define (main samplerate)
+  (megasaw6))
+
+
+
+Simplifying:
+
+(define (test6)
+  (loop (c (nb_channels 2))
+        ()
+        ()
+        (mix (v (nb_osc 50))
+             ()
+             (float v))))
+
+
+    for (int t = 0; t < t_endx; t ++) {
+        struct proc_si * restrict si = (struct proc_si *)(&state[(t^0)&1]);
+        struct proc_so * restrict so = (struct proc_so *)(&state[(t^1)&1]);
+        float32_t r0 = p_copy(t);
+        float32_t r1 = p_copy(t_endx);
+        float32_t r3 = p_copy(1.0);
+        float32_t r4 = p_sub(r3,1.0);
+        so->r6 = p_sub(si->r5,1.0);
+        float32_t r12[2];
+        for (int r7 = 0; r7 < 2; r7 ++) {
+            float32_t r9 = p_copy(0.0);
+            for (int r8 = 0; r8 < 50; r8 ++) {
+                float32_t r10 = p_copy(r8);
+                float32_t r11 = p_add(r9,r10);
+                r9 = p_copy(r11);
+            }
+            r12[r7] = p_copy(r9[r7]);   // ***
+        }
+        for (int i0 = 0; i0 < 2; i0 ++) {
+            out->r13[i0][t] = p_copy(r12[i0]);
+        }
+    }
+
+
+Problem here is r9 in the *** marked line.
+This is probably defined as a (! ..) operator but still has the grid type.
+
+Essentially we just need to replace (! . is) with (@ . is).
