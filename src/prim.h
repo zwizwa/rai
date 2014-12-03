@@ -49,7 +49,9 @@
 #define p_not(a)    (!((i_)(a)))
 
 // bitwise
-#define p_xor(a,b)  p_integer(^,a,b)
+#define p_band(a,b)  p_integer(&,a,b)
+#define p_bor(a,b)   p_integer(|,a,b)
+#define p_bxor(a,b)  p_integer(^,a,b)
 
 #define p_mod(a,b)  p_integer(%,a,b)
 #define p_quot(a,b) p_integer(/,a,b)

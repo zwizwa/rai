@@ -9,9 +9,13 @@
 (define (p_sub a b) (- a b))
 (define (p_mul a b) (* a b))
 
-(define (p_and a b) (bitwise-and a b))
-(define (p_or  a b) (bitwise-ior a b))
-(define (p_xor a b) (bitwise-xor a b))
+(define (p_band a b) (bitwise-and a b))
+(define (p_bor  a b) (bitwise-ior a b))
+(define (p_bxor a b) (bitwise-xor a b))
+
+(define (p_and a b) (and a b))
+(define (p_or  a b) (or  a b))
+
 (define (p_not a)   (if a 0 1))
 
 

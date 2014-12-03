@@ -2777,3 +2777,14 @@ Problem here is r9 in the *** marked line.
 This is probably defined as a (! ..) operator but still has the grid type.
 
 Essentially we just need to replace (! . is) with (@ . is).
+
+EDIT: Almost: if there's a second loop, the index variable name
+changes so always take it from current loop context.
+
+
+Entry: Is the fdn problem solved now?
+Date: Wed Dec  3 14:30:55 EST 2014
+
+I ran into a problem expressing intermediate results when implementing
+fdns.  Is this still a problem?
+

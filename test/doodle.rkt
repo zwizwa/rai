@@ -104,10 +104,25 @@
              ()
              (float v))))
 
+(define (del1)
+  (let* ((x_i (timer 25000))
+         (x (float x_i)))
+    (delay/fixed-fb x 8123 0.5)))
+
+(define (tinpan)
+  (let* ((x_i (timer 25000))
+         (x (float x_i)))
+    (fdn4 x (vector 13 27 97 101))))
+
+(define (fdn1)
+  (let* ((x_i (timer 25000))
+         (x (float x_i)))
+    (fdn4 x (vector 113 227 397 1101))))
 
 (define (main samplerate)
-  (megasaw6)
-  ;;(test6)
+  ;;(del1)
+  ;;(fdn1)
+  (tinpan)
   )
 
 

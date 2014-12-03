@@ -274,9 +274,16 @@
     (mul 2)
     (div 2)
     (pow 2)          ;; second argument = power, should be a number
+
+
+    ;; bitwise
+    (band 2)
+    (bor  2)
+    (bxor 2)
+
+    ;; logic
     (and 2)
     (or  2)
-    (xor 2)
     (not 1)
 
     ;; Racket doesn't have a logic shift, probably because bignums

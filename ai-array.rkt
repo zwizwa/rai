@@ -259,10 +259,15 @@
   (define e-div  (e-prim 'p_div  p_div))
   (define e-add  (e-prim 'p_add  p_add))
   (define e-sub  (e-prim 'p_sub  p_sub))
+
   (define e-and  (e-prim 'p_and  p_and))
   (define e-or   (e-prim 'p_or   p_or))
-  (define e-xor  (e-prim 'p_xor  p_xor))
   (define e-not  (e-prim 'p_not  p_not))
+
+  (define e-band (e-prim 'p_band  p_band))
+  (define e-bor  (e-prim 'p_bor   p_bor))
+  (define e-bxor (e-prim 'p_bxor  p_bxor))
+
   (define e-quot (e-prim 'p_quot p_quot))
   (define e-mod  (e-prim 'p_mod  p_mod))
   (define e-sal  (e-prim 'p_sal  p_sal))
@@ -284,7 +289,7 @@
                 (e-add sem index offset)
                 index))
            ;; Modulo access.  Delay buffer pool size is power of 2.
-           (m-index (e-and sem index delay-buf-mask))
+           (m-index (e-band sem index delay-buf-mask))
            )
       m-index))
     
@@ -634,8 +639,12 @@
 
              #:and        e-and
              #:or         e-or
-             #:xor        e-xor
              #:not        e-not
+
+             #:band       e-band
+             #:bor        e-bor
+             #:bxor       e-bxor
+             
              #:mod        e-mod
              #:quot       e-quot
 
@@ -920,6 +929,7 @@
          (if (not (in-phase? vars))
              '()
              (match binding
+               ;; p_for
                ((list _
                       (list 'p_for
                             index
@@ -939,12 +949,15 @@
                           `(,((annotate-def lc-loop) `(! ,i))
                             (p_copy ,((annotate-ref lc-loop) o))))
                       )))))
-               
+
+               ;; p_array
                ((list (list array)
                       (list-rest _ 'p_array els))
                 (for/list ((el els)
                            (i (in-naturals)))
                   `((! ,array ,i) (p_copy ,((annotate-ref lc) el)))))
+
+               ;; p_vbuf_update
                ((list (list vbuf)
                       (list _ 'p_vbuf_update
                             vbuf-read-ref ;; ignored, all info is in vbuf
@@ -953,13 +966,14 @@
                 `(((! ,(vbuf-storage vbuf) ,index)
                    (p_copy ,((annotate-ref lc) value)))))
 
+               ;; p_decl_array
                ((list (list array)
                       (list-rest _ 'p_decl_array  dims))
                 (if (external-node? array)
                     '()
                     `(((,(node-base-type array) ,array ,dims) '()))))
 
-               ;; Deep copy.
+               ;; p_copy - Deep copy.
                ;; FIXME: how to avoid dependency on loop context?
                ((list (list out)
                       (list _ 'p_copy in))
@@ -979,7 +993,7 @@
                       `(,((annotate-statement lc) s))
                       )))
 
-               ;; Side effect store
+               ;; p_set - Side effect store
                ((list '()
                       (list _ 'p_set (list-rest dst indices) r))
                 `(((! ,dst ,@indices) (p_copy ,((annotate-ref lc) r)))))
@@ -989,20 +1003,29 @@
                ((list (list v) expr)
                 `(,((annotate-statement lc)
                     `(,v ,(match expr
+
+                            ;; p_index
                             ((list-rest _ 'p_index a is)
                              `(p_copy (@ ,a . ,is)))
+
+                            ;; p_array_size
                             ((list _ 'p_array_size arr)
                              `(p_copy ,(car (type-index-list (node-type arr)))))
-                                             
+
+                            ;; p_vbuf_attrib
                             ((list _ 'p_vbuf_attrib v)
                              (let ((vbuf (if (vbuf? v) v
                                              (dict-ref vbuf-read->write v))))
                                `(p_copy ,(dict-ref (vbuf-attr) vbuf))))
+
+                            ;; p_vbuf_read
                             ((list _ 'p_vbuf_read  vbuf-read-ref index)
                              (let* ((v (dict-ref vbuf-read->write
                                                  vbuf-read-ref))
                                     (arr (vbuf-storage v)))
                                `(p_copy  (@ ,arr ,index))))
+
+                            ;; p_phase
                             ((list _ 'p_phase v0 v1)
                              `(p_copy ,(case (phase) 
                                          ((0) v0)
