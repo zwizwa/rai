@@ -2880,3 +2880,13 @@ Combine this with M-F3 as save.
 
 
 http://www.emacswiki.org/emacs/ThingAtPoint
+
+
+Entry: Snarfing params
+Date: Thu Dec  4 17:17:47 EST 2014
+
+- Create a special form that names each parameter
+
+- Keep parsing at high rate until the structure changes.  If it
+  doesn't change, send only parameter values.
+

@@ -121,12 +121,12 @@
 
 
 (define (riff)
-  (let* ((f    0.0022)
-         (tick (float (timer 14000.0)))
-         (e1   (env-AR tick 1 8.3e-05))
-         (e2   (env-AR tick 1 0.00026))
+  (let* ((f    0.0013)
+         (tick (float (timer 26000.0)))
+         (e1   (env-AR tick 1.0 8.3e-05))
+         (e2   (env-AR tick 1 0.00012))
          (s    (* .1 (* e1 (saw-d2 f))))
-         (l    (svf-lp s (* e2 120.0 f) 0.057))
+         (l    (svf-lp s (* e2 43.0 f) 0.057))
          )
     (* 0.15 l)))
 
