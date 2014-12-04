@@ -121,14 +121,14 @@
 
 
 (define (riff)
-  (let* ((f    0.012)
-         (tick (float (timer 5000.0)))
-         (e1   (env-AR tick 1 0.0002))
-         (e2   (env-AR tick 1 0.00053))
-         (s    (* e1 (saw-d2 f)))
-         (l    (svf-lp s (* e1 10 f) .5))
+  (let* ((f    0.0022)
+         (tick (float (timer 14000.0)))
+         (e1   (env-AR tick 1 8.3e-05))
+         (e2   (env-AR tick 1 0.00026))
+         (s    (* .1 (* e1 (saw-d2 f))))
+         (l    (svf-lp s (* e2 120.0 f) 0.057))
          )
-    (* 0.032 l)))
+    (* 0.15 l)))
 
 
 (define (main samplerate)
