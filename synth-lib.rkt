@@ -545,6 +545,12 @@
     (values (dl-shift line in)
             out)))
 
+(define (delay/fixed-fb (line) (in time fb))
+  (let* ((out (dl-ref line time))
+         (del-in (+ in (* fb out))))
+    (values (dl-shift line del-in)
+            del-in)))
+
 
 ;; Variable delay line.  Cross-fading param update, once per control
 ;; rate block.  `max' needs to be a literal, as it determines the

@@ -33,7 +33,12 @@ struct proc_store store;
 #include "param_reader.h"
 
 
-/* Access to i/o as float arrays. */
+/* Access to i/o as float arrays.
+   NOTE that for a_in, a_out, this supports both:
+   - named scalar nodes
+   - a single vector node.
+   Other configurations are not supported and will probably cause a crash. */
+
 float **a_param  = (float**)&param;
 float **a_in     = (float**)&in;
 float **a_out    = (float**)&out;

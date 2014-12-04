@@ -56,7 +56,10 @@
   (ai-and   and)
   (ai-or    or)
   (ai-not   not)
-  (ai-xor   xor)
+  
+  (ai-band  band)
+  (ai-bor   bor)
+  (ai-bxor  bxor)
 
   (ai-quot  quot)
   (ai-mod   mod)

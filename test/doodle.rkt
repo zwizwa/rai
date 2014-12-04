@@ -65,15 +65,65 @@
             (* g (saw-d3 (* f (+ 1 v1 v2))))
             (* g (saw-d3 (* f (+ 1 v3 v4)))))))))
 
-(define (main samplerate)
-  (megasaw3))
+;(define (main samplerate)
+;  (megasaw3))
 
-;; (define (_main samplerate)
+;; (define (main samplerate)
 ;;   (loop (c (nb_channels 2))
 ;;         ()
 ;;         ()
 ;;         (float c)))
 
+
+(define (megasaw5)
+  (let ((f 0.002))
+    (loop (c (nb_channels 2))
+          ()
+          ()
+          (saw-d1 (* f (+ 1 (* 0.01 (float c))))))))
+
+(define (megasaw6)
+  (let ((f .001))
+    (loop (c (nb_channels 2))
+          ()
+          ()
+          (mix (v (nb_osc 50))
+               ()
+               (let* ((v1 (* 0.001 (float v)))
+                      (v2 (* v1 v1))
+                      (v3 (* 0.02 (float c)))
+                      (g 0.0005)
+                      )
+                 (* g (saw-d3 (* f (+ 1 v1 v2 v3)))))))))
+
+(define (test6)
+  (loop (c (nb_channels 2))
+        ()
+        ()
+        (mix (v (nb_osc 50))
+             ()
+             (float v))))
+
+(define (del1)
+  (let* ((x_i (timer 25000))
+         (x (float x_i)))
+    (delay/fixed-fb x 8123 0.5)))
+
+(define (tinpan)
+  (let* ((x_i (timer 25000))
+         (x (float x_i)))
+    (fdn4 x (vector 13 27 97 101))))
+
+(define (fdn1)
+  (let* ((x_i (timer 25000))
+         (x (float x_i)))
+    (fdn4 x (vector 113 227 397 1101))))
+
+(define (main samplerate)
+  ;;(del1)
+  ;;(fdn1)
+  (tinpan)
+  )
 
 
   
