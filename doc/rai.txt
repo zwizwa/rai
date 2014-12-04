@@ -2821,5 +2821,62 @@ Entry: Is the fdn problem solved now?
 Date: Wed Dec  3 14:30:55 EST 2014
 
 I ran into a problem expressing intermediate results when implementing
-fdns.  Is this still a problem?
+FDNs as loops.  Is this still a problem?
 
+
+
+Entry: Live coding : make every number a parameter
+Date: Wed Dec  3 21:13:54 EST 2014
+
+Basically, update continuously.  However that's not realistic because
+compilation takes too long, but as an intermediate point: turn all
+numbers into parameters and update them continously from an editor.
+
+
+Or is it?  Why is compilation so slow?  What about doing the same as
+in Staapl: add a namespace?
+
+Trouble is that I want to change the "language" on the fly.
+
+
+
+Entry: emacs
+Date: Wed Dec  3 22:16:50 EST 2014
+
+Live coding in emacs:
+- Make saving simpler
+- add up/down arrow editing
+
+
+;; logarithmic number editing
+(require 'thingatpt)
+(defun my-m-up ()
+  (interactive)
+  (my-scale-number-at-point 1.1))
+(defun my-m-down ()
+  (interactive)
+  (my-scale-number-at-point 0.9))
+(defun my-scale-number-at-point (factor)
+  (let*
+      ((word (thing-at-point 'symbol))
+       (num (string-to-number word)))
+    (when (not (zerop num)) ;; Only operate on numbers
+      (let* 
+          ((updated (* num factor))
+           ;; Round digits through exponential notation.
+           (snum (format "%.1e" updated))
+           ;; But keep ordinary number format
+           (snum (number-to-string (string-to-number snum)))
+           (bounds (bounds-of-thing-at-point 'symbol))
+           (start (car bounds))
+           (stop  (cdr bounds)))
+        (delete-region start stop)
+        (insert snum)))))
+(global-set-key (kbd "<M-up>")   'my-m-up)
+(global-set-key (kbd "<M-down>") 'my-m-down)
+
+
+Combine this with M-F3 as save.
+
+
+http://www.emacswiki.org/emacs/ThingAtPoint
