@@ -2702,3 +2702,36 @@ Both need a smarter way to determine what parts of a grid node can be
 re-used.
 
 
+
+How to start?
+
+The problem is equating "zero-dimensional" with "internal node".
+
+At some point the knowledge pops up that storage is indexed, e.g. (!
+rx ry).  At this point it should also be noted that further references
+are indexed.  That knowledge is lost in the ad-hoc handling..
+
+Why is it known?
+It's at definition point, so it's obviously known.
+
+
+What about making the "virtual type" and "implementation type"
+explicit?  I.e. for input/output nodes, both are the same, but for
+internal nodes they can be different.
+
+Roamap:
+- Write an example and print out types
+- Find a place to put the extra annotation
+- Replace the current 'internal-node?' based guessing.
+
+
+
+Entry: Can't rewrite yet
+Date: Tue Dec  2 20:29:27 EST 2014
+
+The structure of the implementation is probably "beyond repair".  To
+fix this means to rewrite it, and it seems best to do that once the
+typing can be expressed in Haskell.
+
+To use a bad metaphor, this has gotten "too big to fail", i.e. it's
+too useful to throw away until a full replacement is ready.
