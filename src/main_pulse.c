@@ -11,9 +11,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <pulse/simple.h>
 #include <pulse/error.h>
+
 
 
 
@@ -86,7 +89,7 @@ int main(int argc, char*argv[]) {
         goto exit;
     }
 
-
+    unsigned int stamp = 0;
     for(;;) {  // FIXME: exit?
 
         proc_loop((void*)&state, &in, &param, &out, &store, nframes);
@@ -98,6 +101,14 @@ int main(int argc, char*argv[]) {
         }
 
         if (pa_simple_write(s, buf, (size_t) sizeof(buf), &error) < 0) goto exit;
+
+        // for live coding: exit when source file changed.
+        if (argc >= 2) {
+            struct stat s;
+            stat(argv[1], &s);
+            if (stamp && (stamp != s.st_mtime)) goto exit;
+            stamp = s.st_mtime;
+        }
     }
   exit:
     pa_simple_drain(s, &error); // ignore error
