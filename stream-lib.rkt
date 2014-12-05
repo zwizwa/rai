@@ -1,7 +1,7 @@
 #lang s-exp "stream.rkt"
 (require "stream-meta.rkt"
          (for-syntax scheme/base
-                     scheme/pretty))
+                     "tools.rkt"))
 (provide (all-defined-out))
 
 ;; ** STREAM OPS **
@@ -178,16 +178,16 @@
 
 
 ;; Collect all numbers as explicit parameters which are returned as a
-;; second value.
+;; second value.  FIXME: This won't work for literal type level numbers.
 (define-syntax (lambda/params stx)
   (define params '())
-  (define (collect-number! f)
-    (let* ((n (length params))
-           (p (datum->syntax
+  (define (collect-number! num)
+    (let* ((index (length params))
+           (varname (datum->syntax
                #f (string->symbol
-                   (format "p~s" n)))))
-      (set! params (cons (cons p f) params))
-      p))
+                   (format "p~s" index)))))
+      (push! params (cons varname num))
+      varname))
   (define (traverse! stx)
     (let ((expr (syntax-e stx)))
       (if (list? expr)

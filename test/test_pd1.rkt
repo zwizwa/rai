@@ -2,6 +2,7 @@
 (require rai/stream-lib)
 (provide (all-defined-out))
 
+(define main-defaults '())
 (define main-nsi 1)
 (define main
   (lambda (inc min max)

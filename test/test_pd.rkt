@@ -5,6 +5,7 @@
 
 ;; Number of stream inputs.
 (define main-nsi 0)
+(define main-defaults '())
 
 (define (main voice_freq voice_gate ;; Driven by voice allocator
               samplerate
