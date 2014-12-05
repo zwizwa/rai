@@ -17,7 +17,7 @@
  ;; Scheme forms
  require provide all-defined-out
  ;;define
- define-syntax-rule define-syntax
+ define-syntax-rule define-syntax define-values
  (for-syntax syntax-rules)
  let  let-values
  let* let*-values

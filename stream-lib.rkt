@@ -1,6 +1,7 @@
 #lang s-exp "stream.rkt"
 (require "stream-meta.rkt"
-         (for-syntax scheme/base))
+         (for-syntax scheme/base
+                     scheme/pretty))
 (provide (all-defined-out))
 
 ;; ** STREAM OPS **
@@ -174,3 +175,33 @@
 
 
 
+
+
+;; Collect all numbers as explicit parameters which are returned as a
+;; second value.
+(define-syntax (lambda/params stx)
+  (define params '())
+  (define (collect-number! f)
+    (let* ((n (length params))
+           (p (datum->syntax
+               #f (string->symbol
+                   (format "p~s" n)))))
+      (set! params (cons (cons p f) params))
+      p))
+  (define (traverse! stx)
+    (let ((expr (syntax-e stx)))
+      (if (list? expr)
+          (map traverse! expr)
+          (let ((datum (syntax->datum stx)))
+            (if (number? datum)
+                (collect-number! datum)
+                stx)))))
+  (syntax-case stx ()
+    ((_ (a ...) f)
+     (let* ((form (traverse! #'f))
+            (ps (reverse params))
+            (out #`(values
+                    (ai-lambda (a ... #,@(map car ps)) #,form)
+                    '#,ps)))
+       (pretty-print (syntax->datum out))
+       out))))

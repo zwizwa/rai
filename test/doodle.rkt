@@ -120,23 +120,21 @@
     (fdn4 x (vector 113 227 397 1101))))
 
 
-(define (riff)
-  (let* ((f    0.0013)
-         (tick (float (timer 26000.0)))
-         (e1   (env-AR tick 1.0 8.3e-05))
-         (e2   (env-AR tick 1 0.00012))
-         (s    (* .1 (* e1 (saw-d2 f))))
-         (l    (svf-lp s (* e2 43.0 f) 0.057))
-         )
-    (* 0.15 l)))
 
 
-(define (main samplerate)
-  ;;(del1)
-  ;;(fdn1)
-  ;;(tinpan)
-  (riff)
-  )
+
+(define-values
+  (main ps)
+  (lambda/params (samplerate)
+    (let* ((f    0.0013)
+           (tick (float (timer 26000.0)))
+           (e1   (env-AR tick 1.0 8.3e-05))
+           (e2   (env-AR tick 1 0.00012))
+           (s    (* .1 (* e1 (saw-d2 f))))
+           (l    (svf-lp s (* e2 43.0 f) 0.057))
+           )
+      (* 0.15 l))))
+
 
 
   
