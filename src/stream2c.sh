@@ -6,6 +6,7 @@ cat <<EOF | $RACKET -e '(eval (read))' | tee "$2"
   (require rai/ai-array-c)
   (require (file "$1"))
   (display (ai-array-c main
+                 #:defaults main-defaults
                  #:nsi main-nsi
                  )))
 EOF

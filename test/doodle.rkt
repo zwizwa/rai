@@ -124,7 +124,7 @@
 
 
 (define-values
-  (main ps)
+  (main main-defaults)
   (lambda/params (samplerate)
     (let* ((f    0.0013)
            (tick (float (timer 26000.0)))

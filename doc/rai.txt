@@ -2898,3 +2898,10 @@ well into ai-lambda / ai-app.  Probably doing something unorthodox
 here that should be solved somewhere else.  There is already an
 explicit treewalker, right?
 
+Solved by adding to stream-lib.rkt which has correct bindings.
+
+Next:
+- defaults / initial values.
+- param updates?
+
+

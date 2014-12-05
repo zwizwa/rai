@@ -203,5 +203,5 @@
             (out #`(values
                     (ai-lambda (a ... #,@(map car ps)) #,form)
                     '#,ps)))
-       (pretty-print (syntax->datum out))
+       ;;(pretty-print (syntax->datum out))
        out))))

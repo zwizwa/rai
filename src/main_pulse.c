@@ -27,10 +27,11 @@
 
 /* Only build a static wrapper. */
 struct proc_si state[2];
-struct proc_param param;
 struct proc_in in;
 struct proc_out out;
 struct proc_store store;
+#define INIT_PARAM(p,v) .p = v,
+struct proc_param param = { proc_for_param_defaults(INIT_PARAM) };
 
 // Bound to some of the names above.
 #include "param_reader.h"

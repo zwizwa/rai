@@ -29,6 +29,7 @@
 (define (ai-array/c expr
                     #:indextype (indextype 'int)
                     #:prefix (prefix "proc_")
+                    #:defaults (defaults '())
                     #:default_type (default_type "float32_t"))
   
   (define (pfx x) (format "~a~a" prefix x))
@@ -126,7 +127,15 @@
                         ,(foldr * 1 (node-dims n))
                         ,@(reverse (node-dims n))))))
     (printf " \n"))
-    
+
+  (define (gen-param-defaults)
+    (printf "#define ~a(__macro__) \\\n" (pfx "for_param_defaults"))
+    (for ((d (in-dict-pairs defaults)))
+      (printf "~a__macro__(~a) \\\n"
+              tab-string
+              (c-list (list (car d) (cdr d)))))
+    (printf " \n"))
+      
 
   (define (ref expr)
     (match expr
@@ -255,11 +264,14 @@
          ;; GUI parameters
          (gen-node-units units)
 
-         ;; Note initializers.  Note that params don't have
+         ;; Node initializers.  Note that params don't have
          ;; initializers = a pure input.  However, implementation is
          ;; stateful, so they will be to 0 at in proc_instance_new().
          (gen-node-inits inits si)
          (gen-node-inits '() store)  ;; FIXME: currently all 0
+
+         ;; Param defaults
+         (gen-param-defaults)
 
          ;; Core routine
          (line "static void ~a (\n" (pfx "loop"))
@@ -294,9 +306,12 @@
 
 ;; Compiler driver.
 (define (ai-array-c program
+                    #:defaults (defaults '())
                     #:tc (ignored #f)
                     #:nsi (nsi #f))   ;; Default: all inputs are streams
   (ai-array/c
    (ai-array program
              #:out-base Float
-             #:nsi nsi)))
+             #:nsi nsi)
+   #:defaults defaults))
+
