@@ -2904,4 +2904,17 @@ Next:
 - defaults / initial values.
 - param updates?
 
+EDIT: Done initial values.
+
+
+Entry: Emacs side
+Date: Fri Dec  5 18:18:08 EST 2014
+
+To get faster updates, probably every edit action in an emacs buffer
+should synchronously trigger sending out parametesr.  Why not parse
+the s-expression in emacs directly?  Not really that hard..
+
+(thing-at-point 'sentence) returns a function
+
+
 

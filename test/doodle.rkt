@@ -4,7 +4,6 @@
 
 (provide (all-defined-out))
 
-foo
 
 (define main-nsi 0)
 (define main-tc '())
