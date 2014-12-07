@@ -2917,4 +2917,20 @@ the s-expression in emacs directly?  Not really that hard..
 (thing-at-point 'sentence) returns a function
 
 
+EDIT:
 
+;; RAI
+(defun my-send-nums ()
+  (interactive)
+  (let* ((cmds '())
+         (str (thing-at-point 'sentence))
+         (expr (read str)))
+    (labels ((gather (it)
+               (cond 
+                ((listp it)
+                 (mapc #'gather it))
+                ((numberp it) 
+                 (let ((cmd (format "p%d %f;\n" (length cmds) it)))
+                   (push cmd cmds))))))
+      (gather expr)
+      (message (apply #'concat (reverse cmds))))))
