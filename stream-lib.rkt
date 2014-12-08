@@ -177,8 +177,8 @@
 
 
 
-;; Collect all numbers as explicit parameters which are returned as a
-;; second value.  FIXME: This won't work for literal type level numbers.
+;; Abstract all explicitly quoted numbers as parameters.  Return
+;; default dictionary as second value.
 (define-syntax (lambda/params stx)
   (define params '())
   (define (collect-number! num)
@@ -189,13 +189,10 @@
       (push! params (cons varname num))
       varname))
   (define (traverse! stx)
-    (let ((expr (syntax-e stx)))
-      (if (list? expr)
-          (map traverse! expr)
-          (let ((datum (syntax->datum stx)))
-            (if (number? datum)
-                (collect-number! datum)
-                stx)))))
+    (syntax-case stx (quote)
+      ('num (collect-number! (syntax->datum #'num)))
+      ((e ...) (map traverse! (syntax-e stx)))
+      (else stx)))
   (syntax-case stx ()
     ((_ (a ...) f)
      (let* ((form (traverse! #'f))

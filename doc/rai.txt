@@ -2960,3 +2960,15 @@ so in pd we have:
 
 currently it sends all parameters.  how to send only the current one?
 probably not necessary..
+
+It's probably also better to explicitly tag the numbers that should be
+parameters using a "p" tag.  Define this as a syntax parameter in
+scheme?  Basically just something to reserve the name.
+
+Or maybe something like quote/unquote/quasiquote?  These are not used
+for anything and supported in emacs.  Unquote seems best as it has no
+standard meaning outside of quasiquote.
+
+Yeah can't figure out unquote ("not inside quasiquote") without going
+deeper.  Let's use quote: it's already optional for numbers.
+
