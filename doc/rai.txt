@@ -2934,3 +2934,29 @@ EDIT:
                    (push cmd cmds))))))
       (gather expr)
       (message (apply #'concat (reverse cmds))))))
+
+
+Entry: emacs udp
+Date: Sun Dec  7 19:46:38 EST 2014
+
+(defun osc-make-client (host port)
+(make-network-process
+:name "OSCclient"
+:coding 'binary
+:host host
+:service port
+:type 'datagram))
+
+https://github.com/mlang/emacs-lisp/blob/master/osc.el
+
+
+Entry: one number at a time
+Date: Sun Dec  7 19:58:45 EST 2014
+
+so in pd we have:
+- inc/dec current number
+- gather all numbers from current expression
+- send over udp socket
+
+currently it sends all parameters.  how to send only the current one?
+probably not necessary..

@@ -121,15 +121,12 @@
     (fdn4 x (vector 113 227 397 1101))))
 
 
-
-
-
 (define-values
   (main main-defaults)
   (lambda/params (samplerate)
-    (let* ((f    0.0013)
+    (let* ((f    0.0035)
            (tick (float (timer 26000.0)))
-           (e1   (env-AR tick 1.0 8.3e-05))
+           (e1   (env-AR tick 1.0 7.6e-05))
            (e2   (env-AR tick 1 0.00012))
            (s    (* .1 (* e1 (saw-d2 f))))
            (l    (svf-lp s (* e2 43.0 f) 0.057))
