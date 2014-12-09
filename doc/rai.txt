@@ -2972,3 +2972,9 @@ standard meaning outside of quasiquote.
 Yeah can't figure out unquote ("not inside quasiquote") without going
 deeper.  Let's use quote: it's already optional for numbers.
 
+
+Entry: Structural addresses?
+Date: Sun Dec  7 21:23:53 EST 2014
+
+So what about using structural addresses instead of sequential ones?
+That would keep naming consistent when just changing the quotes.
