@@ -1,6 +1,7 @@
 RKT := $(wildcard $(RAI)/*.rkt) $(wildcard *.rkt) 
 
 RAI_SRC := $(RAI)/src
+RAI_BIN := $(RAI)/bin
 
 # RACKET := /usr/local/racket-5.3.4.7/bin/racket
 # RACO := /usr/local/racket-5.3.4.7/bin/raco
@@ -55,18 +56,18 @@ LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 %.sp: %.sp.elf
 	objcopy --only-section=.text -O binary $< $@
 %.sp.pd: %.sp
-	chmod +x $(RAI_SRC)/pd_notify.sh ; $(RAI_SRC)/pd_notify.sh $< >$@
+	chmod +x $(RAI_BIN)/pd_notify.sh ; $(RAI_BIN)/pd_notify.sh $< >$@
 
 
 # Scheme -> C code generation.
 %.g.h: %.rkt $(RKT)
-	chmod +x $(RAI_SRC)/stream2c.sh
-	RACKET=$(RACKET) $(RAI_SRC)/stream2c.sh $< $@
+	chmod +x $(RAI_BIN)/stream2c.sh
+	RACKET=$(RACKET) $(RAI_BIN)/stream2c.sh $< $@
 
 # Scheme -> IL (intermediate language) code generation.
 %.il: %.rkt $(RKT)
-	chmod +x ./stream2il.sh
-	RACKET=$(RACKET) ./stream2il.sh $< $@
+	chmod +x $(RAI_BIN)/stream2il.sh
+	RACKET=$(RACKET) $(RAI_BIN)/stream2il.sh $< $@
 
 
 
@@ -149,3 +150,8 @@ libproc.so: $(RAI_SRC)/proc.h $(LIBPROC_O)
 
 bcr2000: $(RAI_SRC)/bcr2000.c
 	gcc -o $@ $<
+
+
+# Live coding phony
+%.lc: %.rkt
+	$(RACKET) $(RAI)/fam-sp.rkt $< $(RAI_BIN)/pd_notify.sh

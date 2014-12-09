@@ -22,7 +22,6 @@ ALL_RUN := \
 	test-delay.rkt.run \
 	test_jack.rkt.run \
 	test-lang.rkt.run \
-	test-lc2.rkt.run \
 	test-libproc.rkt.run \
 	test-map.rkt.run \
 	test-matrix-lib.rkt.run \
@@ -76,8 +75,8 @@ zwizwa: ~/www/zwizwa.be/rai/index.html
 
 test-libproc.rkt.run: test_pd.sp synth.sp libproc.so
 
-livecode:
-	$(RACKET) fam-sp.rkt synth.rkt ./pd_notify.sh
+# Live coding example for doodle.rkt
+livecode: doodle.lc
 
 
 

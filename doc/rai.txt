@@ -2978,3 +2978,20 @@ Date: Sun Dec  7 21:23:53 EST 2014
 
 So what about using structural addresses instead of sequential ones?
 That would keep naming consistent when just changing the quotes.
+
+
+
+Entry: Live coding
+Date: Tue Dec  9 09:48:53 EST 2014
+
+So, two mechanisms:
+
+1. Change structure -> recompile -> reload
+2. Change param -> send message from emacs
+
+Second one works well.  First one needs a fix.
+
+I believe that test-lc2.rkt is obsolete.  This was in the Makefile:
+
+livecode:
+	$(RACKET) fam-sp.rkt synth.rkt ./pd_notify.sh

@@ -5,8 +5,8 @@
 
 (require (planet jao/mzfam:2:1/fam-task)
          racket/system
-         "ai-proc.rkt"
-         "synth-lib.rkt")
+         rai/ai-proc
+         rai/synth-lib)
 
 ;; Anchor with most support modules pulled in.
 (define-namespace-anchor anchor)

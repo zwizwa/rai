@@ -37,8 +37,6 @@ zwizwa: ~/www/zwizwa.be/rai/index.html
 
 test-libproc.rkt.run: test_pd.sp synth.sp libproc.so
 
-livecode:
-	$(RACKET) fam-sp.rkt synth.rkt ./pd_notify.sh
 
 
 
