@@ -26,10 +26,12 @@
 
 /* Only build a static wrapper. */
 struct proc_si state[2];
-struct proc_param param;
 struct proc_in in;
 struct proc_out out;
 struct proc_store store;
+#define INIT_PARAM(p,v) .p = v,
+struct proc_param param = { proc_for_param_defaults(INIT_PARAM) };
+
 
 // Bound to some of the names above.
 #include "param_reader.h"
@@ -69,6 +71,11 @@ process (jack_nframes_t nframes, void *arg)
     for (int i=0; i < proc_size_out; i++) a_out[i] = jack_port_get_buffer (output_port[i], nframes);
 
     proc_loop((void*)&state, &in, &param, &out, &store, nframes);
+
+#if 1
+    param_vu(a_out, proc_size_out, nframes);
+#endif
+
     return 0;
 }
 
@@ -136,7 +143,7 @@ void create_ports(jack_nframes_t sr) {
 }
 
 
-void go() {
+void go(void) {
     const char **ports;
 
     /* Tell the JACK server that we are ready to roll.  Our
@@ -167,6 +174,7 @@ void go() {
     if (ports == NULL) {
         ERROR("no physical playback ports\n");
     }
+    LOG("Connecting 0->0\n");
     if (jack_connect (client, jack_port_name (output_port[0]), ports[0])) {
         LOG("cannot connect output ports\n");
     }

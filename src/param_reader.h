@@ -30,13 +30,23 @@ static inline void param_set(char *var, int val) {
 
 static inline void param_reader(void) {
     char var[100];
-    int val;
+    float val;
     while(1) {
         readline();
-        if (2 != sscanf(readline_buf, "%s %d;\n", (char*)&var, &val)) ERROR("scanf()\n");
-        // LOG("%s = %d\n", var, val);
+        if (2 != sscanf(readline_buf, "%s %f;\n", (char*)&var, &val)) ERROR("scanf()\n");
         param_set(var, val);
     }
+}
+
+static inline void param_vu(float **a_out, int proc_size_out, int nframes) {
+    float max = 0;
+    for (int j=0; j < nframes; j++) {
+        for (int i=0; i < proc_size_out; i++) {
+            float v = fabs(a_out[i][j]);
+            max = v > max ? v : max;
+        }
+    }
+    LOG("\r%0.5f\r", max);
 }
 
 #endif
