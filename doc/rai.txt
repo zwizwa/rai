@@ -2995,3 +2995,35 @@ I believe that test-lc2.rkt is obsolete.  This was in the Makefile:
 
 livecode:
 	$(RACKET) fam-sp.rkt synth.rkt ./pd_notify.sh
+
+
+
+Entry: BCR-2000 setup
+Date: Tue Jan 20 17:01:21 EST 2015
+
+Let's get some awkwardness out of the way.  I'm always messing with
+this shit and quite tired of it.
+
+Have it connected to raspi.  Need it to broadcast over local net so
+anything can hook into it.  Need to add midi learn to all apps
+(incuding fucking TV volume control) and probably should have inc/dec
+mode only.
+
+So:
+
+- set up inc/dec mode
+- broadcast midi from raspi
+
+Entry: socat broadcast midi
+Date: Tue Jan 20 17:03:10 EST 2015
+
+UDP-SENDTO
+
+Run it from udev when
+SUBSYSTEM=sound
+ACTION=add
+echo $DEVNAME | grep /dev/midi && socat -u file:$DEVNAME UDP-SENDTO:239.0.0.1:12345
+
+# socat -u UDP4-RECV:10000,ip-add-membership=239.0.0.1:192.168.11.238 - |hd
+# socat -u UDP4-RECV:10000,ip-add-membership=239.0.0.1:0.0.0.0 - |hd
+
