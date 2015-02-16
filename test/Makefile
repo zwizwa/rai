@@ -48,10 +48,15 @@ ALL :=  $(ALL_RUN)
 RAI := ..
 
 
-all: $(ALL)
+all: $(ALL) bait
 	@echo "<$$(readlink -f test.png)>"
 
 all_bin: $(ALL_BIN)
+
+
+# Reminders / attract attention in test build output.
+bait: synth.il
+	cat synth.il
 
 clean:
 	rm -rf $(ALL) *~ *.elf *.bin *.sp *.o *.sp.o.* *.g.h *.pd_linux *.run *.jack compiled *.dll *.exe *.sp.pd *.il *.pulse

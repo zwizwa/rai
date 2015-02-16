@@ -254,6 +254,7 @@
 
 (declare-prims ai-impl make-ai
 
+    ;; *** CONTROL / SPECIAL PURPOSE ****               
 
     ;; SPACE/TIME OPERATIONS
     (feedback/n 4)   ;; output feedback / unit time delay
@@ -268,6 +269,27 @@
     (copy 1)         ;; node copy.  (used in type bridging and implementation of hold).
     (index 3)        ;; array indexing
 
+
+    (cast/n 2)       ;; type casting
+
+    ;; CONDITIONAL
+    (if 3)
+    
+    ;; AD-HOC EXTENSIONS
+    (dl-shift 2)     ;; shift delay line state vector
+    (dl-ref 2)       ;; read from delay line state vector
+    
+    (tag 2)          ;; tag node with arbitrary list of pairs dictionary '((k . v) ...)
+    (debug 1)
+
+
+    ;; EXPERIMENTAL
+    (_map 2)
+
+
+    ;; *** SIMPLE DATAFLOW ****
+    (lt 2)           ;; a < b
+    
     ;; LIFTED SCALAR OPS
     (add 2)
     (sub 2)
@@ -301,26 +323,6 @@
     (exp 1)
     (log 1)
     (atan 1)
-
-    (cast/n 2)       ;; type casting
-
-    (lt 2)           ;; a < b
-
-    ;; CONDITIONAL
-    (if 3)
-    
-    ;; AD-HOC EXTENSIONS
-    (dl-shift 2)     ;; shift delay line state vector
-    (dl-ref 2)       ;; read from delay line state vector
-    
-    (tag 2)          ;; tag node with arbitrary list of pairs dictionary '((k . v) ...)
-    (debug 1)
-
-
-    ;; EXPERIMENTAL
-    (_map 2)
-
-    
 
     )
 

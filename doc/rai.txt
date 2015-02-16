@@ -3027,3 +3027,56 @@ echo $DEVNAME | grep /dev/midi && socat -u file:$DEVNAME UDP-SENDTO:239.0.0.1:12
 # socat -u UDP4-RECV:10000,ip-add-membership=239.0.0.1:192.168.11.238 - |hd
 # socat -u UDP4-RECV:10000,ip-add-membership=239.0.0.1:0.0.0.0 - |hd
 
+
+
+Entry: next?
+Date: Fri Feb 13 18:25:46 EST 2015
+
+What's next?  I've been thinking about porting the model to Haskell.
+Not sure if this is really useful at this point.  Maybe best to clean
+up the model internally first.
+
+There are some ugly ad-hoc things in there that are quite useful in
+practice, but would need some effort to type properly:
+
+- delay lines
+- control rate hacks
+- fixed primitives
+- parameter range specs
+
+Look at stream-syntax.rkt for hints of these.
+
+Currently no inspiration.. Probably best to move to application?
+
+
+Entry: Abstracting primitives
+Date: Fri Feb 13 18:39:23 EST 2015
+
+One of the interesting changes is to make the set of primitives
+programmable, to be able to target different machines.  It might be
+too constraining to keep a single base language.
+
+E.g. allow implementation in base language but allow mapping to
+different primitive cores.
+
+[1] entry://20141129-181735
+
+
+
+Entry: Application
+Date: Fri Feb 13 19:21:50 EST 2015
+
+Problem right now is really user interface.  I've got all these synths
+I want to build but I keep getting stuck in finding ways to make them
+playable / explorable.
+
+Core OS will probably be in Rust eventually.  I had a couple of days
+of deep-dive and I feel I'm ready.  Should probably think about
+ARM-targeting to keep things lean?
+
+For now thought the problem is graphics and UI/UX.  Rai can be used to
+generate computations for visualizations.  I might take a detour
+finishing logic analyzer visualizations.
+
+
+
