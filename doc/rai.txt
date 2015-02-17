@@ -3079,4 +3079,8 @@ generate computations for visualizations.  I might take a detour
 finishing logic analyzer visualizations.
 
 
+Entry: live coding
+Date: Tue Feb 17 01:53:59 EST 2015
+
+Added notes to emacs/rai.el to point the way.
 

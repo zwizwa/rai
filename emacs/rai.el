@@ -1,3 +1,16 @@
+
+;; Quick start:
+
+;; Load this file.  It will bind M-up and M-down to logarithmically
+;; inc/dec the number at point, followed by sending in pd format all
+;; numbers marked with quote (') indexed in traversal order.
+
+;; Then use the form `lambda/params' instead of `lambda' to generate a
+;; processor with parameters for each quoted number.  Compile to
+;; something that accepts pd messages.
+
+
+
 ;; logarithmic number editing
 (require 'thingatpt)
 (defun rai-m-up ()
