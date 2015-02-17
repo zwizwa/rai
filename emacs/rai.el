@@ -9,6 +9,7 @@
 ;; processor with parameters for each quoted number.  Compile to
 ;; something that accepts pd messages.
 
+;; see rai/test/doodle.rkt
 
 
 ;; logarithmic number editing
