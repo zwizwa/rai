@@ -56,8 +56,9 @@
 
 (defun pd-gather-nums ()
   (let* ((cmds '())
-         (str (thing-at-point 'sentence))
+         (str (thing-at-point 'defun));;'sentence
          (expr (read str)))
+    ;;(message str)
     (labels ((gather (it)
                (when (listp it)
                  (if (and (= (length it) 2)
