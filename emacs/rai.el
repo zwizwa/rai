@@ -34,13 +34,24 @@
 
 ;; https://github.com/mlang/emacs-lisp/blob/master/osc.el
 
-(defvar *pd-send-process* 
-  (pd-make-client "localhost" 12345))
+(defun pd-make-client (host port)
+  (make-network-process
+   :name "pd-client"
+   :coding 'binary
+   :host host
+   :service port
+   :type 'datagram))
 
-(defun pd-send (message)
+(defvar *pd-send-process* 
+  (pd-make-client "127.0.0.1" 12345))
+
+;; (setq *pd-send-process* (pd-make-client "127.0.0.1" 12345))
+
+(defun pd-send (msg)
   (with-temp-buffer
     (set-buffer-multibyte nil)
-    (insert message)
+    (insert msg)
+    ;; (message msg)
     (process-send-string *pd-send-process* (buffer-string))))
 
 (defun pd-gather-nums ()
