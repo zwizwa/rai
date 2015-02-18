@@ -3084,3 +3084,10 @@ Date: Tue Feb 17 01:53:59 EST 2015
 
 Added notes to emacs/rai.el to point the way.
 
+
+Entry: next?
+Date: Tue Feb 17 02:40:50 EST 2015
+
+Ride the livecode wave.  Eliminate obstacles and see what happens.
+
+
