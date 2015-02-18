@@ -81,7 +81,8 @@ zwizwa: ~/www/zwizwa.be/rai/index.html
 test-libproc.rkt.run: test_pd.sp synth.sp libproc.so
 
 # Live coding example for doodle.rkt
-livecode: doodle.lc
+# livecode: doodle.lc
+livecode: doodle.lc2
 
 
 

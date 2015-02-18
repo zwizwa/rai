@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <pulse/simple.h>
 #include <pulse/error.h>
+#include <pthread.h>
 
 
 
@@ -55,6 +56,11 @@ float **a_out    = (float**)&out;
 #define proc_size_out     PROC_NB_EL(struct proc_out,   float*)
 
 
+void *thread_main(void *ctx) {
+    param_reader();
+    return ctx;
+}
+
 int main(int argc, char*argv[]) {
     /* The Sample format to use */
     static const pa_sample_spec ss = {
@@ -89,6 +95,10 @@ int main(int argc, char*argv[]) {
         fprintf(stderr, "pa_simple_new() failed: %d\n", error);
         goto exit;
     }
+
+    /* Start reader */
+    pthread_t t;
+    pthread_create(&t, NULL, thread_main, NULL);
 
     unsigned int stamp = 0;
     for(;;) {  // FIXME: exit?

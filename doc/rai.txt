@@ -3092,3 +3092,9 @@ Date: Tue Feb 17 02:40:50 EST 2015
 Ride the livecode wave.  Eliminate obstacles and see what happens.
 
 
+
+Entry: Merging live coding strategies
+Date: Wed Feb 18 03:01:56 EST 2015
+
+See doodle.lc2
+

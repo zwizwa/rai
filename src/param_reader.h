@@ -18,14 +18,14 @@ static inline void readline(void) {
     readline_buf[i] = 0;
 }
 
-static inline void param_set(char *var, int val) {
+static inline void param_set(char *var, float val) {
 #define CASE_PARAM(p_name, ...)                                         \
     if (!strcmp(#p_name, var)) { *(float *)(&param.p_name) = val; goto ok; }
     proc_for_param(CASE_PARAM)
-    LOG("? %s = %d\n", var, val);
+    LOG("? %s = %f\n", var, val);
     return;
   ok:
-    LOG("! %s = %d\n", var, val);
+    LOG("! %s = %f\n", var, val);
 }
 
 static inline void param_reader(void) {

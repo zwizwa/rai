@@ -38,7 +38,7 @@ LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 
 # Pulseaudio wrapper, standalone ELF
 %.pulse: %.g.h $(RAI_SRC)/prim.h $(RAI_SRC)/main_pulse.c $(RAI_SRC)/proc.h $(LIBPROC_O) $(RKT)
-	gcc -DPROC_FILE=\"$<\" -DCLIENT_NAME=\"$*\" $(CFLAGS) $(RAI_SRC)/main_pulse.c $(LIBPROC_O) $(LDFLAGS) `pkg-config libpulse-simple --cflags --libs` -o $@
+	gcc -DPROC_FILE=\"$<\" -DCLIENT_NAME=\"$*\" $(CFLAGS) $(RAI_SRC)/main_pulse.c $(LIBPROC_O) $(LDFLAGS) `pkg-config libpulse-simple --cflags --libs` -lpthread -o $@
 
 
 # Object files containing base name of the file as a global symbol
@@ -152,6 +152,12 @@ bcr2000: $(RAI_SRC)/bcr2000.c
 	gcc -o $@ $<
 
 
-# Live coding phony
+# TODO: combine both mechanisms
+
+# Live coding: famd object reloading.
 %.lc: %.rkt
 	$(RACKET) $(RAI)/fam-sp.rkt $< $(RAI_BIN)/pd_notify.sh
+
+# Live coding v2: lambda/param netsend from emacs (see emacs/rai.el)
+%.lc2: %.pulse
+	netcat -ulp 12345 | $$(readlink -f $<)

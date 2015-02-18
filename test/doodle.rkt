@@ -124,12 +124,12 @@
 (define-values
   (main main-defaults)
   (lambda/params (samplerate)
-    (let* ((f    0.0035)
-           (tick (float (timer '26000.0)))
-           (e1   (env-AR tick 1 '0.00076))
-           (e2   (env-AR tick 1 '0.00043))
+    (let* ((f    '0.0035)
+           (tick (float (timer '6100.0)))
+           (e1   (env-AR tick 1 '0.0014))
+           (e2   (env-AR tick 1 '0.00091))
            (s    (* .1 (* e1 (saw-d2 f))))
-           (l    (svf-lp s (* e2 43.0 f) 0.057))
+           (l    (svf-lp s (* e2 '22.0 f) '1.1))
            )
       (* 0.15 l))))
 
