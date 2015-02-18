@@ -127,11 +127,13 @@
     (let* ((f    '0.0035)
            (tick (float (timer '8100.0)))
            (e1   (env-AR tick 1 '0.0014))
-           (e2   (env-AR tick 1 '0.00091))
+           (e2   (env-AR tick 1 '0.001))
            (s    (* .1 (* e1 (saw-d2 f))))
            (l    (svf-lp s (* e2 '22.0 f) '1.1))
            )
-      (* 0.15 l))))
+      (* 0.15 l)
+      ;; (fdn1)
+      )))
 
 
 
