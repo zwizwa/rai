@@ -71,14 +71,19 @@
 (defun pd-gather-nums ()
   (let* ((cmds '())
          (str (thing-at-point 'defun));;'sentence
-         (expr (read str)))
+         (expr (read str))
+         (node 0) ;; structural address
+         )
     ;;(message str)
     (labels ((gather (it)
+               (setq node (+ 1 node))
                (when (listp it)
                  (if (and (= (length it) 2)
                           (eq (car it) 'quote)
                           (numberp (cadr it)))
-                     (let ((cmd (format "p%d %f;\n" (length cmds) (cadr it))))
+                     (let ((cmd (format "p%d %f;\n"
+                                        node ;;(length cmds)
+                                        (cadr it))))
                        (push cmd cmds))
                    (mapc #'gather it)))))
       (gather expr)

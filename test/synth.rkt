@@ -27,7 +27,7 @@
            (fs   samplerate)
            (pi   (* 4 (atan 1)))
            ;; UI input specs.  Output is normalized units.
-           (a (p-rate-ms 1 attack  "Attack"  100    fs))
+           (a (p-rate-ms 1 attack  "Attack"  '100.0    fs))
            (d (p-rate-ms 1 decay   "Decay"   100    fs))
            (s (p-gain-db 1 sustain "Sustain" -20 0    ))
            (r (p-rate-ms 1 release "Release" 100    fs))
