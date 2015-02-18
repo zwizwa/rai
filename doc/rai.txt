@@ -3098,3 +3098,6 @@ Date: Wed Feb 18 03:01:56 EST 2015
 
 See doodle.lc2
 
+Currently the main_pulse.c checks a file's time stamp, but this could
+better be the executable instead of source, i.e. let somebody else
+watch source and compile it, then let program restart.

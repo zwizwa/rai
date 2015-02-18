@@ -159,5 +159,6 @@ bcr2000: $(RAI_SRC)/bcr2000.c
 	$(RACKET) $(RAI)/fam-sp.rkt $< $(RAI_BIN)/pd_notify.sh
 
 # Live coding v2: lambda/param netsend from emacs (see emacs/rai.el)
+# combined with full reload when elf changes.
 %.lc2: %.pulse
-	netcat -ulp 12345 | $$(readlink -f $<)
+	netcat -ulp 12345 | (while date; do $$(readlink -f $<) $<; done)

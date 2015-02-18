@@ -58,7 +58,7 @@ float **a_out    = (float**)&out;
 
 void *thread_main(void *ctx) {
     param_reader();
-    return ctx;
+    return NULL;
 }
 
 int main(int argc, char*argv[]) {
@@ -97,8 +97,8 @@ int main(int argc, char*argv[]) {
     }
 
     /* Start reader */
-    pthread_t t;
-    pthread_create(&t, NULL, thread_main, NULL);
+    pthread_t thread;
+    pthread_create(&thread, NULL, thread_main, NULL);
 
     unsigned int stamp = 0;
     for(;;) {  // FIXME: exit?
