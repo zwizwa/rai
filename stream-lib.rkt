@@ -181,14 +181,15 @@
 ;; default dictionary as second value.
 (define-syntax (lambda/params stx)
   (define params '())
+  (define node 0)
   (define (collect-number! num)
-    (let* ((index (length params))
-           (varname (datum->syntax
-               #f (string->symbol
-                   (format "p~s" index)))))
+    (let* ((varname (datum->syntax
+                     #f (string->symbol
+                         (format "p~s" node)))))
       (push! params (cons varname num))
       varname))
   (define (traverse! stx)
+    (set! node (+ node 1))
     (syntax-case stx (quote)
       ('num (collect-number! (syntax->datum #'num)))
       ((e ...) (map traverse! (syntax-e stx)))

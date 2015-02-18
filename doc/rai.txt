@@ -2979,6 +2979,7 @@ Date: Sun Dec  7 21:23:53 EST 2014
 So what about using structural addresses instead of sequential ones?
 That would keep naming consistent when just changing the quotes.
 
+EDIT: Numbering the nodes in a tree traversal should be enough.
 
 
 Entry: Live coding

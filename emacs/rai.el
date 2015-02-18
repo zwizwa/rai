@@ -70,10 +70,14 @@
 
 (defun pd-gather-nums ()
   (let* ((cmds '())
-         (str (thing-at-point 'defun));;'sentence
+         (str (thing-at-point 'defun))
          (expr (read str))
-         (node 0) ;; structural address
-         )
+         (node 0))
+
+    ;; Strip to the inner form of lambda/params (see stream-lib.rkt)
+    (setq expr (if (eq (car expr) 'define-values) (caddr expr) '()))
+    (setq expr (if (eq (car expr) 'lambda/params) (caddr expr) '()))
+    
     ;;(message str)
     (labels ((gather (it)
                (setq node (+ 1 node))
@@ -82,7 +86,7 @@
                           (eq (car it) 'quote)
                           (numberp (cadr it)))
                      (let ((cmd (format "p%d %f;\n"
-                                        node ;;(length cmds)
+                                        node
                                         (cadr it))))
                        (push cmd cmds))
                    (mapc #'gather it)))))
