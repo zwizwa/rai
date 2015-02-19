@@ -17,11 +17,11 @@
 (defun rai-m-up ()
   (interactive)
   (rai-scale-number-at-point 1.1)
-  (pd-send-nums))
+  (rai-send-nums))
 (defun rai-m-down ()
   (interactive)
   (rai-scale-number-at-point 0.91)
-  (pd-send-nums))
+  (rai-send-nums))
 
 (defun rai-scale-number-at-point (factor)
   (let*
@@ -48,27 +48,29 @@
 
 ;; https://github.com/mlang/emacs-lisp/blob/master/osc.el
 
-(defun pd-make-client (host port)
+(defun rai-make-client (host port)
   (make-network-process
-   :name "pd-client"
+   :name "rai-client"
    :coding 'binary
    :host host
    :service port
    :type 'datagram))
 
-(defvar *pd-send-process* 
-  (pd-make-client "127.0.0.1" 12345))
+(defvar *rai-send-process* 
+  (rai-make-client "127.0.0.1" 12345))
 
-;; (setq *pd-send-process* (pd-make-client "127.0.0.1" 12345))
+;; (setq *rai-send-process* (rai-make-client "127.0.0.1" 12345))
 
-(defun pd-send (msg)
+(defun rai-send (msg)
   (with-temp-buffer
     (set-buffer-multibyte nil)
     (insert msg)
     ;; (message msg)
-    (process-send-string *pd-send-process* (buffer-string))))
+    (process-send-string *rai-send-process* (buffer-string))))
 
-(defun pd-gather-nums ()
+(defvar rai-send-format "p%d %f;\n") ;; pd netsend format
+
+(defun rai-gather-nums ()
   (let* ((cmds '())
          (str (thing-at-point 'defun))
          (expr (read str))
@@ -85,7 +87,7 @@
                  (if (and (= (length it) 2)
                           (eq (car it) 'quote)
                           (numberp (cadr it)))
-                     (let ((cmd (format "p%d %f;\n"
+                     (let ((cmd (format rai-send-format
                                         node
                                         (cadr it))))
                        (push cmd cmds))
@@ -93,7 +95,7 @@
       (gather expr)
       (reverse cmds))))
 
-(defun pd-send-nums ()
+(defun rai-send-nums ()
   (interactive)
-  ;; (pd-send (apply #'concat (pd-gather-nums)))
-  (mapc #'pd-send (pd-gather-nums)))
+  ;; (rai-send (apply #'concat (rai-gather-nums)))
+  (mapc #'rai-send (rai-gather-nums)))
