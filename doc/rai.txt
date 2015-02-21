@@ -3101,3 +3101,16 @@ See doodle.lc2
 Currently the main_pulse.c checks a file's time stamp, but this could
 better be the executable instead of source, i.e. let somebody else
 watch source and compile it, then let program restart.
+
+
+
+Entry: rai image
+Date: Fri Feb 20 21:58:50 EST 2015
+
+I forget so much... With geiser it's possible to display racket's
+images in interaction.  I did use this before to print plots.  Where
+is that code?
+
+See rai/compalg.rkt
+
+

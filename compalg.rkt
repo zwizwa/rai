@@ -21,7 +21,7 @@ test
 ;; To see graphical plots, run this file in drracket / geiser.
 
 ;; Scalar plots
-;(plot-lin/lin test 0 1)
+(plot-lin/lin test 0 1)
 ;(plot-log/log test 0.01 1)
 
 ;; Stream plots: time
