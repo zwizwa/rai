@@ -3114,3 +3114,23 @@ is that code?
 See rai/compalg.rkt
 
 
+Entry: Next?
+Date: Sun Feb 22 17:58:29 EST 2015
+
+What is the problem?  Why is there no music coming out of my speakers?
+
+I played a bit with the new emacs stuff and it's nice, but it's still
+cerebral.  How to dig back into that non-cerebral thing?
+
+I keep saying i want knobs, but i have this big box of knobs sitting
+right next to me and I'm not using it.  Somehow the _setup_ problem is
+still the big one.  How to set the table such that I can sit down and
+play without having to _think_, ruining the mood..
+
+
+Some systematic thing that seems to work:
+- just whip things up
+- find bounds and scales and map them to knobs
+- start exploring the field
+
+
