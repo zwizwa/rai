@@ -3134,3 +3134,12 @@ Some systematic thing that seems to work:
 - start exploring the field
 
 
+
+Entry: Workflow
+Date: Thu Feb 26 02:16:59 EST 2015
+
+Combine the emacs editing with macros (visual programming!) and the
+bcr2000 knob box.  Basically, use emacs "infinite" log scale for
+setting the limits of parameters.
+
+
