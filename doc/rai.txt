@@ -3143,3 +3143,14 @@ bcr2000 knob box.  Basically, use emacs "infinite" log scale for
 setting the limits of parameters.
 
 
+Entry: Visualize
+Date: Tue Mar  3 23:50:04 EST 2015
+
+Made basic draft of 2D gl widget collection.
+
+Point is to visualize.  Keep controls in hardware knobs for now,
+possibly with on-screen feedback, but don't worry about editing with
+the mouse.
+
+
+
