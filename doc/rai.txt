@@ -3154,3 +3154,8 @@ the mouse.
 
 
 
+
+Entry: The Death of Optimizing Compilers
+Date: Sun Apr 19 20:58:03 EDT 2015
+
+[1] https://lobste.rs/s/slioj7/the_death_of_optimizing_compilers
