@@ -3159,3 +3159,20 @@ Entry: The Death of Optimizing Compilers
 Date: Sun Apr 19 20:58:03 EDT 2015
 
 [1] https://lobste.rs/s/slioj7/the_death_of_optimizing_compilers
+
+
+Entry: Next?
+Date: Sat Jul 11 01:25:53 EDT 2015
+
+4 months of madness preventing any work...  So what's next here?  The
+remaining problems are not really technical.  They are mostly fear
+about not having any musical ideas when using this, and then getting
+lost in ambitious abstraction and typification..
+
+Might be good to ask some annoying questions.
+What do I really want to accomplish here?
+
+Is the point making sound, or is the point growing in understanding of
+computer programming, as a goal in itself?
+
+
