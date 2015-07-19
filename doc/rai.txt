@@ -3176,3 +3176,23 @@ Is the point making sound, or is the point growing in understanding of
 computer programming, as a goal in itself?
 
 
+
+Entry: Haskell types
+Date: Sun Jul 19 13:40:33 EDT 2015
+
+It would be nice to write out the core of this as Haskell operators,
+to see how they commute.  In the current racket implementation all of
+this is a big ball of mud.
+
+- composition of state machines with state 'accumulation'.
+
+- introduction of block-rate and other sample rate up/down conversion
+
+- spatial operations (essentially feldspar)
+
+- abstraction of data primitives (with control being fixed).
+
+I'm moving this back into meta/dspm where it belongs.
+[1] http://zwizwa.be/darcs/meta/dsmp/DSPM_RAI.txt
+
+
