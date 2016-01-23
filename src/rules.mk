@@ -161,4 +161,4 @@ bcr2000: $(RAI_SRC)/bcr2000.c
 # Live coding v2: lambda/param netsend from emacs (see emacs/rai.el)
 # combined with full reload when elf changes.
 %.lc2: %.pulse
-	netcat -ulp 12345 | (while date; do $$(readlink -f $<) $<; done)
+	netcat -ulp 12345 | (while date; do $$(readlink -f $<) $*.rkt; make $*.pulse; done)

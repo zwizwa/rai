@@ -5,12 +5,13 @@
 ;; inc/dec the number at point, followed by sending in pd format all
 ;; numbers marked with quote (') indexed in traversal order.
 
+;; Messages can be seen e.g. with "netcat -lup 12345"
+
 ;; Then use the form `lambda/params' instead of `lambda' to generate a
 ;; processor with parameters for each quoted number.  Compile to
 ;; something that accepts pd messages.
 
-;; see rai/test/doodle.rkt
-
+;; Now check rai/test/doodle.rkt at the bottom.
 
 ;; logarithmic number editing
 (require 'thingatpt)
@@ -99,3 +100,6 @@
   (interactive)
   ;; (rai-send (apply #'concat (rai-gather-nums)))
   (mapc #'rai-send (rai-gather-nums)))
+
+
+;; TODO: make M-left, M-right cycle through the parameters.

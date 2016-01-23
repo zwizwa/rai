@@ -9,3 +9,6 @@ This repository is a Racket package.  To install:
   
     raco pkg install github://github.com/zwizwa/rai/master
   
+
+
+Follow the white rabbit in emacs/rai.el
