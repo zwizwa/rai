@@ -11,4 +11,4 @@ This repository is a Racket package.  To install:
   
 
 
-Follow the white rabbit in emacs/rai.el
+Follow the white rabbit in test/doodle.rkt
