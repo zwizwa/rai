@@ -43,18 +43,23 @@
   (main main-defaults)
   (lambda/params (samplerate)
     (let* ((f    '0.0035)
-           (tick (float (timer '6700.0))) ;; 3500 - 6100 
-           (e1   (env-AR tick 1 '0.00057)) ;; .01 - .0003  
-           (e2   (env-AR tick 1 '0.00069)) ;; .00052 - .01
-           (s    (* .1 (* e1 (saw-d2 f))))
-           (l    (svf-lp s (* e2 '52.0 f) '1.1))
+           (tick (float (timer '430.0)))    ;; 3500 - 6100 
+           (e1   (env-AR tick '1.0 '0.067)) ;; .01 - .0003  
+           (e2   (env-AR tick '1 '0.00043)) ;; .00052 - .01
+           (s    (* .1 (* e1 (saw-d3 f))))
+           (l    (svf-lp s (* e2 '14.0 f) '0.98))
            )
-      (* '0.15 l)
+      (* '0.1 l)
       ;; (fdn1)
       )))
 
 (define main-nsi 0)
 (define main-tc '())
+
+;; TODO:
+;; - keep on adding LFOs
+;; - add a simpler exampe, then separate out "performances"
+;; - use hamiltonian modulators
 
 
 ;; (define (phasor32 (s) (period32))
