@@ -95,7 +95,7 @@
                    (mapc #'gather it)))))
       (gather expr)
       (reverse cmds))))
-
+ 
 (defun rai-send-nums ()
   (interactive)
   ;; (rai-send (apply #'concat (rai-gather-nums)))
