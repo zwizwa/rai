@@ -3196,3 +3196,43 @@ I'm moving this back into meta/dspm where it belongs.
 [1] http://zwizwa.be/darcs/meta/dsmp/DSPM_RAI.txt
 
 
+
+Entry: GCN
+Date: Sun Jan 24 23:45:15 EST 2016
+
+https://en.wikipedia.org/wiki/Graphics_Core_Next
+https://en.wikipedia.org/wiki/AMD_Radeon_Rx_200_series
+
+I have this:
+Radeon R9 270 	Nov 13, 2013 	Curaçao PRO 	GCN 1.0
+
+Might be interesting to start playing a bit with programming this
+thing.  All fairly recent developments:
+
+asm/dasm:
+https://community.amd.com/thread/190822
+
+
+
+Entry: Driver application
+Date: Mon Jan 25 15:35:25 EST 2016
+
+Trouble these days is really the mindset.  Too skewed towards "real
+life" -- payed work pulling me into economic mindset.
+
+So what I do have is a headset on frequently.  Just playing nothing,
+with noise cancelling on to get rid of the traffic noise.  What about
+putting some ambient on there?  Simple things.  As for platform, it
+needs to be portable.  Old cell phone would work fine.
+
+
+
+Entry: Interface
+Date: Mon Feb  8 22:48:51 EST 2016
+
+Looking for inspiration.  Need to find a way to experiment with
+structural elements and parameter range finding without having to
+type.  Touch screens come to mind, but I also have this wacom tablet i
+never used..
+
+Let's make a driver for it and see where it leads.
