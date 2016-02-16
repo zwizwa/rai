@@ -56,7 +56,7 @@ SPICE_NET_EXT := sn
 
 clean:
 	rm -f *.log *~ *.gbr *.cnc *.new.pcb board.net board.cmd \
-		*.pcb.bak* *.pcb- *.pdf *.ps *.net *.cmd
+		*.pcb.bak* *.pcb- *.pdf *.ps *.net *.cmd *.sn
 
 
 olimex:
