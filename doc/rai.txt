@@ -3236,3 +3236,41 @@ type.  Touch screens come to mind, but I also have this wacom tablet i
 never used..
 
 Let's make a driver for it and see where it leads.
+
+
+
+Entry: Mix matrix
+Date: Sat Feb 13 09:25:36 EST 2016
+
+Always intrigued me, but never really knew what to do with it.  What
+about this:
+
+- start with clean slate
+
+- add module, and automatically extend the current mix matrix
+
+- visualize the matrix in a module diagram?
+
+- prune mix matrix
+
+- assign controller knobs (autolearn)
+
+- knob range finding
+
+
+
+I don't think I can repeat this often enough: the problem is user
+interface for composition, which involves:
+- instantiation
+- connection
+- parameter mapping
+
+That's really all.  Do that in a way that doesn't trigger logical
+(language) thought.
+
+
+Entry: probably best to switch to OSC
+Date: Sun Feb 14 02:35:52 EST 2016
+
+Here's an emacs library:
+https://delysid.org/emacs/osc.html
