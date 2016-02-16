@@ -1,5 +1,6 @@
 #lang scheme/base
 (provide (all-defined-out))
+(require racket/string)
 
 ;; Basic idea is to have a way to analyze circuits both for designing
 ;; actual analog, and for then approximating those and turning them
@@ -13,8 +14,13 @@
 
 (define (netlist file)
   (for/list
-      ((l (in-lines (open-input-file file))))
-    l))
+      ((line (in-lines (open-input-file file)))
+       ;; Skip comments
+       #:when (not (regexp-match #rx"^\\*" line))
+       ;; Ignore anything past .end
+       #:break (regexp-match #rx"^\\.end" line)
+       )
+    (string-split line)))
 
              
       
