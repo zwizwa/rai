@@ -39,12 +39,10 @@ GSCH2PCB := gsch2pcb -d $(PACKAGES)
 %.drc: %.sch
 	gnetlist -g drc2 $< -o $@
 
-SPICE_NET_EXT := sn
+SPICE_NET_EXT := spice
 %.$(SPICE_NET_EXT): %.sch
 	gnetlist -g spice-sdb $< -o $@
 
-%.spice: %.$(SPICE_NET_EXT)
-	ngspice $<
 
 
 # PRINTING
@@ -56,7 +54,7 @@ SPICE_NET_EXT := sn
 
 clean:
 	rm -f *.log *~ *.gbr *.cnc *.new.pcb board.net board.cmd \
-		*.pcb.bak* *.pcb- *.pdf *.ps *.net *.cmd *.sn
+		*.pcb.bak* *.pcb- *.pdf *.ps *.net *.cmd *.spice
 
 
 olimex:

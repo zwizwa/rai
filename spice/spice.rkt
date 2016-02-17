@@ -47,5 +47,5 @@
   (system (format "make ~s" file))
   (netlist file))
 
-(test "vca.sn")
+(test "vca.spice")
 

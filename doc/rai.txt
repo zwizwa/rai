@@ -3274,3 +3274,27 @@ Date: Sun Feb 14 02:35:52 EST 2016
 
 Here's an emacs library:
 https://delysid.org/emacs/osc.html
+
+
+Entry: Spice: taking a stab at working with equations
+Date: Tue Feb 16 18:19:12 EST 2016
+
+Two things need to be distinguished:
+- Primitive equations that relate currents, voltages and time
+- Spice's GV=I approach.
+
+I'm currently more interested in building a good representation of the
+equations, and then find mappings of that that will answer questions.
+E.g. sensitivities: effect of circuit parameter on some computable
+property.
+
+The full equation is a first order, non-linear differential equation.
+
+The state variables can be currents and voltages.  However, they
+generally are voltages, as inductors are rare and can be omitted on
+the first try.  ( And could be replaced by gyrators? )
+
+( Re-reading from october 2015.  Essentially going through the same
+thing. )
+
+
