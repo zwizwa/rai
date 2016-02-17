@@ -57,9 +57,9 @@
   (main main-defaults)
   (lambda/params
    (samplerate)
-   (let* ((f '0.0046)
-          (ff '0.063)
-          (s (ssaw f '0.029 30))
-          (l (svf-lp (* '0.039 s) ff '0.19)))
-     (* '0.41 l))))
+   (let* ((f '0.0014)
+          (ff '0.052)
+          (s (ssaw f '0.029 20))
+          (l (svf-lp (* '0.039 s) ff '0.52)))
+     (* '1.0 l))))
 
