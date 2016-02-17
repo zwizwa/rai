@@ -3298,3 +3298,31 @@ the first try.  ( And could be replaced by gyrators? )
 thing. )
 
 
+
+
+Entry: To solve
+Date: Tue Feb 16 20:01:38 EST 2016
+
+Vector intermediates.  That's a big one.
+( Make me think of applicative functors... )
+
+
+Entry: Doodling rai/lc
+Date: Tue Feb 16 20:02:44 EST 2016
+
+One synth a day to get back into the groove.  What I forgot is that
+the exploratory part is really essential: once you take the local view
+of a single parameter, it is usually easy to imagine some kind of next
+processing step.  However, the iterative / layered approach is
+*essential* to discovering these paths through soundscapes.  ( Like
+deep learning :)
+
+
+Entry: retrigger state reset
+Date: Tue Feb 16 20:42:32 EST 2016
+
+It would be nice to add a conditional state reset.  A nice emerging
+property is the natural transient that happens for many of these
+systems.  E.g.: reverb, supersaw (into distortion to limit amplitude
+due to initial constructive interference).
+

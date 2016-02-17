@@ -58,8 +58,8 @@
   (lambda/params
    (samplerate)
    (let* ((f '0.0014)
-          (ff '0.052)
-          (s (ssaw f '0.029 20))
+          (ff '0.039)
+          (s (ssaw f '0.012 20))
           (l (svf-lp (* '0.039 s) ff '0.52)))
      (* '1.0 l))))
 
