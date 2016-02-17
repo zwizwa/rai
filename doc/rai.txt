@@ -3326,3 +3326,15 @@ property is the natural transient that happens for many of these
 systems.  E.g.: reverb, supersaw (into distortion to limit amplitude
 due to initial constructive interference).
 
+
+
+Entry: circuit simulation
+Date: Wed Feb 17 11:22:14 EST 2016
+
+TODO:
+
+- Equations: Look at previous posts. There are some good ideas there +
+  some code.
+
+- Make ngspice/gnucap work (add models)
+
