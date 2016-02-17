@@ -41,13 +41,25 @@
 ;; doodle.lc" in this directory, and loading "emacs/rai.el" into
 ;; Emacs.
 
+;; Aliasing supersaw.
+(define (ssaw freq spread n)
+  (mix (i (nb_saws n))
+       ()
+       (let* ((i   (cast Float i))
+              (n   (cast Float nb_saws))
+              (dx  (- (* 2 (/ i n)) 1))
+              (cube (* dx dx dx)))
+         (phasor (* freq (+ 1 (* spread cube)))
+                 -1 1))))
 
 
 (define-values
   (main main-defaults)
   (lambda/params
    (samplerate)
-   (let* ((f '0.0024)
-          (s (supersaw f '0.056)))
-     (* '0.0097 s))))
+   (let* ((f '0.0046)
+          (ff '0.063)
+          (s (ssaw f '0.029 30))
+          (l (svf-lp (* '0.039 s) ff '0.19)))
+     (* '0.41 l))))
 
