@@ -3491,4 +3491,13 @@ Date: Wed Feb 17 21:50:26 EST 2016
   current sources.
 
 
+Entry: Axoloti scales
+Date: Wed Feb 17 21:54:19 EST 2016
 
+audio, control voltages, en parameterFrac32SMap:
+normal range -0x0800000 tot 0x07FFFFFF  (4 bit headroom).
+
+This range is mapped in UI to -64.0 tot 64.0.
+Promotes use of nice numbers as opposed to fractions  (a sort of percentage..)
+
+Compare to analog modular synth, +-64 Volts, 1 volt per semitone.
