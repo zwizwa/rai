@@ -3338,3 +3338,157 @@ TODO:
 
 - Make ngspice/gnucap work (add models)
 
+
+
+Entry: Got lost in thinking about graphs...
+Date: Wed Feb 17 18:04:40 EST 2016
+
+Not easy.  I'm missing a lot of intuition.
+
+It's not clear how to think of circuits graphs, since there are
+terminals and nets, which have more structure than graphs (nodes,
+edges).
+
+Circuits are terminals and nets.
+
+It's helpful to draw a fully connected circuit and replacing
+electrical symbols with "blank" 2 and 3 terminals.
+
+
+2-terminals can be represented by edges.
+Such a graph is not simple (i.e. parallel connections possible).
+
+However, parallel connections can be eliminated by using composite
+objects.  The result is then a simple graph.
+
+Using norton/thevenin transformation, even further reduction is
+possible (eliminate serial connections) until a single norton/thevenin
+circuit remains.
+
+When 3-terminals enter the picture, this is no longer possible.
+
+Modeling 3-terminals as a collection of 2-terminals and some extra
+equations (gyrators?) is possible but will "halt" the ability to
+construct equivalent circuits, as that is only possible for linears..
+
+
+
+
+Are circuits planar graphs[1]?  Not necessarily.
+https://en.wikipedia.org/wiki/Planar_graph
+
+For circuit analysis, a problem that arises is which loops to pick to
+determine independent KVL equations.  Planar graphs seem to make this
+easier (as it is easier to construct the dual?)
+
+Circuits (networks) are n-terminals connected to nets.  They are not
+graphs per se (in the mathematical sense; objects made of nodes and
+links).
+
+Circuits of linear 2-terminals can be combined to a single 2-terminal
+in the Laplace domain.
+
+Circuits of non-reactive nonlinear 2-terminals can be combined in a
+similar way into a single current/voltage relation.
+
+Once nonlinear and active are combined, the behavior becomes more
+complex and cannot be condensed into functions: systems of nonlinear
+differential equations arise.
+
+N-ports, N>2 complicate matters.  However in the application of
+interest (analysis of diode + bjt circuits), these can be decomposed
+into networks of 2-terminal devices with extra current/voltage
+relations (Ebers-Moll, with 2 current relations).
+
+So the objects we're working with are:
+- networks of 2-terminals
+- KCL, KVL
+- passive static (R) and dynamic (C,H) relations
+- current/voltage controlled current/voltage sources
+
+Such a circuit is a non-simple, directed graph, where every edge
+represents a 2-terminal.
+
+
+
+Entry: Drawing equivalent circuits.
+Date: Wed Feb 17 19:23:23 EST 2016
+
+Since equivalent circuits are all 2-terminals, they are proper
+non-simple graphs, so might be drawn with graphviz.
+
+To make this pretty, distinguish nodes and 2-terminals, and draw
+2-terminal edges as edge->box->edge.
+
+http://stackoverflow.com/questions/29768453/how-to-use-graphviz-and-racket
+
+
+
+Entry: KVL vs. KCL
+Date: Wed Feb 17 19:35:44 EST 2016
+
+I wonder, is KVL actually necessary?  By assigning a voltage to every
+node, there is no way to make that not work.
+
+So it seems spice uses KCL, and not KVL.  The reason?  Likely because
+it is easy to build equations from nodes (that information is right
+there in the netlist, as opposed to having to analyze the graph to
+find loops).  At least that is what is inferred here [1].
+
+A consequence of that is that it is not possible to have isolated
+voltage sources: they always need to be translated to current source +
+series resistor.
+
+Leads to the question: is it possible to partially invert this?
+E.g. use a graph transformation to partially dualize?  ( I went here before... )
+
+G v = i
+
+Where v are the node voltages, and i are the node currents injected
+into each node.
+
+It seems that this is just a re-organization of the equations:
+
+  [ G -I ] [ v i ]^T = 0
+
+Into
+
+  [ A B ]  [x c]^T = 0  or  Ax + Bc = 0
+
+Where x denotes the unknowns and c denotes the known current/voltage
+sources.
+
+So essentially a simple problem.
+
+
+
+
+
+
+
+[1] http://electronics.stackexchange.com/questions/19198/kcl-vs-kvl-in-circuit-analysis
+[2] http://ltwiki.org/?title=Pure_Inductor_and_Voltage_Source_Modelling_%28and_how_to_speed_up_simulations_with_them%29_using_LTspice
+
+
+
+Entry: Summary: why spice looks like it does
+Date: Wed Feb 17 21:50:26 EST 2016
+
+- KCL gives an easy way to dervice equations from a netlist: one
+  equation per node, except ground node.
+
+- This expresses connectivity as an admittance (conductance) matrix G,
+  each element corresponding to the conductance of a single resistor.
+
+- To deal with ideal voltage sources, the equations can be re-arranged
+  from Gv=i, [G|-1][v|i]^T=0 form to Ap+Bs=0, where p contains all
+  variabiable voltages/currents and s contains all voltage/current
+  sources.
+
+- If G represents the connectivity of the network, each element in G,
+  if not a static resistor, is a current linear approximation of
+  dynamic and nonlinear effects.  Offsets are determined by voltage,
+  current sources.
+
+
+
