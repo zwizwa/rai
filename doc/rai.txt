@@ -1363,18 +1363,6 @@ Axo?  Cortex M4 DSP?  Fixed point analysis?  GUI?
 
 
 
-Entry: Porting analog
-Date: Fri Jun 13 09:16:12 EDT 2014
-
-Been working on analog circuits for a bit.  Very interesting, but also
-very messy.  Slow process.  I'd like to find a way to boost the
-process by formalizing at least the small-signal portion of a circuit.
-
-I wanted to get into spice but really it seems a bit awkward to me.
-Better to find a good way to express circuits as code/functions and
-then have it generate spice input?
-
-
 
 Entry: Axo reboot
 Date: Thu Sep 18 21:23:22 CEST 2014
@@ -1946,233 +1934,7 @@ Date: Thu Oct  9 08:44:36 CDT 2014
 
 
 
-Entry: Writing a circuit simulator
-Date: Thu Oct 16 16:20:05 EDT 2014
 
-Mostly to gain some insight into discretization + some practical
-incentive to do "boutique" analog design.
-
- - Set point analysis
- - Linearized impedance / transfer functions
-
-How to make this work?  One thing that seems important is to figure
-out how to remove infinities due to ideal components.  E.g. opamps
-with finite gain and GBW.
-
-Can this be done through abstract interpretation?
-
-
-
-Entry: Circuit simulation
-Date: Tue Oct 21 11:04:44 EDT 2014
-
-Been thinking about impedance and circuits.  Some conclusions:
-
-- It's possible to move nonlinearities into the temporal domain as
-  long as they are smooth enough.  I.e. a diode becomes (d = unit delay):
-
-  I[k]/I_s = e(V[k-1]/V_T) {1 + (V[k]-V[k-1])/V_T}
-  
-  I.e. the nonlinear relation is past->now, not now<->now.
-
-
-- For circuits, nonlinearity is essential (cannot be decoupled).
-  I.e. we need to keep that matrix and solve it.
-
-Open questions:
-
-- In what form should equations be specified?
-
-- How to translate equations into matrix form, i.e. separate variables
-  from coefficients and linearize nonlinear components.
-
-- Should voltages be floating or is a common ground assumed? -> NO
-
-
-Start with abstraction! Equations should be specified as n-ports.  A
-system that is solvable is a 0-port.  E.g. system of interest + input
-source.
-
-
-
-Entry: Circuit editor
-Date: Tue Oct 21 18:47:10 EDT 2014
-
-It would be so cool to make this into a real-time circuit editor that
-produces sound on the fly.
-
-
-Entry: Specification language
-Date: Tue Oct 21 20:19:11 EDT 2014
-
-A first draft: an RC filter.
-All nodes are explicit.  It is up to the user to not connect them.
-A non-connected node is a node connected to a 0 current source.
-Current flows into the node from the outside of the n-port.
-
-n-ports do not have hidden supply nodes, so \sum I = 0 always holds.
-Does it need to be explicit? (1)
-
-  (nport
-   (terminals
-    (v_in  i_in)
-    (v_out i_out)
-    (v_gnd i_gnd))
-   (parameters
-    (R C))
-   (equations
-    (+ i_gnd i_in i_out)  ;; (1)
-    (+ i_gnd (* C (d/dt (- v_out v_gnd))))
-    (- i_in  (* R (- v_in v_out)))
-    ))
-
-
-6 unknowns, 3 degrees of freedom left.
-A full connection would be:
-
-  v_in  = x   input voltage
-  v_gnd = 0   common ground
-  i_out = 0   no output load
-
-
-TODO: identify state variables.
-
-A problem is expressions like (d/dt (- v1 v2)).  Those need to be made
-explicit, probably by adding extra unknowns.
-
-
-
-Entry: Serializing equations
-Date: Wed Oct 22 09:16:10 EDT 2014
-
-Given a set of equations:
-
-- For each d/dt, make sure the variable is naked.  Otherwise add new
-  variables and an extra equation.
-
-- Equations have a set of inputs.  Separate parameters from variables.
-
-- Solve set of equations
-
-- Repeat
-
-
-
-Looks like this will need some appropriate data structure traversals.
-Tree processing is always the big hurdle, so let's do it right this
-time.
-
-mapAccum[1] seems appropriate: process datastructure + update
-accumulator.  however, when this is a tree, there seems to be a
-conflict between substitution and traversal.  i.e. when a node
-processing function prunes a subtree, should the old one be traversed
-still?
-
-Let's bypass the d/dt rewriting and just assume d/dt operates on naked
-variables first.
-
-
-[1] http://www.haskell.org/hoogle/?hoogle=mapAccum
-
-
-
-Entry: Splitting d/dt
-Date: Fri Oct 24 13:36:21 EDT 2014
-
-This equation expression
-
-    (+ i_gnd (* C (d/dt v_c)))  ;; = 0
-
-needs to be transformed into an update.  The update comes straight
-from the naked expression for the derivative so to normalize, expand
-everything to sum of products and bring the d/dt term to the other side.
-
-to solve the other equations, simply do not take this into account
-
-
-This is what comes out atm
-
-racket@test-impedance.rkt> (info p)
-((variables (i_out v_in i_in i_gnd v_gnd v_out v_c))
- (derivatives (v_c))
- (equations
-  ((algebraic
-    ((- v_c (- v_out v_gnd))
-     (- i_in (* R (- v_in v_out)))
-     (+ i_in i_out i_gnd)))
-   (diff
-    ((+ i_gnd (* C (d/dt v_c))))))))
-
-
-So.. for the algebraic instantaneous equations, the variables that
-have differentials are actually parameters.
-
-
-Now it might be easier to start with normal forms.  Later maybe add
-sugar on top but that's probably not necessary if the NFs are clear.
-
-Something like this
-
-dif:  (v e)            -> (= (d/dt v) e)           ;; e is any function of vars, params
-alg:  (c (c1 x1) ...)) -> (= c (+ (* c1 x1) ...))  ;; c, c1, ... are coefficients (can not depend on x1 ...)
-
-  (nport
-
-   (terminals
-    (v_in  i_in)
-    (v_out i_out)
-    (v_gnd i_gnd))
-
-   (parameters R C)
-   
-   (differential
-    (v_c (/ (- i_gnd) C)))
-
-   (algebraic
-    (0 (-1 v_c) (1 v_out) (-1 v_gnd))
-    (0 (-1 i_in) ((* -1 R) v_in) (* R v_out))
-    (0 (1 i_in) (1 i_out) (i_gnd))))
-
-
-
-So basic idea is that:
-- all linear variables are exposed 
-- all differential variables are exposed
-
-For non-linearity, it seems that just computing the coefficients
-through automatic differentiation is already enough to perform
-linearized approximation.
-
-I wonder if the whole thing can then be solved using iterative methods
-as well, since the solution doesn't change much from point to point.
-I.e. no matrix inversion.
-
-
-Entry: Rethinking circuit representation
-Date: Wed Nov  5 10:25:45 EST 2014
-
-I'm starting to understand the spice rationale[1].  The basic model is
-that of a resistive network with one node dedicated as ground node.
-Equations are set up using KCL for each non-ground node.  This gives a
-relation between node voltages and currents flowing into each node:
-
-    G V = I
-
-This is just a relation.  It can be interpreted as currents drawn from
-voltage sources, or node voltages caused by current sources.
-
-The matrix G is symmetric, positive definite.
-- symmetric: a resistor has no directionality
-- positive definite: V^T G V = V^T I = P, total power is always > 0
-
-Starting from this basic model, SPICE linearizes the equations and
-performs NR iterations at a particular time instance, and uses one of
-several integration methods to move forward in time.
-
-The structure of G allows for Krylov subspace methods (conjugate
-gradient, lanczos)
-
-[1] entry://../math/20141105-000511
 
 
 
@@ -3276,27 +3038,6 @@ Here's an emacs library:
 https://delysid.org/emacs/osc.html
 
 
-Entry: Spice: taking a stab at working with equations
-Date: Tue Feb 16 18:19:12 EST 2016
-
-Two things need to be distinguished:
-- Primitive equations that relate currents, voltages and time
-- Spice's GV=I approach.
-
-I'm currently more interested in building a good representation of the
-equations, and then find mappings of that that will answer questions.
-E.g. sensitivities: effect of circuit parameter on some computable
-property.
-
-The full equation is a first order, non-linear differential equation.
-
-The state variables can be currents and voltages.  However, they
-generally are voltages, as inductors are rare and can be omitted on
-the first try.  ( And could be replaced by gyrators? )
-
-( Re-reading from october 2015.  Essentially going through the same
-thing. )
-
 
 
 
@@ -3328,169 +3069,6 @@ due to initial constructive interference).
 
 
 
-Entry: circuit simulation
-Date: Wed Feb 17 11:22:14 EST 2016
-
-TODO:
-
-- Equations: Look at previous posts. There are some good ideas there +
-  some code.
-
-- Make ngspice/gnucap work (add models)
-
-
-
-Entry: Got lost in thinking about graphs...
-Date: Wed Feb 17 18:04:40 EST 2016
-
-Not easy.  I'm missing a lot of intuition.
-
-It's not clear how to think of circuits graphs, since there are
-terminals and nets, which have more structure than graphs (nodes,
-edges).
-
-Circuits are terminals and nets.
-
-It's helpful to draw a fully connected circuit and replacing
-electrical symbols with "blank" 2 and 3 terminals.
-
-
-2-terminals can be represented by edges.
-Such a graph is not simple (i.e. parallel connections possible).
-
-However, parallel connections can be eliminated by using composite
-objects.  The result is then a simple graph.
-
-Using norton/thevenin transformation, even further reduction is
-possible (eliminate serial connections) until a single norton/thevenin
-circuit remains.
-
-When 3-terminals enter the picture, this is no longer possible.
-
-Modeling 3-terminals as a collection of 2-terminals and some extra
-equations (gyrators?) is possible but will "halt" the ability to
-construct equivalent circuits, as that is only possible for linears..
-
-
-
-
-Are circuits planar graphs[1]?  Not necessarily.
-https://en.wikipedia.org/wiki/Planar_graph
-
-For circuit analysis, a problem that arises is which loops to pick to
-determine independent KVL equations.  Planar graphs seem to make this
-easier (as it is easier to construct the dual?)
-
-Circuits (networks) are n-terminals connected to nets.  They are not
-graphs per se (in the mathematical sense; objects made of nodes and
-links).
-
-Circuits of linear 2-terminals can be combined to a single 2-terminal
-in the Laplace domain.
-
-Circuits of non-reactive nonlinear 2-terminals can be combined in a
-similar way into a single current/voltage relation.
-
-Once nonlinear and active are combined, the behavior becomes more
-complex and cannot be condensed into functions: systems of nonlinear
-differential equations arise.
-
-N-ports, N>2 complicate matters.  However in the application of
-interest (analysis of diode + bjt circuits), these can be decomposed
-into networks of 2-terminal devices with extra current/voltage
-relations (Ebers-Moll, with 2 current relations).
-
-So the objects we're working with are:
-- networks of 2-terminals
-- KCL, KVL
-- passive static (R) and dynamic (C,H) relations
-- current/voltage controlled current/voltage sources
-
-Such a circuit is a non-simple, directed graph, where every edge
-represents a 2-terminal.
-
-
-
-Entry: Drawing equivalent circuits.
-Date: Wed Feb 17 19:23:23 EST 2016
-
-Since equivalent circuits are all 2-terminals, they are proper
-non-simple graphs, so might be drawn with graphviz.
-
-To make this pretty, distinguish nodes and 2-terminals, and draw
-2-terminal edges as edge->box->edge.
-
-http://stackoverflow.com/questions/29768453/how-to-use-graphviz-and-racket
-
-
-
-Entry: KVL vs. KCL
-Date: Wed Feb 17 19:35:44 EST 2016
-
-I wonder, is KVL actually necessary?  By assigning a voltage to every
-node, there is no way to make that not work.
-
-So it seems spice uses KCL, and not KVL.  The reason?  Likely because
-it is easy to build equations from nodes (that information is right
-there in the netlist, as opposed to having to analyze the graph to
-find loops).  At least that is what is inferred here [1].
-
-A consequence of that is that it is not possible to have isolated
-voltage sources: they always need to be translated to current source +
-series resistor.
-
-Leads to the question: is it possible to partially invert this?
-E.g. use a graph transformation to partially dualize?  ( I went here before... )
-
-G v = i
-
-Where v are the node voltages, and i are the node currents injected
-into each node.
-
-It seems that this is just a re-organization of the equations:
-
-  [ G -I ] [ v i ]^T = 0
-
-Into
-
-  [ A B ]  [x c]^T = 0  or  Ax + Bc = 0
-
-Where x denotes the unknowns and c denotes the known current/voltage
-sources.
-
-So essentially a simple problem.
-
-
-
-
-
-
-
-[1] http://electronics.stackexchange.com/questions/19198/kcl-vs-kvl-in-circuit-analysis
-[2] http://ltwiki.org/?title=Pure_Inductor_and_Voltage_Source_Modelling_%28and_how_to_speed_up_simulations_with_them%29_using_LTspice
-
-
-
-Entry: Summary: why spice looks like it does
-Date: Wed Feb 17 21:50:26 EST 2016
-
-- KCL gives an easy way to dervice equations from a netlist: one
-  equation per node, except ground node.
-
-- This expresses connectivity as an admittance (conductance) matrix G,
-  each element corresponding to the conductance of a single resistor.
-
-- To deal with ideal voltage sources, the equations can be re-arranged
-  from Gv=i, [G|-1][v|i]^T=0 form to Ap+Bs=0, where p contains all
-  variabiable voltages/currents and s contains all voltage/current
-  sources.
-
-- If G represents the connectivity of the network, each element in G,
-  if not a static resistor, is a current linear approximation of
-  dynamic and nonlinear effects.  Offsets are determined by voltage,
-  current sources.
-
-
 Entry: Axoloti scales
 Date: Wed Feb 17 21:54:19 EST 2016
 
@@ -3501,3 +3079,56 @@ This range is mapped in UI to -64.0 tot 64.0.
 Promotes use of nice numbers as opposed to fractions  (a sort of percentage..)
 
 Compare to analog modular synth, +-64 Volts, 1 volt per semitone.
+
+
+
+Entry: Spice: TODO
+Date: Wed Feb 17 23:42:13 EST 2016
+
+1. Assume Gv-i=0 needs to be solved numerically.
+2. Later, see if the gaussian elimination can be done structurally
+
+Methods that use structure are usually iterative, so implement
+conjugate gradient?  This is a tracking problem, so iterative solution
+might actually work better.
+
+Plan:
+
+- Express the multiplication by G as a program
+
+- Use the conjugate gradient method to solve the system equation
+
+- The update G(k) -> G(k+1), e.g. the computation of the derivatives,
+  can likely be expressed as an iterative update in its own right.
+
+
+As long as the time step is small, all these iterative steps should be
+quite precise.  The problem is reaching the initial state.  For some
+circuits, this might be possible to do by powering them up slowly.
+
+
+Computation of derivatives:
+  - Use autodiff to obtain program that computes derivative
+
+  - To evaluate the trancendentals, use a single iteration that uses
+    the previous value as a starting point.
+
+Question though, is will that drift?
+
+The only transcendental I need is exp, for diodes and ebers-moll.  I
+have some evaluators for that.  A possible approach is to pipeline a
+non-drifting version over N steps, and then replace the iterative
+approximation.
+
+This comes back the the essential need for "control rate" processing.
+
+
+
+
+md5://c360a9013f7276bfa1f860bea697c374
+
+
+Entry: AKFE
+Date: Thu Feb 18 00:52:46 EST 2016
+
+a knob for everything

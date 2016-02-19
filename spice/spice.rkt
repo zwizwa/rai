@@ -6,6 +6,17 @@
          racket/list
          racket/dict)
 
+;; About spice and circuit analysis.  Some memory-trigger remarks:
+;; - Netlist/nodes representation -> KCL equations (loops/KVL = much harder)
+;; - KCL expresses connectivity as admittance matrix: Gv=i
+;; - Gv=i needs rearrangement to Ap+Bc=0 when ideal voltage sources are present
+;; - Reactive and nonlinear effects appear linearized as (G,i)
+
+
+
+
+
+
 ;; Basic idea is to have a way to analyze circuits both for designing
 ;; actual analog, and for then approximating those and turning them
 ;; into C code.
@@ -34,9 +45,9 @@
     (match (string-split line)
       ((cons name args)
        (let*-values
-           (((tag)      (string->symbol (substring name 0 1)))
-            ((inst)     (string->symbol (format "_~a" (substring name 1))))
-            ((nb)       (nb-terminals tag))
+           (((tag     ) (string->symbol (substring name 0 1)))
+            ((inst    ) (string->symbol (format "_~a" (substring name 1))))
+            ((nb      ) (nb-terminals tag))
             ((nets val) (split-at args nb)))
          (list tag
                inst
