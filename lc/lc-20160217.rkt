@@ -57,7 +57,7 @@
   (main main-defaults)
   (lambda/params
    (samplerate)
-   (let* ((ff (+ '0.063 (* '0.011 (phasor '9.1e-05 1 0))))
+   (let* ((ff (+ '0.057 (* '0.011 (phasor '9.1e-05 1 0))))
           (s1 (ssaw '0.004 '0.0023 10))
           (s2 (ssaw '0.006 '0.039 10))
           (s (+ s1 s2))
