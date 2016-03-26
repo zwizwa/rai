@@ -82,8 +82,8 @@
     (setq expr (if (eq (car expr) 'lambda/params) (caddr expr) '()))
     
     ;;(message str)
-    (labels ((gather (it)
-               (setq node (+ 1 node))
+    (cl-labels ((gather (it)
+	       (setq node (+ 1 node))
                (when (listp it)
                  (if (and (= (length it) 2)
                           (eq (car it) 'quote)
