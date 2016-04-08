@@ -49,6 +49,37 @@
 
 ;; https://github.com/mlang/emacs-lisp/blob/master/osc.el
 
+;; Gather quoted numbers and assign structural addresses.
+
+(defun rai-gather-nums-at-point ()
+  (let* ((str (thing-at-point 'defun))
+         (expr (read str)))
+    (message str)
+    (rai-gather-nums expr)))
+
+(defun rai-gather-nums (expr)
+  (let* ((cmds '())
+         (node 0))
+
+    ;; Strip to the inner form of lambda/params (see stream-lib.rkt)
+    (setq expr (if (eq (car expr) 'define-values) (caddr expr) '()))
+    (setq expr (if (eq (car expr) 'lambda/params) (caddr expr) '()))
+    
+    (cl-labels ((gather (it)
+	       (setq node (+ 1 node))
+               (when (listp it)
+                 (if (and (= (length it) 2)
+                          (eq (car it) 'quote)
+                          (numberp (cadr it)))
+                     (let ((cmd (list node (cadr it))))
+                       (push cmd cmds))
+                   (mapc #'gather it)))))
+      (gather expr)
+      (reverse cmds))))
+
+
+
+
 (defun rai-make-client (host port)
   (make-network-process
    :name "rai-client"
@@ -62,44 +93,21 @@
 
 ;; (setq *rai-send-process* (rai-make-client "127.0.0.1" 12345))
 
+(defun rai-send-format (node number)
+  (format "p%d %f;\n" node number)) ;; pd netsend
+
 (defun rai-send (msg)
   (with-temp-buffer
     (set-buffer-multibyte nil)
-    (insert msg)
+    (insert (apply 'rai-send-format msg))
     ;; (message msg)
     (process-send-string *rai-send-process* (buffer-string))))
 
-(defvar rai-send-format "p%d %f;\n") ;; pd netsend format
 
-(defun rai-gather-nums ()
-  (let* ((cmds '())
-         (str (thing-at-point 'defun))
-         (expr (read str))
-         (node 0))
-
-    ;; Strip to the inner form of lambda/params (see stream-lib.rkt)
-    (setq expr (if (eq (car expr) 'define-values) (caddr expr) '()))
-    (setq expr (if (eq (car expr) 'lambda/params) (caddr expr) '()))
-    
-    ;;(message str)
-    (cl-labels ((gather (it)
-	       (setq node (+ 1 node))
-               (when (listp it)
-                 (if (and (= (length it) 2)
-                          (eq (car it) 'quote)
-                          (numberp (cadr it)))
-                     (let ((cmd (format rai-send-format
-                                        node
-                                        (cadr it))))
-                       (push cmd cmds))
-                   (mapc #'gather it)))))
-      (gather expr)
-      (reverse cmds))))
- 
 (defun rai-send-nums ()
   (interactive)
   ;; (rai-send (apply #'concat (rai-gather-nums)))
-  (mapc #'rai-send (rai-gather-nums)))
+  (mapc #'rai-send (rai-gather-nums-at-point)))
 
 
 ;; TODO: make M-left, M-right cycle through the parameters.

@@ -3132,3 +3132,84 @@ Entry: AKFE
 Date: Thu Feb 18 00:52:46 EST 2016
 
 a knob for everything
+
+
+Entry: Midi knobs and structural editing
+Date: Fri Apr  8 09:58:17 EDT 2016
+
+I've got the midi equipment organized in an Erlang program (studio).
+Next: assign knobs to numeric values in code.
+
+Do this the same way as before: traverse the tree, giving structural
+addresses.
+
+Doodling a bit, it seems what is necessary next is a way to relate the
+parsed expression back to text.  Maybe this is all easier to do in
+racket instead of emacs.
+
+emacs -> racket:  code snippet
+racket -> emacs:  cut & replace
+
+Best to focus on edits instead of sending the whole thing.
+
+Emacs has a notion of "current expression".  This is initialized
+through:
+
+ beginning-of-thing
+ thing-at-point
+
+
+Messages in more detail:
+
+emacs -> racket
+
+  - operate on current number
+  - update full expression
+
+racket -> emacs
+
+  - update part or full expression
+  
+
+Entry: Structural editor
+Date: Fri Apr  8 10:54:04 EDT 2016
+
+Let's do this properly.  Any change to the emacs buffer will propagate
+to racket.  Ideally it should parse incrementally, but there doesn't
+seem to be a good reason to do it different than the dumb way: send it
+the whole thing on every keystroke.
+
+No this will be too complicated.  It is important to keep the end
+result in mind: allow numeric parameter updates without making
+structural changes.  This is a necessary optimization: incremental
+compilation isn't fast enough to keep up with a 50 Hz update rate.
+
+So the basic idea is to keep two models in sync:
+
+- Emacs buffer with textual representation
+
+- Compiled form + parameter values.
+
+
+To make this work, start both from the same point = the source file.
+Go back to that point whenever an invariant is broken.
+
+Distinguish these kinds of edits:
+
+  - Number control events, e.g. from an external midi controller or
+    using emacs to modify the current number under edit.
+
+    This is structure-preserving, but needs to update the number
+    literals in the representation.
+  
+  - Any other arbitrary code change.
+
+    If it parses to the same structure a parameter update can be
+    performed.  Else a recompilation is necessary.
+
+
+I wonder if geiser can be used to do this.  Likely there are at least
+some communication primitives to be reused.
+
+
+
