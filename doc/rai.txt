@@ -3213,3 +3213,9 @@ some communication primitives to be reused.
 
 
 
+Entry: s-expr coords
+Date: Fri Apr  8 19:54:42 EDT 2016
+
+Using existing emacs navigation it might be possible to use
+s-expression coordinates for parameter names.
+
