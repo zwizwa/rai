@@ -3219,3 +3219,10 @@ Date: Fri Apr  8 19:54:42 EDT 2016
 Using existing emacs navigation it might be possible to use
 s-expression coordinates for parameter names.
 
+
+
+Entry: Ardour 5 inline display
+Date: Sat Aug 13 10:58:06 EDT 2016
+
+Display plugin gui inside mixer strip.  (currently display only)
+https://community.ardour.org/node/13842
