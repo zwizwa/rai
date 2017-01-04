@@ -3226,3 +3226,23 @@ Date: Sat Aug 13 10:58:06 EDT 2016
 
 Display plugin gui inside mixer strip.  (currently display only)
 https://community.ardour.org/node/13842
+
+
+
+
+Entry: Raw audio & packet loss
+Date: Mon Jan  2 22:37:23 EST 2017
+
+Perform resampling at the receiving end to regulate buffer depth.  If
+data is missing, just drop it with mixing and recover buffer depth
+again through regulation.
+
+This might be an interesting thing to build as it has a lot of
+different components that are useful elsewhere.
+
+
+Entry: oleg on stream fusion
+Date: Tue Jan  3 01:34:30 EST 2017
+
+https://speakerdeck.com/biboudis/stream-fusion-to-completeness
+
