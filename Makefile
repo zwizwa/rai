@@ -24,5 +24,6 @@ github: remove
 	$(RACO) pkg install github://github.com/zwizwa/rai/master
 
 link: remove
+	$(RACO) pkg install rsound
 	cd $$(readlink -f .)/.. ; $(RACO) pkg install --link rai
 
