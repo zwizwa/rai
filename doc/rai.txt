@@ -3246,3 +3246,22 @@ Date: Tue Jan  3 01:34:30 EST 2017
 
 https://speakerdeck.com/biboudis/stream-fusion-to-completeness
 
+
+
+Entry: Haskell
+Date: Sat Mar 18 09:54:03 EDT 2017
+
+Time to translate the core back to Haskell.  Most work on streams is
+done.  What is left:
+
+- internal buffers, i.e. "spatial algorithms"
+
+- delay lines
+
+- annotation (e.g. units, UI information)
+
+- LLVM generation
+
+
+Regarding LLVM: does it make sense to abandon C / GCC?
+
