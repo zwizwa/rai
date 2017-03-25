@@ -20,7 +20,6 @@ ALL_RUN := \
 	test-axo.rkt.run \
 	test_benchmark.rkt.run \
 	test-delay.rkt.run \
-	test_jack.rkt.run \
 	test-lang.rkt.run \
 	test-libproc.rkt.run \
 	test-map.rkt.run \
@@ -29,6 +28,10 @@ ALL_RUN := \
 	test_pd.rkt.run \
 	test-series.rkt.run \
 	test-type.rkt.run \
+
+
+ALL_PROBLEMATIC := \
+	test_jack.rkt.run \
 
 
 ALL_BIN := \

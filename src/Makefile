@@ -3,8 +3,9 @@
 
 ALL_BIN := \
 	sp_host.elf \
-	libproc.so \
-	sp_host.pd_linux \
+	libproc.so
+
+#	sp_host.pd_linux
 
 
 ALL :=  $(ALL_BIN)
