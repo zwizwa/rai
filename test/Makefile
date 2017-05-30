@@ -11,38 +11,36 @@ ALL_RUN := \
 	test-ai-c.rkt.run \
 	test-ai-freq.rkt.run \
 	test-ai-linpar.rkt.run \
-	test-ai-network.rkt.run \
-	test-ai-proc.rkt.run \
 	test-ai.rkt.run \
-	test-ai-stream.rkt.run \
 	test-ai-taylor.rkt.run \
 	test-array-scheme.rkt.run \
 	test-axo.rkt.run \
 	test_benchmark.rkt.run \
 	test-delay.rkt.run \
 	test-lang.rkt.run \
-	test-libproc.rkt.run \
 	test-map.rkt.run \
 	test-matrix-lib.rkt.run \
 	test_pd1.rkt.run \
 	test_pd.rkt.run \
 	test-series.rkt.run \
 	test-type.rkt.run \
-
-
-ALL_PROBLEMATIC := \
 	test_jack.rkt.run \
 
+BITROT := \
+	test-libproc.rkt.run \
+	test-ai-network.rkt.run \
+	test-ai-proc.rkt.run \
+	test-ai-stream.rkt.run \
+	test_pd.sp \
+	synth.sp \
+	test_pd.dll \
 
 ALL_BIN := \
 	test_pd.g.h \
-	test_pd.sp \
 	test_pd.g.elf \
 	test_jack.g.h \
 	test_jack.jack \
 	proc.pd_linux \
-	test_pd.dll \
-	synth.sp \
 
 # ALL :=  $(ALL_BIN) $(ALL_RUN)
 ALL :=  $(ALL_RUN)
@@ -53,6 +51,9 @@ RAI := ..
 
 all: $(ALL) bait
 	@echo "<$$(readlink -f test.png)>"
+
+bitrot: $(BITROT)
+
 
 all_bin: $(ALL_BIN)
 

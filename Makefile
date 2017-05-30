@@ -1,5 +1,5 @@
-MZSCHEME=mzscheme
-RACO=raco
+
+include src/config.mk
 
 .PHONY: all clean remove github link
 
@@ -8,7 +8,7 @@ all:
 	make -C test
 
 clean:
-	make -C test clean
+	make -C test clean RACO=$(RACO)
 	make -C src clean
 	rm -rf slv2/compiled
 	rm -rf stream/lang/compiled

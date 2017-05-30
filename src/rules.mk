@@ -3,11 +3,6 @@ RKT := $(wildcard $(RAI)/*.rkt) $(wildcard *.rkt)
 RAI_SRC := $(RAI)/src
 RAI_BIN := $(RAI)/bin
 
-# RACKET := /usr/local/racket-5.3.4.7/bin/racket
-# RACO := /usr/local/racket-5.3.4.7/bin/raco
-
-RACKET := racket
-RACO := raco
 
 LIBPROC_O := proc.o proc_sp.o
 
@@ -32,6 +27,7 @@ LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 	$(RACKET) $< >$@
 	cat $@
 
+# apt-get install libjack-jackd2-dev
 # Jack wrapper, standalone ELF
 %.jack: %.g.h $(RAI_SRC)/prim.h $(RAI_SRC)/main_jack.c $(RAI_SRC)/proc.h $(LIBPROC_O) $(RKT)
 	gcc -DPROC_FILE=\"$<\" -DCLIENT_NAME=\"$*\" $(CFLAGS) $(RAI_SRC)/main_jack.c $(LIBPROC_O) $(LDFLAGS) `pkg-config jack --cflags --libs` -o $@
