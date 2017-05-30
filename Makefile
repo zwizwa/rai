@@ -6,6 +6,7 @@ include src/config.mk
 all:
 	make -C src
 	make -C test
+	@cat README.md | grep 'white rabbit'
 
 clean:
 	make -C test clean RACO=$(RACO)
