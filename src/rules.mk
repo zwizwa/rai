@@ -32,6 +32,7 @@ LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 %.jack: %.g.h $(RAI_SRC)/prim.h $(RAI_SRC)/main_jack.c $(RAI_SRC)/proc.h $(LIBPROC_O) $(RKT)
 	gcc -DPROC_FILE=\"$<\" -DCLIENT_NAME=\"$*\" $(CFLAGS) $(RAI_SRC)/main_jack.c $(LIBPROC_O) $(LDFLAGS) `pkg-config jack --cflags --libs` -o $@
 
+# apt-get install libpulse-dev
 # Pulseaudio wrapper, standalone ELF
 %.pulse: %.g.h $(RAI_SRC)/prim.h $(RAI_SRC)/main_pulse.c $(RAI_SRC)/proc.h $(LIBPROC_O) $(RKT)
 	gcc -DPROC_FILE=\"$<\" -DCLIENT_NAME=\"$*\" $(CFLAGS) $(RAI_SRC)/main_pulse.c $(LIBPROC_O) $(LDFLAGS) `pkg-config libpulse-simple --cflags --libs` -lpthread -o $@
@@ -157,4 +158,5 @@ bcr2000: $(RAI_SRC)/bcr2000.c
 # Live coding v2: lambda/param netsend from emacs (see emacs/rai.el)
 # combined with full reload when elf changes.
 %.lc2: %.pulse
+	pulseaudio --check
 	netcat -ulp 12345 | (while date; do $$(readlink -f $<) $*.rkt; make $*.pulse; done)

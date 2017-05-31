@@ -36,21 +36,21 @@
 ;;   by the binary.
 ;;
 ;; For this file, the workflow above can be accessed by typing "make
-;; doodle.lc" in this directory, and loading "emacs/rai.el" into
+;; doodle.lc2" in this directory, and loading "emacs/rai.el" into
 ;; Emacs.
 
 (define-values
   (main main-defaults)
   (lambda/params (samplerate)
-    (let* ((f    '0.0035)
-           (tick (float (timer '470.0)))    ;; 3500 - 6100 
-           (e1   (env-AR tick '1.0 '0.0047)) ;; .01 - .0003  
-           (e2   (env-AR tick '1 '0.00063)) ;; .00052 - .01
+    (let* ((f    '0.0032)
+           (tick (float (timer '6100.0)))    ;; 3500 - 6100 
+           (e1   (env-AR tick '0.61 '0.014)) ;; .01 - .0003  
+           (e2   (env-AR tick '1 '0.00035)) ;; .00052 - .01
            (s    (* .1 (* e1 (saw-d3 f))))
-           (l    (svf-lp s (* e2 '14.0 f) '0.024))
+           (l    (svf-lp s (* e2 '16.0 f) '0.031))
            )
       (* '0.1 l)
-      ;; (fdn1)
+      ;;(fdn1)
       )))
 
 (define main-nsi 0)

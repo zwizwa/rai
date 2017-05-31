@@ -3296,3 +3296,9 @@ cat README.md
 Follow the white rabbit in test/doodle.rkt
 
 
+
+Entry: tp / core
+Date: Tue May 30 18:07:43 CEST 2017
+
+- put links tp->core to racket-6.8 and ~/.racket
+- install libpulse-dev on tp

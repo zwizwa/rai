@@ -11,12 +11,7 @@ all:
 clean:
 	make -C test clean RACO=$(RACO)
 	make -C src clean
-	rm -rf slv2/compiled
-	rm -rf stream/lang/compiled
-	rm -rf gui/compiled
-	rm -rf doc/compiled
-	rm -rf compiled
-
+	rm -rf `find -name compiled`
 
 remove:
 	$(RACO) pkg remove rai || echo not installed

@@ -4,8 +4,13 @@
 
 # RACKET_VERSION=6.1.1
 RACKET_VERSION=6.8
-RACKET=racket-$(RACKET_VERSION)
-RACO=raco-$(RACKET_VERSION)
+
+#RACKET=racket-$(RACKET_VERSION)
+#RACO=raco-$(RACKET_VERSION)
+
+RACKET_BIN=/usr/local/racket-$(RACKET_VERSION)/bin
+RACKET=$(RACKET_BIN)/racket
+RACO=$(RACKET_BIN)/raco
 
 # The Steinberg VST SDK 2.4 can not be included in this distribution.
 # Get it at: http://www.steinberg.net/en/company/developer.html
