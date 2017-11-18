@@ -20,6 +20,8 @@ CXXFLAGS := $(CFLAGS_BASE) $(CFLAGS_OPTI)
 CFLAGS_DLL  := $(CXXFLAGS) -I$(VST_DIR) -I$(VST_DIR)/public.sdk/source/vst2.x -mfpmath=sse -msse2
 LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 
+RACO := $(WITH_ENV) raco
+RACKET := $(WITH_ENV) racket
 
 # Test running racket code.
 %.rkt.run: %.rkt $(RKT)

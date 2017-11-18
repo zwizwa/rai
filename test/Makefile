@@ -69,8 +69,7 @@ test: all
 	mzc -vk test-ai-scheme.rkt
 	mzc -vk test-ai.rkt
 
-RACO=../raco.sh
-RACKET:=../racket.sh
+WITH_ENV=../with-env.sh
 include ../src/rules.mk
 
 %.html: %.scrbl
