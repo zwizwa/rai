@@ -69,9 +69,9 @@ test: all
 	mzc -vk test-ai-scheme.rkt
 	mzc -vk test-ai.rkt
 
-include ../src/config.mk
+RACO=../raco.sh
+RACKET:=../racket.sh
 include ../src/rules.mk
-
 
 %.html: %.scrbl
 	cd $(dir $<) ; scribble --htmls $(notdir $<)

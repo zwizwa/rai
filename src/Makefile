@@ -26,7 +26,8 @@ test: all
 	mzc -vk test-ai-scheme.rkt
 	mzc -vk test-ai.rkt
 
-include config.mk
+RACO:=../raco.sh
+RACKET:=../racket.sh
 include rules.mk
 
 

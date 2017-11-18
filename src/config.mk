@@ -1,13 +1,9 @@
+# OLD: remove this
+
 # Build dependencies configuration
 
-# MZSCHEME=mzscheme-6.1.1
-
-# RACKET_VERSION=6.1.1
+## Old approach on Debian dev machine (FIXME: remove)
 RACKET_VERSION=6.8
-
-#RACKET=racket-$(RACKET_VERSION)
-#RACO=raco-$(RACKET_VERSION)
-
 RACKET_BIN=/usr/local/racket-$(RACKET_VERSION)/bin
 RACKET=$(RACKET_BIN)/racket
 RACO=$(RACKET_BIN)/raco

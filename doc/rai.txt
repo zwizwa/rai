@@ -3302,3 +3302,30 @@ Date: Tue May 30 18:07:43 CEST 2017
 
 - put links tp->core to racket-6.8 and ~/.racket
 - install libpulse-dev on tp
+
+
+
+Entry: nixos: clean build
+Date: Sat Nov 18 12:20:52 EST 2017
+
+Added a default.nix
+Use "nix-shell --pure" to build it.
+
+TODO: install the package source somewhere.
+
+"raco pkg install --link rai" won't work if .racket is under rai/
+
+
+What I want is
+
+1. for things to build cleanly inside "nix-shell --pure"
+
+2. (later) wrap it as a package
+
+
+Here, 2 might not be so important because this is really a compiler,
+i.e. it is an "environment".
+
+Maybe install ".rai.deps" next to "rai"?
+
+
