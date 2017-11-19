@@ -22,7 +22,7 @@ exec "\$@"
 EOF
 chmod +x with-env.sh
 
-( . env.sh ; raco pkg install --deps search-auto rsound )
-( . env.sh ; cd ${PARENT_ABS} ; raco pkg install --link rai )
+( ./with-env.sh raco pkg install --deps search-auto rsound )
+( cd ${PARENT_ABS} ; ./${PRJ_DIR}/with-env.sh  raco pkg install --link rai )
 
 exit 0

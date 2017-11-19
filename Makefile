@@ -1,24 +1,21 @@
 
-ENV_SH := $(shell readlink -f ./env.sh)
+WITH_ENV := $(shell readlink -f ./with-env.sh)
 
 # FIXME: for non-standard dependencies, always take them from the environment.
 # include src/config.mk
 
-RACO   := ". $(ENV_SH) ; raco"
-RACKET := ". $(ENV_SH) ; racket"
-
 .PHONY: all clean remove github link
 
-all: $(ENV_SH)
+all: $(WITH_ENV)
 	make -C src
 	make -C test
 	@cat README.md | grep 'white rabbit'
 
-$(ENV_SH):
+$(WITH_ENV):
 	./install-env.sh
 
 clean:
-	make -C test clean RACO="$(RACO)"
+	make -C test clean
 	make -C src clean
 	rm -rf `find -name compiled`
 
