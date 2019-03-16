@@ -3329,3 +3329,18 @@ i.e. it is an "environment".
 Maybe install ".rai.deps" next to "rai"?
 
 
+
+Entry: re-evaluate
+Date: Mon Mar 11 09:23:10 EDT 2019
+
+So... I've had quite a bit of time working with Haskell and Rust, and
+was wondering if it makes sense to continue with racket, or to just go
+the fully typed way.
+
+One thing that might still be useful, is to use racket as a #lang
+frontend to some Haskell code.
+
+I want a front-end for monadic languages, and other than the compiling
+to categories approach, I do not find a good way.  Maybe that should
+be checked out first?
+
