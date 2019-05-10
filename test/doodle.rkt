@@ -5,8 +5,8 @@
 
 ;; A simple form of "live coding", not necessarily aimed at
 ;; performance, but at making it more convenient to perform parameter
-;; adjustments whenbuilding a DSP effect or synthesis module.  It is
-;; based on two priciples:
+;; adjustments when building a DSP effect or a synthesis module.  It
+;; is based on two priciples:
 ;;
 ;; - Number edits in the source can be linked to live parameter
 ;;   updates in the running code without recompiling anything.

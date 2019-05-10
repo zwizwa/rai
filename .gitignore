@@ -13,3 +13,12 @@ rai/doc/rai
 *.jack
 a.out
 rai/bcr2000
+doc/*.css
+doc/*.js
+*.\#*
+*.il
+out.list
+with-env.sh
+*.html
+*.sxref
+*.rktd

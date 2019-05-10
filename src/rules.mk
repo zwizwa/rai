@@ -61,7 +61,7 @@ RACKET := $(WITH_ENV) racket
 # Scheme -> C code generation.
 %.g.h: %.rkt $(RKT)
 	chmod +x $(RAI_BIN)/stream2c.sh
-	RACKET=$(RACKET) $(RAI_BIN)/stream2c.sh $< $@
+	RACKET="$(RACKET)" $(RAI_BIN)/stream2c.sh $< $@
 
 # Scheme -> IL (intermediate language) code generation.
 %.il: %.rkt $(RKT)

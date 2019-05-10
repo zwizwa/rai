@@ -3344,3 +3344,16 @@ I want a front-end for monadic languages, and other than the compiling
 to categories approach, I do not find a good way.  Maybe that should
 be checked out first?
 
+
+
+
+Entry: connect to exo
+Date: Fri May 10 11:45:47 EDT 2019
+
+- keep the setup as is (make doodle.lc2) to allow stand alone use of
+  the demo
+
+- provide a daemon to capture those udp events and route them to exo
+
+- use the push_change reload code instead of the make loop
+
