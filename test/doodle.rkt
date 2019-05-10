@@ -42,15 +42,18 @@
 (define-values
   (main main-defaults)
   (lambda/params (samplerate)
-    (let* ((f    '0.23) 
-           (tick (float (timer '9100.0)))    ;; 3500 - 6100 
-           (e1   (env-AR tick '0.42 '0.014)) ;; .01 - .0003  
-           (e2   (env-AR tick '1 '0.0097)) ;; .00052 - .01
+    (let* ((f    '0.0015) 
+           (tick (float (timer '3500.0)))    ;; 3500 - 6100 
+           (e1   (env-AR tick '0.42 '0.0013)) ;; .01 - .0003  
+           (e2   (env-AR tick '1 '0.00052)) ;; .00052 - .01
            (s    (* .1 (* e1 (saw-d3 f))))
-           (l    (svf-lp s (* e2 '16.0 f) '0.031))
+           (l    (svf-lp s (* e2 '120.0 f) '0.011))
            )
-      (* '0.1 l)
-      ;;(fdn1)
+      
+      ;; (fdn4 (* '0.052 l) (vector 113 227 1397 11101.0))
+
+      
+      (* '0.17 l)
       )))
 
 (define main-nsi 0)

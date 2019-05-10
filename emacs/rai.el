@@ -54,7 +54,7 @@
 (defun rai-gather-nums-at-point ()
   (let* ((str (thing-at-point 'defun))
          (expr (read str)))
-    (message str)
+    ;; (message str)
     (rai-gather-nums expr)))
 
 (defun rai-gather-nums (expr)
