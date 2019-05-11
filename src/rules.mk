@@ -25,6 +25,7 @@ RACKET := $(WITH_ENV) racket
 
 # Test running racket code.
 %.rkt.run: %.rkt $(RKT)
+	echo WITH_ENV=$(WITH_ENV) RACO=$(RACO)
 	$(RACO) make -v -j 6 $<
 	$(RACKET) $< >$@
 	cat $@

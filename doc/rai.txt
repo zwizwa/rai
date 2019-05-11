@@ -3357,3 +3357,18 @@ Date: Fri May 10 11:45:47 EDT 2019
 
 - use the push_change reload code instead of the make loop
 
+
+Entry: fixable?
+Date: Fri May 10 14:50:43 EDT 2019
+
+Maybe it is actually possible to introduce intermediates in the way
+explored in rtl.txt
+
+So what is the difference?  There was something weird about how rai
+uses combinators as contexts.  This isn't necessarily a bad idea, but
+I ran into a problem with intermediate arrays.
+
+It will take a bit of time to reload the idea and implementation.  Too
+tired for that now...
+
+
