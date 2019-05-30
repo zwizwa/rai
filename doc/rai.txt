@@ -3371,4 +3371,52 @@ I ran into a problem with intermediate arrays.
 It will take a bit of time to reload the idea and implementation.  Too
 tired for that now...
 
+EDIT: See explanation in 20141202-133516
+
+I still can't wrap my head around it.  And not sleeping properly isn't
+helping either..
+
+The previous idea is probably ok: go ahead and build some synths.  It
+will later on be easy to translate them into a more general setting.
+
+
+
+Entry: Unfused
+Date: Sun May 12 09:15:52 EDT 2019
+
+Create an unfused "full grid" language first.  Then look at what comes
+out, and solve fusion in a second pass.
+
+EDIT: Worked a bit on Language.Grid in asm-tools-grid.  Reached the
+conclusion that all the interesting bits are about post-processing and
+loop transformations.
+
+EDIT: So I think it is fixable.  But it will require a lot of work.
+Both on the Haskell side (where it might be simpler to just go ahead
+in Haskell), and on the RAI side.  It does seem beneficial to keep
+both avenues open.
+
+
+
+Entry: synth.rkt
+Date: Mon May 13 10:57:11 EDT 2019
+
+I don't understand how the voice allocator works.
+
+proc.c proc_voice_init_from_proc takes "voice_gate" and "voice_freq"
+params.   do the usual jack and pulse wrapper have these activated?
+
+Maybe it's only in pd?
+
+tom@panda:~/rai$ grep -re proc_voice_init_from_proc *
+doc/rai.txt:proc.c proc_voice_init_from_proc takes "voice_gate" and "voice_freq"
+src/main_pd.c:            if (0 == proc_voice_init_from_proc(x->proc_instance, &x->voice)) {
+src/proc.c:int proc_voice_init_from_proc(struct proc_instance *p, struct proc_voice *v) {
+src/proc.h:int proc_voice_init_from_proc(struct proc_instance *p, struct proc_voice *v);
+
+Ok so just look at the pd code.  It still needs to be added to the
+other two.
+
+
+
 

@@ -1,4 +1,10 @@
+elfs () {
+    echo test/$1.pulse.host.elf
+    echo test/$1.jack.host.elf
+}
+
 cat <<EOF >$3
-test/doodle_pulse.host.elf
-test/doodle_jack.host.elf
+$(elfs controlspace)
+$(elfs synth)
+$(elfs doodle)
 EOF

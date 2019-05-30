@@ -31,8 +31,10 @@ struct proc_si state[2];
 struct proc_in in;
 struct proc_out out;
 struct proc_store store;
+struct proc_voice voice;
 #define INIT_PARAM(p,v) .p = v,
 struct proc_param param = { proc_for_param_defaults(INIT_PARAM) };
+
 
 // Bound to some of the names above.
 #include "param_reader.h"
@@ -56,8 +58,26 @@ float **a_out    = (float**)&out;
 #define proc_size_out     PROC_NB_EL(struct proc_out,   float*)
 
 
+
+static void param_set2(const char *var, float val1, float val2) {
+    if (voice.nb) {
+        if (!strcmp("note", var)) {
+            float freq = val1;
+            float amp  = val2;
+            if (amp > 0) {
+                LOG("note on %f\n", freq);
+                proc_voice_on(&voice, freq);
+            }
+            else {
+                LOG("note off %f\n", freq);
+                proc_voice_off(&voice, freq);
+            }
+        }
+    }
+}
+
 void *thread_main(void *ctx) {
-    param_reader();
+    param_reader_loop(&param_set1, &param_set2);
     return NULL;
 }
 
@@ -83,6 +103,18 @@ int main(int argc, char*argv[]) {
 #if defined(proc_param_timestep) && 0 == proc_param_timestep
     param.timestep = 1 / (float)ss.rate;
     LOG("timestep = %f\n", param.timestep);
+#endif
+
+    /* Config synth voices */
+    bzero(&voice, sizeof(voice));
+#if defined(proc_param_voice_freq) && proc_param_voice_freq > 0 && \
+    defined(proc_param_voice_gate) && proc_param_voice_gate > 0
+    LOG("nb_voices = %d\n", (int)PROC_NB_EL(param.voice_freq,float));
+    proc_voice_init(
+        &voice,
+        PROC_NB_EL(param.voice_freq,float),
+        &param.voice_gate[0],
+        &param.voice_freq[0]);
 #endif
 
     /* Output buffers.  FIXME: a_in: currently no inputs supported. */

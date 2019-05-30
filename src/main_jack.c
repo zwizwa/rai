@@ -29,6 +29,7 @@ struct proc_si state[2];
 struct proc_in in;
 struct proc_out out;
 struct proc_store store;
+struct proc_voice voice;
 #define INIT_PARAM(p,v) .p = v,
 struct proc_param param = { proc_for_param_defaults(INIT_PARAM) };
 
@@ -140,8 +141,38 @@ void create_ports(jack_nframes_t sr) {
     LOG("timestep = %f\n", param.timestep);
 #endif
 
+    /* Config synth voices */
+    bzero(&voice, sizeof(voice));
+#if defined(proc_param_voice_freq) && proc_param_voice_freq > 0 && \
+    defined(proc_param_voice_gate) && proc_param_voice_gate > 0
+    LOG("nb_voices = %d\n", (int)PROC_NB_EL(param.voice_freq,float));
+    proc_voice_init(
+        &voice,
+        PROC_NB_EL(param.voice_freq,float),
+        &param.voice_gate[0],
+        &param.voice_freq[0]);
+#endif
+
 }
 
+
+
+static void param_set2(const char *var, float val1, float val2) {
+    if (voice.nb) {
+        if (!strcmp("note", var)) {
+            float freq = val1;
+            float amp  = val2;
+            if (amp > 0) {
+                LOG("note on %f\n", freq);
+                proc_voice_on(&voice, freq);
+            }
+            else {
+                LOG("note off %f\n", freq);
+                proc_voice_off(&voice, freq);
+            }
+        }
+    }
+}
 
 void go(void) {
     const char **ports;
@@ -242,7 +273,7 @@ main (int argc, char *argv[])
     }
     else {
         LOG("Starting param_reader on stdin.\n");
-        param_reader();
+        param_reader_loop(&param_set1, &param_set2);
     }
 
 
