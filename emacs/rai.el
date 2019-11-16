@@ -100,14 +100,29 @@
   (with-temp-buffer
     (set-buffer-multibyte nil)
     (insert (apply 'rai-send-format msg))
-    ;; (message msg)
-    (process-send-string *rai-send-process* (buffer-string))))
+    (process-send-string *rai-send-process* (buffer-string))
+    ))
 
+;; Erlang pid associated to this buffer, for use with distel.
+(defvar-local rai-pid nil)
 
 (defun rai-send-nums ()
   (interactive)
-  ;; (rai-send (apply #'concat (rai-gather-nums)))
-  (mapc #'rai-send (rai-gather-nums-at-point)))
+  (let ((msgs (rai-gather-nums-at-point)))
+    (if (not rai-pid)
+        ;; (rai-send (apply #'concat (rai-gather-nums)))
+        (mapc #'rai-send msgs)
+      (let ((set-msg (vector 'set
+                         (mapcar #'rai-format-binding msgs))))
+        (message (format "via erlang: %s %s" rai-pid set-msg))
+        (erl-send rai-pid set-msg)))))
+(defun rai-format-binding (binding)
+  (let ((num (car binding))
+        (val (cadr binding)))
+    (vector num (format "%.5e" val))))
 
+(defun rai-buffer-pid (name)
+  (save-excursion (set-buffer name) rai-pid))
 
 ;; TODO: make M-left, M-right cycle through the parameters.
+
