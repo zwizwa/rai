@@ -7,6 +7,9 @@ WITH_ENV := $(shell readlink -f ./with-env.sh)
 .PHONY: all clean remove github link
 
 all: $(WITH_ENV)
+# FIXME: Remove these hardcoded paths.  If this breaks, run ./install-env.sh
+	[ -d ../.rai.deps/.racket/6.8/pkgs/rsound ]
+	[ -d ../.rai.deps/.racket/6.8/pkgs/portaudio ]
 	make -C src
 	make -C test
 	@cat README.md | grep 'white rabbit'

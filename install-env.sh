@@ -3,6 +3,10 @@
 # Idempotent install script for rai dependencies.
 # Assumes "raco" is in the path.
 
+# FIXME: Currently in the process of making this run inside of
+# "nix-shell --pure"
+
+
 HERE_ABS=$(readlink -f $(dirname $0))
 PRJ_DIR=$(basename $HERE_ABS)
 PARENT_ABS=$(dirname $HERE_ABS)
