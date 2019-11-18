@@ -114,12 +114,12 @@
         (mapc #'rai-send msgs)
       (let ((set-msg (vector 'set
                          (mapcar #'rai-format-binding msgs))))
-        (message (format "via erlang: %s %s" rai-pid set-msg))
+        ;;(message (format "via distel: %s %s" rai-pid set-msg))
         (erl-send rai-pid set-msg)))))
 (defun rai-format-binding (binding)
   (let ((num (car binding))
         (val (cadr binding)))
-    (vector num (format "%.5e" val))))
+    (vector num val)))
 
 (defun rai-buffer-pid (name)
   (save-excursion (set-buffer name) rai-pid))

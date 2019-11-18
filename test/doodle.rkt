@@ -43,9 +43,9 @@
   (main main-defaults)
   (lambda/params (samplerate)
     (let* ((f    '0.0017) 
-           (tick (float (timer '4700.0)))    ;; 3500 - 6100 
+           (tick (float (timer '5200.0)))    ;; 3500 - 6100 
            (e1   (env-AR tick '0.46 '0.0014)) ;; .01 - .0003  
-           (e2   (env-AR tick '1.0 '0.00043)) ;; .00052 - .01
+           (e2   (env-AR tick '1.0 '0.00035)) ;; .00052 - .01
            (s    (* .1 (* e1 (saw-d3 f))))
            (l    (svf-lp s (* e2 '120.0 f) '0.014))
            )
