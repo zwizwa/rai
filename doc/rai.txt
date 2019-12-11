@@ -3420,3 +3420,33 @@ other two.
 
 
 
+Entry: Pin racket version in Nix for integration in exo
+Date: Thu Nov 14 10:47:57 EST 2019
+
+Which one was it?
+Last working version racket-6.8
+Is this available in nixpkgs as is?
+
+It seems best to modify nixpkgs directly.
+But only _add_ stuff.  Do not remove the old version.
+
+So maybe don't modify nixpkgs?
+Policy: only do bugfixes on nixpkgs.  Put other nix files in exo/nix/
+
+See exo/nix/nixpkgs-extra/racket
+
+tom@panda:~/exo/nix/nixpkgs-extra$ /nix/store/wljspgn904figapd273490wmqnr5nqvv-racket-6.8/bin/racket
+
+Welcome to Racket v6.8.
+>
+
+
+
+
+Entry: Pulseaudio
+Date: Mon Nov 18 10:28:18 EST 2019
+
+Some practicals.  How to create a pulseaudio effect?
+Use module-ladspa-sink
+
+https://askubuntu.com/questions/43950/how-can-i-apply-a-ladspa-plugin-to-a-pulseaudio-stream
