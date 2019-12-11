@@ -3442,3 +3442,11 @@ Welcome to Racket v6.8.
 
 
 
+
+Entry: Pulseaudio
+Date: Mon Nov 18 10:28:18 EST 2019
+
+Some practicals.  How to create a pulseaudio effect?
+Use module-ladspa-sink
+
+https://askubuntu.com/questions/43950/how-can-i-apply-a-ladspa-plugin-to-a-pulseaudio-stream
