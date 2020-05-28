@@ -3450,3 +3450,49 @@ Some practicals.  How to create a pulseaudio effect?
 Use module-ladspa-sink
 
 https://askubuntu.com/questions/43950/how-can-i-apply-a-ladspa-plugin-to-a-pulseaudio-stream
+
+
+
+Entry: Midi jack
+Date: Mon Apr 20 16:41:05 EDT 2020
+
+So I've set up the studio again.  Settled on jack + jack_midi is the
+thing that just works.  All the rest is too cumbersome to map and
+translate.
+
+So how to get that integrated into RAI?
+
+
+
+
+Entry: Cleanup
+Date: Thu May 28 11:45:58 EDT 2020
+
+I'd like to use this for a secret project and integrate it with exo.
+Some things that need work:
+
+- resampler to run algos faster internally
+- bring it to more recent racket version
+
+I don't remember what is the problem with the version issue.
+Currently at 6.8
+
+Let's spend some time on it.
+
+
+
+Entry: Racket updates
+Date: Thu May 28 11:48:12 EDT 2020
+
+Last working is 6.8
+Maybe insteall a couple of other versions and see how it goes?
+Maybe just bump to 6.9?
+
+That was already installed.  Let's try.
+
+How to install the dependencies?
+
+It's going to be simpler to temporarily disable rsound and portaudio
+until the version is bumped.
+
+
