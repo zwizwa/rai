@@ -10,17 +10,21 @@
 ;; Connect midi keyboard to m_tune
 ;; The rest should go to controller keys.
 
+;; FIXME: Make floats log, ints linear.
+
 (define-values
   (main main-defaults)
   (lambda/params (timestep cc14 cc15)
-    (let* ((f     (p-log 127 cc14 20 2000.0 timestep)) ;; Osc frequency
-           (t1    (p-log 127 cc15 1200 6100 timestep))
+    (let* ((cc14a (+ '20.0 cc14))
+           (cc15a (+ '91.0 cc15))
+           (f     (p-log 127 cc14a 20 2000.0 timestep)) ;; Osc frequency
+           (t1    (p-log 127 cc15a 1200 6100 timestep))
            (tick  (float (timer t1)))    ;; 3500 - 6100 
-           (tick1 (float (timer '1100.0)))    ;; 3500 - 6100 
+           (tick1 (float (timer '290.0)))    ;; 3500 - 6100 
            (e1    (env-AR tick '0.84 '0.0069)) ;; .01 - .0003  
-           (e2    (env-AR tick1 '1.0 '0.0063)) ;; .00052 - .01
+           (e2    (env-AR tick1 '0.092 '0.0063)) ;; .00052 - .01
            (s     (* .1 (* e1 (saw-d3 f))))
-           (l     (svf-lp s (* e2 '91.0 f) '0.015))
+           (l     (svf-lp s (* e2 '83.0 f) '0.015))
            )
       
       ;; (fdn4 x (vector 113 227 1397 11101.0))
@@ -28,7 +32,7 @@
       ;; (megasaw6)
       ;; (tinpan)
       
-      (* '0.063 l)
+      (* '0.1 l)
       
       )))
 

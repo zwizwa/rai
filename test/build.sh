@@ -1,4 +1,5 @@
-#! write in terms of build.sh
+
+
 EXT="${2##*.}"
 BN=$(basename $2 .$EXT)
 RKT=$BN.rkt

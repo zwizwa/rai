@@ -51,6 +51,7 @@ RAI := ..
 
 all: $(ALL) bait
 	@echo "<$$(readlink -f test.png)>"
+	$(RACKET) --version
 
 bitrot: $(BITROT)
 
