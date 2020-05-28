@@ -1,3 +1,47 @@
+# Build rules for RAI project.
+
+## CONFIGURATION
+
+# Racket install is pulled from the environment, which is optionally
+# set up by a (generated) launcher script.  It is the responsibility
+# of the Makefile that includes us to set this up.
+
+RACO   := $(WITH_ENV) raco
+RACKET := $(WITH_ENV) racket
+
+######################################################################
+
+# FIXME: Clean up old hardcoded variables.  Most The VST and MINGW
+# setups probably broke.
+
+## Old approach on Debian dev machine (FIXME: remove)
+# RACKET_VERSION=6.8
+# RACKET_BIN=/usr/local/racket-$(RACKET_VERSION)/bin
+# RACKET=$(RACKET_BIN)/racket
+# RACO=$(RACKET_BIN)/raco
+
+# The Steinberg VST SDK 2.4 can not be included in this distribution.
+# Get it at: http://www.steinberg.net/en/company/developer.html
+
+VST_DIR := $(HOME)/kmook/vst/vstsdk2.4
+# VST_DIR := $(HOME)/vstsdk2.4
+# VST_DIR := C:/home/tom/vstsdk2.4
+
+# MinGW prefix for compiling Windows DLL/EXE
+
+## Debian-hosted mingw32msvc
+MINGW := i586-mingw32msvc-
+
+## Cygwin-hosted mingw
+#MINGW := i686-pc-mingw32-
+
+## Native MinGW.  See build-mingw.bat
+# set PATH=C:\MinGW\bin;%PATH%
+# set PATH=C:\MinGW\msys\1.0\bin;%PATH%
+# set PATH=C:\Progra~1\Racket\;%PATH%
+# MINGW := mingw32-
+
+
 RKT := $(wildcard $(RAI)/*.rkt) $(wildcard *.rkt) 
 
 RAI_SRC := $(RAI)/src
@@ -20,8 +64,6 @@ CXXFLAGS := $(CFLAGS_BASE) $(CFLAGS_OPTI)
 CFLAGS_DLL  := $(CXXFLAGS) -I$(VST_DIR) -I$(VST_DIR)/public.sdk/source/vst2.x -mfpmath=sse -msse2
 LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 
-RACO := $(WITH_ENV) raco
-RACKET := $(WITH_ENV) racket
 
 # Test running racket code.
 %.rkt.run: %.rkt $(RKT)

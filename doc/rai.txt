@@ -3495,4 +3495,8 @@ How to install the dependencies?
 It's going to be simpler to temporarily disable rsound and portaudio
 until the version is bumped.
 
+6.9 actually seems to work.
 
+7.7 also.
+
+I wonder what went wrong last time?

@@ -5,12 +5,10 @@ ALL_BIN := \
 	sp_host.elf \
 	libproc.so
 
-#	sp_host.pd_linux
+ALL_BIN_DISABLED := \
+	sp_host.pd_linux
 
-
-ALL :=  $(ALL_BIN)
-
-
+ALL := $(ALL_BIN)
 RAI := ../
 
 
@@ -26,9 +24,11 @@ test: all
 	mzc -vk test-ai-scheme.rkt
 	mzc -vk test-ai.rkt
 
+# It is assumed that this script exists.  See ../Makefile
 WITH_ENV=../with-env.sh
-include rules.mk
 
+# Build rules
+include rules.mk
 
 zwizwa: ~/www/zwizwa.be/rai/index.html
 
