@@ -18,10 +18,15 @@
 #include <math.h>
 
 #include <jack/jack.h>
+#include <jack/midiport.h>
 
 #define ERROR(...) {fprintf (stderr, __VA_ARGS__); exit(1); }
 #define LOG(...)   {fprintf (stderr, __VA_ARGS__); }
-
+#define ASSERT(x) if (!(x)) { ERROR("ASSERT FAILED: " #x "\n"); exit(1); }
+static inline void log_hex(uint8_t *buf, ssize_t size) {
+    for (ssize_t i=0; i<size; i++) { LOG(" %02x", buf[i]); }
+    LOG("\n");
+}
 
 
 /* Only build a static wrapper. */
@@ -54,6 +59,7 @@ float **a_out    = (float**)&out;
 /* Jack port objects */
 jack_port_t *input_port[proc_size_in];
 jack_port_t *output_port[proc_size_out];
+jack_port_t *midi_input_port;
 jack_client_t *client;
 
 
@@ -67,13 +73,30 @@ jack_client_t *client;
 int
 process (jack_nframes_t nframes, void *arg)
 {
+    /* Process midi. */
+    void *midi_input_buf = jack_port_get_buffer(midi_input_port, nframes);
+    jack_nframes_t n_midi_events = jack_midi_get_event_count(midi_input_buf);
+    for (jack_nframes_t i = 0; i < n_midi_events; i++) {
+        jack_midi_event_t event;
+        jack_midi_event_get(&event, midi_input_buf, i);
+        if (3 == event.size) {
+            if (0xB0 == (event.buffer[0] & 0xF0)) {
+                /* Continuous controller (OMNI). */
+                char param_name[6];
+                sprintf(param_name,"cc%d\n", event.buffer[1]);
+                param_set1(param_name, (float)event.buffer[2]);
+            }
+        }
+        // log_hex(event.buffer, event.size);
+    }
+
     /* Get port buffers. */
     for (int i=0; i < proc_size_in; i++)  a_in[i]  = jack_port_get_buffer (input_port[i],  nframes);
     for (int i=0; i < proc_size_out; i++) a_out[i] = jack_port_get_buffer (output_port[i], nframes);
 
     proc_loop((void*)&state, &in, &param, &out, &store, nframes);
 
-#if 1
+#if 0
     param_vu(a_out, proc_size_out, nframes);
 #endif
 
@@ -106,10 +129,15 @@ void create_input(const char *name, void* base, int kind, int size) {
 }
 void create_output(const char *name, void* base, int kind, int size) {
     static int p;
+    /* Do outputs always have generated names?  It seems so.  Don't
+     * use those.  Most jack software seems to use 1-base port
+     * indexing, so do the same. */
+    char out_name[10] = {};
+    snprintf(out_name, sizeof(out_name)-1, "out_%d", p+1);
     if (p >= proc_size_out) ERROR("proc_size_out\n");
-    LOG("\t%d: %s %d %d\n", p, name, kind, size);
+    LOG("\t%d: %s=%s %d %d\n", p, name, out_name, kind, size);
     if (NULL == (output_port[p] =
-                 jack_port_register(client, name, JACK_DEFAULT_AUDIO_TYPE,
+                 jack_port_register(client, out_name, JACK_DEFAULT_AUDIO_TYPE,
                                     JackPortIsOutput, 0))) {
         ERROR("no more JACK ports available\n");
     }
@@ -130,6 +158,12 @@ void create_ports(jack_nframes_t sr) {
     LOG("parameters:\n"); proc_for_param (CREATE_PARAM);
     LOG("inputs:\n");     proc_for_in    (CREATE_INPUT);
     LOG("outputs:\n");    proc_for_out   (CREATE_OUTPUT);
+
+    ASSERT(midi_input_port = jack_port_register(
+               client, "midi_in",
+               JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0));
+
+    // create_midi_input(); // FIXME
 
 #if defined(proc_param_samplerate) && 0 == proc_param_samplerate
     LOG("samplerate = %d\n", sr);
@@ -205,10 +239,15 @@ void go(void) {
     if (ports == NULL) {
         ERROR("no physical playback ports\n");
     }
+
+    /* Do not connect anything. This really needs to be left to the
+     * user or framework. */
+#if 0
     LOG("Connecting 0->0\n");
     if (jack_connect (client, jack_port_name (output_port[0]), ports[0])) {
         LOG("cannot connect output ports\n");
     }
+#endif
     jack_free (ports);
 
 }
