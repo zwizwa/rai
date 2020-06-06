@@ -7,9 +7,9 @@
 
 ;; Messages can be seen e.g. with "netcat -lup 12345"
 
-;; Then use the form `lambda/params' instead of `lambda' to generate a
-;; processor with parameters for each quoted number.  Compile to
-;; something that accepts pd messages.
+;; Then use the form `lambda/params' to generate a processor with
+;; parameters for each quoted number.  Compile to something that
+;; accepts pd messages.
 
 ;; Now check rai/test/doodle.rkt at the bottom.
 

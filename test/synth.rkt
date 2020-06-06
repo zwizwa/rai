@@ -12,16 +12,17 @@
 (define main-defaults '())
 
 (define main
-  (lambda (voice_freq voice_gate ;; Driven by voice allocator
-           timestep samplerate
-           spread
-           attack decay sustain release
-           cutoff
-           filter_attack
-           filter_decay
-           filter_env
-           filter_q
-           )
+  (lambda
+    (voice_freq voice_gate ;; Driven by voice allocator
+     timestep samplerate
+     spread
+     attack decay sustain release
+     cutoff
+     filter_attack
+     filter_decay
+     filter_env
+     filter_q
+     )
     
     (let* ((1/fs timestep)
            (fs   samplerate)

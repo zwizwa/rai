@@ -32,21 +32,20 @@
  (all-from-out "stream-meta.rkt")
  (rename-out
 
-  ;; These are useful for e.g. defining parameterized processors.  It
-  ;; is a little clumsy to have to redefine these, but oth the
-  ;; language is very much not scheme, so maybe just be explicit about
-  ;; it?
-  
-  (define             define*)
-  (lambda             lambda*)
+  ;; Note that 'lambda' is overridden, so we re-export it as lambda/scheme.
+  ;; To define a scheme function instead of an ai-proc, use:
+  ;; (define name (lambda/scheme <args> <form> ...))
+  ;; The define form is also overridden, but that will do the same as in racket.
+  (lambda             lambda/scheme)
   
   (ai-define          define)
   (ai-tag             tag)
 
+  (ai-lambda          lambda)
+  
   ;; Language stuff
   ;; (ai-datum           #%datum)  ;; FIXME: Insert proper ai-literal wrapper for data.
   (ai-app             #%app)
-  (ai-lambda          lambda)
   (ai-values          values)
 
   

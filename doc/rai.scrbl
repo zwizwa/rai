@@ -141,6 +141,7 @@ that of @hyperlink["http://faust.grame.fr" "Faust"].
 
 Composing functions is the same as in Scheme:
 @codeblock|{
+
 #lang s-exp rai/stream
 (define (square x)
   (* x x))
