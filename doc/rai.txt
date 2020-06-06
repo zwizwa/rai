@@ -3500,3 +3500,218 @@ until the version is bumped.
 7.7 also.
 
 I wonder what went wrong last time?
+
+7.2 from my current nix also works
+
+I guess this is no longer a problem.
+
+
+
+Entry: Next
+Date: Thu May 28 14:06:36 EDT 2020
+
+Integrate into exo.  I want to run this as a service to avoid the
+Racket startup delay, and do some interactive stuff.  Maybe some kind
+of notebook style thing.
+
+https://github.com/rmculpepper/iracket
+
+
+
+Entry: Parameterizing modules
+Date: Sat Jun  6 13:57:03 EDT 2020
+
+Currently I don't think it is possible to parameterize ai-freq
+interpretations, so we go through a compilation step using a
+namespace.
+
+(define-namespace-anchor anchor)
+
+(define (svf fun f q)
+  ;; Otherwise:  define-values: assignment disallowed; cannot re-define a constant
+  (define
+    expr
+   `(begin
+      (module test rai/stream
+        (provide ,fun)
+        (define (,fun (s1 s2) (in))
+          (let* ((f ,f)
+                 (q ,q)
+                 (s2 (+ s2 (* f s1)))
+                 (s1 (- s1 (* f (+ (* q s1) s2 in)))))
+            (values s1 s2
+                    s2))))
+      (require 'test)
+      ,fun))
+  (pretty-write expr)
+  (eval
+   expr
+   (namespace-anchor->namespace anchor)))
+
+
+
+This seems to be a very clumsy way to do it.  The function symbol
+cannot be reused.
+
+Preliminary conclusion is that it might be best to not spend too much
+time on this...
+
+Maybe I'm just not getting it.  There is ai-lambda.
+
+EDIT: Yeah I was not getting it!  This isn't bad at all.  Just need to
+read the code again and play with it.
+
+So it still doesn't seem to work.  Some contract violation on number
+somewhere in the syntax expansion.  Let's figure this out...
+
+(define (svf f q)
+  (ai-lambda-feedback
+   (((s1 0) (s2 0)) ;; state params + init
+    (in)            ;; inputs
+    ())             ;; time parameters, not used
+   (let* ((s2 (+ s2 (* f s1)))
+          (s1 (- s1 (* f (+ (* q s1) s2 in)))))
+     (values s1 s2
+             s2))))
+
+
+
+EDIT: Getting really confused now... time for a break.
+
+Why are these two different?
+
+(module test rai/stream
+  (provide svf1)
+  (define (svf1 (s1 s2) (in))
+    (let* ((f 0.1)
+           (q 0.3)
+           (s2 (+ s2 (* f s1)))
+           (s1 (- s1 (* f (+ (* q s1) s2 in)))))
+      (values s1 s2
+              s2))))
+(require 'test)
+
+(define svf2
+  (ai-lambda-feedback
+   (((s1 0) (s2 0)) ;; state params + init
+    (in)            ;; inputs
+    ())             ;; time parameters, not used
+   (let* ((f 0.1)
+          (q 0.1)
+          (s2 (+ s2 (* f s1)))
+          (s1 (- s1 (* f (+ (* q s1) s2 in)))))
+     (values s1 s2
+             s2))))
+
+
+The behave differently with test function:
+
+> (test svf1)
+(amplitude 1)
+(amplitude 1)
+#<procedure:.../rai/ai-freq.rkt:375:4>
+> (test svf2)
+(amplitude 1)
+(amplitude 1)
+; *: contract violation
+;   expected: number?
+;   given: (ai-z 0 #<procedure:.../rai/ai-freq.rkt:44:13>)
+;   argument position: 2nd
+; [,bt for context]
+> 
+
+
+> (require "test.rkt")
+(ai-lambda
+ (s1 s2 in)
+ (let* ((f 0.1)
+        (q 0.3)
+        (s2 (+ s2 (* f s1)))
+        (s1 (- s1 (* f (+ (* q s1) s2 in)))))
+   (values s1 s2 s2)))
+(ai-lambda (in) (ai-app ai-feedback/n '((s1 . 0) (s2 . 0)) `(,in) '() update))
+(ai-lambda
+ (s1 s2 in)
+ (let* ((f 0.1)
+        (q 0.1)
+        (s2 (+ s2 (* f s1)))
+        (s1 (- s1 (* f (+ (* q s1) s2 in)))))
+   (values s1 s2 s2)))
+(ai-lambda (in) (ai-app ai-feedback/n '((s1 . 0) (s2 . 0)) `(,in) '() update))
+
+
+It must have something to do with symbol capture...
+
+
+EDIT: I really don't see it.
+
+
+
+(test svf1)
+(ai-semantics #<ai-impl>)
+((freq-semantics #<ai-impl>)
+ (state-names ((s1 . 0) (s2 . 0)))
+ (in-nodes (#(struct:ai-z 0 #<procedure:.../rai/ai-freq.rkt:43:13>)))
+ (time-names ())
+ (update #<ai-function (s1 s2 in)>))
+(ai-semantics #<ai-impl>)
+(ai-semantics #<ai-impl>)
+(ai-semantics #<ai-impl>)
+(ai-semantics #<ai-impl>)
+#<procedure:.../rai/ai-freq.rkt:381:4>
+> 
+
+
+
+(test svf2)
+(ai-semantics #<ai-impl>)
+((freq-semantics #<ai-impl>)
+ (state-names ((s1 . 0) (s2 . 0)))
+ (in-nodes (#(struct:ai-z 0 #<procedure:.../rai/ai-freq.rkt:43:13>)))
+ (time-names ())
+ (update #<ai-function (s1 s2 in)>))
+(ai-semantics #<ai-impl>)
+; *: contract violation
+;   expected: number?
+;   given: (ai-z 0 #<procedure:.../rai/ai-freq.rkt:43:13>)
+;   argument position: 2nd
+; [,bt for context]
+> 
+
+
+
+Entry: Again...
+Date: Sat Jun  6 17:06:16 EDT 2020
+
+This shit is hard to debug.
+So the problem is on line 120 in ai-freq.rkt
+
+           (so-test   (values-list
+                       (apply (ai-function-proc update)
+                              freq-semantics
+                              si-test)))
+
+Can I trigger this with a simpler function maybe?  Because following
+all the indirections is quite a challenge.
+
+I missed that the problem was in the multiplication:
+
+*: contract violation
+
+But I can trigger it with summation also.
+
+
+I wonder if this has something to do with the identity of structs?
+e.g. rai/xxx is not the same as "xxx.rkt"
+
+
+I see the problem.
+Symbols are taken from context, so need to be remapped manually to ai-add etc..
+
+
+Maybe this also needs a different #%app ?
+
+
+This is not the road to travel....
+
+Re-export racket-define, and parameterize that way.
