@@ -30,6 +30,7 @@
          "type.rkt"
          (for-syntax
           racket/base
+          racket/pretty
           "tools.rkt"))
 
 (provide (all-defined-out))
@@ -77,12 +78,13 @@
 ;; `ai-function' struct and adds an extra argument to the
 ;; representation function.  This arguments hold the language
 ;; semantics (a collection of primitive functions) provided by the
-;; top-level evaluator.  Note that argument evaluation is lazy.
+;; top-level expander.  Note that argument evaluation is lazy.
 (define-syntax-rule (ai-lambda
                      (arg ...)
                      expr)
   (make-ai-function
    (lambda (p arg ...)
+     ;;(pretty-write `(ai-semantics ,p))
      (syntax-parameterize
       ((ai-semantics (lambda _ #'p)))
       expr))
@@ -328,7 +330,7 @@
 
 (define-syntax (ai-define stx)
   
-  (define (s0 states)
+  (define (expand-s0 states)
     (for/list ((state (syntax->list states)))
       (syntax-case state ()
         ((s s0) #'(s s0))
@@ -340,14 +342,14 @@
     ((_ (name (s ...) (i ...) (t ...) . hack) update)
      #`(define name
          (ai-lambda-feedback
-          (#,(s0 #'(s ...)) (i ...) (t ...))
+          (#,(expand-s0 #'(s ...)) (i ...) (t ...))
           update)))
 
     ;; Simple time-invariant feedback form.
     ((_ (name (s ...) (i ...)) form)
      #`(define name
          (ai-lambda-feedback
-          (#,(s0 #'(s ...)) (i ...) ())
+          (#,(expand-s0 #'(s ...)) (i ...) ())
           form)))
 
     ;; Pure stream function.

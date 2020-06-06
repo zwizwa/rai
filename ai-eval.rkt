@@ -1,12 +1,20 @@
 #lang racket/base
 (require "tools.rkt"
          "prim.rkt"
-         "stream-syntax.rkt")
+         "stream-syntax.rkt"
+         racket/pretty
+         )
 (provide ai-eval ai-eval-semantics)
 
-(define (prim op)
+(define (prim_ op_name op)
   (lambda (sem . args)
+    ;;(pretty-write `(,op_name . ,args))
+    ;;(flush-output)
     (apply op args)))
+
+(define-syntax-rule (prim p)
+  (prim_ 'p p))
+
 (define ai-eval-semantics
   (make-ai #:default (lambda (sym op)
                        (lambda _

@@ -4,12 +4,24 @@
          "ai-eval.rkt"
          "ai-autodiff.rkt"
          "matrix-lib.rkt"
-         "stream-syntax.rkt")
+         "stream-syntax.rkt"
+         racket/pretty
+         )
 (provide ai-freq      ;; prog -> (inputs -> (z -> outputs))
          ai-spectrum  ;; prog, inputs -> (f -> complex_mag)
          (struct-out ai-z)
          ai-ztx
          )
+
+(define-syntax-rule (dbg var)
+  (begin
+    (pretty-write `(var ,var))
+    (flush-output)))
+
+(define-syntax-rule (dbg-op2 op2)
+  (lambda (a b)
+    (dbg (list op2 a b))
+    (op2 a b)))
 
 ;; Small-signal frequency domain analysis.
 
@@ -87,7 +99,6 @@
                         time-names
                         update
                         )
-      
       ;; Time-variant stuff is not supported.
       (unless (zero? (length time-names))
         (error 'ai-freq:feedback/n:time-names
@@ -352,6 +363,7 @@
 ;; will reduce a proc to a concrete z->amp function based on
 ;; ai-eval-semantics, using only a single input.
 
+
       
 (define (ai-ztx proc [in-sigs
                       (map (lambda _ (ai-freq-make-signal))
@@ -359,7 +371,8 @@
   (let* ((freq (ai-freq proc))
          (proc (ai-function-proc freq))
          (out-sigs (values-list (apply proc ai-eval-semantics in-sigs)))
-         (z->amps (map ai-z-signal out-sigs)))
+         (z->amps (map ai-z-signal out-sigs))
+         )
     ;; (stderr (printf "ai-ztx: offsets: ~a\n" (map ai-z-offset out-sigs)))
     (apply values z->amps)))
 

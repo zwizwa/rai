@@ -32,6 +32,14 @@
  (all-from-out "stream-meta.rkt")
  (rename-out
 
+  ;; These are useful for e.g. defining parameterized processors.  It
+  ;; is a little clumsy to have to redefine these, but oth the
+  ;; language is very much not scheme, so maybe just be explicit about
+  ;; it?
+  
+  (define             define*)
+  (lambda             lambda*)
+  
   (ai-define          define)
   (ai-tag             tag)
 
