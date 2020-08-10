@@ -3715,3 +3715,19 @@ Maybe this also needs a different #%app ?
 This is not the road to travel....
 
 Re-export racket-define, and parameterize that way.
+
+
+
+Entry: Hooked up to exo
+Date: Mon Jun  8 02:07:35 EDT 2020
+
+Together with basic web interface and bode diagram display.
+So what next?
+
+
+Entry: next
+Date: Mon Jun 22 23:51:12 EDT 2020
+
+- summarize johannes' remarks
+- fix the float const bug
+- support high word fixed point multiply
