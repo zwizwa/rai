@@ -72,14 +72,18 @@ LDFLAGS_DLL := -luser32 -lgdi32 -lwsock32
 	$(RACKET) $< >$@
 	cat $@
 
+# Note, these used to be %.jack, %.pulse, but are now changing to
+# exo's more verbose composite extension naming scheme to facilitate
+# multi-target builds.
+
 # apt-get install libjack-jackd2-dev
 # Jack wrapper, standalone ELF
-%.jack: %.g.h $(RAI_SRC)/prim.h $(RAI_SRC)/main_jack.c $(RAI_SRC)/proc.h $(LIBPROC_O) $(RKT)
+%.jack.host.elf: %.g.h $(RAI_SRC)/prim.h $(RAI_SRC)/main_jack.c $(RAI_SRC)/proc.h $(LIBPROC_O) $(RKT)
 	gcc -DPROC_FILE=\"$<\" -DCLIENT_NAME=\"$*\" $(CFLAGS) $(RAI_SRC)/main_jack.c $(LIBPROC_O) $(LDFLAGS) `pkg-config jack --cflags --libs` -o $@
 
 # apt-get install libpulse-dev
 # Pulseaudio wrapper, standalone ELF
-%.pulse: %.g.h $(RAI_SRC)/prim.h $(RAI_SRC)/main_pulse.c $(RAI_SRC)/proc.h $(LIBPROC_O) $(RKT)
+%.pulse.host.elf: %.g.h $(RAI_SRC)/prim.h $(RAI_SRC)/main_pulse.c $(RAI_SRC)/proc.h $(LIBPROC_O) $(RKT)
 	gcc -DPROC_FILE=\"$<\" -DCLIENT_NAME=\"$*\" $(CFLAGS) $(RAI_SRC)/main_pulse.c $(LIBPROC_O) $(LDFLAGS) `pkg-config libpulse-simple --cflags --libs` -lpthread -o $@
 
 
