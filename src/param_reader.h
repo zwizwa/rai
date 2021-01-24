@@ -5,6 +5,9 @@
    NEEDS proc_for_param from .g.h
 */
 
+#include <stdio.h>
+#include <math.h>
+
 
 static char readline_buf[4096];
 static inline void readline(void) {

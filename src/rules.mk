@@ -50,7 +50,7 @@ RAI_BIN := $(RAI)/bin
 
 LIBPROC_O := proc.o proc_sp.o
 
-CFLAGS_OPTI  := -ffast-math -O3
+CFLAGS_OPTI  := -ffast-math -O3 #-fdiagnostics-color=never
 CFLAGS_BASE  := -g -Wall -Wno-unused-variable -I. -I$(RAI_SRC) -I../copy
 CFLAGS_DEBUG := -fPIC -std=gnu99 
 CFLAGS_PD    := -I/usr/local/pd/src   # FIXME: g_canvas.h is usually not exported?

@@ -169,7 +169,6 @@ void create_ports(jack_nframes_t sr) {
     LOG("samplerate = %d\n", sr);
     param.samplerate = sr;
 #endif
-
 #if defined(proc_param_timestep) && 0 == proc_param_timestep
     param.timestep = 1 / (float)sr;
     LOG("timestep = %f\n", param.timestep);
@@ -293,7 +292,11 @@ void init_processor() {
 
 }
 
-
+#ifndef PARAM_READER_LOOP
+#define PARAM_READER_LOOP param_reader_loop
+#else
+void PARAM_READER_LOOP(param_set1_t param_set1, param_set2_t param_set2);
+#endif
 
 int
 main (int argc, char *argv[])
@@ -311,8 +314,8 @@ main (int argc, char *argv[])
         sleep(sleep_count);
     }
     else {
-        LOG("Starting param_reader on stdin.\n");
-        param_reader_loop(&param_set1, &param_set2);
+        LOG("Starting param reader on stdin.\n");
+        PARAM_READER_LOOP(&param_set1, &param_set2);
     }
 
 
