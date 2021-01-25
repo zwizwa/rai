@@ -25,10 +25,10 @@
 
 struct param_meta {
     const char *name;
-    void *ptr;
+    float32_t *slot;
 };
 #define PARAM_META(n, t, k, s, ...) \
-    {#n,(void*)&param.n},
+    {#n,&param.n},
 const struct param_meta param_meta[] = {
 proc_for_param(PARAM_META)
 };
@@ -89,7 +89,15 @@ int map_param_op(struct tag_u32 *req) {
     uint32_t cmd_nb = req->args[-1];
 
     if (cmd_nb >= ARRAY_SIZE(param_meta)) return -1;
-    uint32_t args[] = {123}; // dummy
+    if (req->nb_bytes != 4) return -1;
+
+    union { uint32_t i; float32_t f; } w = {
+        .i = read_be_32(req->bytes, 4)
+    };
+    *param_meta[cmd_nb].slot = w.f;
+    LOG("map_param_op %d <- %f\n", cmd_nb, w.f);
+
+    uint32_t args[] = {0}; // ok
     const struct tag_u32 s = {
         .args = args, .nb_args = ARRAY_SIZE(args)
     };
