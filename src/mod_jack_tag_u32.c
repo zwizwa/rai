@@ -40,45 +40,18 @@ proc_for_param(PARAM_META)
 
 /* UC_TOOLS */
 
-#define USE_PACKET_BRIDGE 0
-
-#if USE_PACKET_BRIDGE
-
-#include "packet_bridge.h"
-struct port *port;
-#define SEND_TAG_U32_BUF_WRITE(...) port->write(port, __VA_ARGS__)
-
-#else
-
-#include "assert_write.h"
-#include "assert_read.h"
-#include "byteswap.h"
-void write_packet(const uint8_t *buf, uint32_t buf_size) {
-    uint8_t hdr[4] = {U32_BE(buf_size)};
-    assert_write(1, hdr, 4);
-    assert_write(1, buf, buf_size);
-}
-#define SEND_TAG_U32_BUF_WRITE(...) write_packet( __VA_ARGS__)
-static inline uint32_t read_uint(uint32_t nb) {
-    uint8_t buf[nb];
-    assert_read(0, buf, nb);
-    return read_be(buf, nb);
-}
-#define READ_VAR(type,var) \
-        type var = read_uint(sizeof(var))
-
-#endif
-
 #include "tag_u32.h"
+int handle_tag_u32(struct tag_u32*);
+
+// Pick one of two implementations.
+//#include "mod_jack_tag_u32_packet_bridge.c"
+#include "mod_jack_tag_u32_stream.c"
+
 #include <string.h>
 #include <stdarg.h>
 
-
-
-
 #include "mod_send_tag_u32_pbuf.c"
 
-int handle_tag_u32(struct tag_u32*);
 
 /* FIXME: This needs to be replaced!
 
@@ -88,74 +61,6 @@ int handle_tag_u32(struct tag_u32*);
 */
 
 
-
-/* Once jack is set up, the main thread handles the communication. */
-void reader_loop(param_set1_t param_set1, param_set2_t param_set2) {
-#if USE_PACKET_BRIDGE
-    /* Framing protocol is hardcoded to {packet,4} */
-    const char *spec = "-:4";
-    ASSERT(port = port_open(spec));
-    for(;;) {
-        uint8_t buf[1024*64];
-        int timeout_ms = 100;
-        ssize_t rv = packet_next(port, timeout_ms, buf, sizeof(buf));
-        if (!rv) {
-            /* This is a place to hook a polling operation. */
-        }
-        else {
-
-            //LOG("packet: "); for(uint32_t i=0; i<rv; i++) { LOG(" %02x", buf[i]); } LOG("\n");
-
-
-            /* Process TAG_U32 protocol. */
-            if ((rv >=4 ) && (TAG_U32 == read_be(buf, 2))) {
-                tag_u32_dispatch(
-                    handle_tag_u32,
-                    send_reply_tag_u32,
-                    NULL, buf, rv);
-            }
-            /* Ignore evertying else. */
-            else {
-                ERROR("bad protocol\n");
-            }
-        }
-    }
-#else
-    /* Streaming parser. */
-    for(;;) {
-        READ_VAR(uint32_t,len);
-        READ_VAR(uint16_t,tag); ASSERT(TAG_U32 == tag);
-        READ_VAR(uint8_t,nb_from);
-        READ_VAR(uint8_t,nb_args);
-        uint32_t nb_tags = nb_from + nb_args;
-        uint32_t nb_bytes = len - 4 - 4 * nb_tags;
-        //LOG("%d %d %d %d %d:", len, tag, nb_from, nb_args, nb_bytes);
-        uint32_t tags[nb_tags];
-        for (uint32_t i=0; i<nb_tags; i++) {
-            tags[i] = read_uint(4);
-            //LOG(" %d", tags[i]);
-        }
-        //LOG("\n");
-
-        struct tag_u32 s = {
-            .reply = send_reply_tag_u32,
-            .from = tags,         .nb_from = nb_from,
-            .args = tags+nb_from, .nb_args = nb_args,
-            .nb_bytes = nb_bytes
-        };
-        // FIXME: how to decide?
-        if (1) {
-            uint8_t buf[nb_bytes + 1];
-            s.bytes = buf;
-            assert_read(0,buf,nb_bytes);
-            buf[nb_bytes] = 0;
-            //LOG("buf = %s\n", buf);
-            handle_tag_u32(&s);
-        }
-    }
-
-#endif
-}
 
 /* Some command IDs (indices) are hard coded.  This avoids having to
    resolve them every time.  It seems ok to do this for the indices
