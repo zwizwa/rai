@@ -50,7 +50,7 @@ int handle_tag_u32(struct tag_u32*);
 #include <string.h>
 #include <stdarg.h>
 
-#include "mod_send_tag_u32_pbuf.c"
+#include "mod_send_tag_u32.c"
 
 
 /* FIXME: This needs to be replaced!
@@ -66,8 +66,10 @@ int handle_tag_u32(struct tag_u32*);
    resolve them every time.  It seems ok to do this for the indices
    that are part of the core API. */
 #define ID_PARAM 0
+#define ID_TYPE  1
 #define ID_SET 0
 #define ID_GET 1
+#define ID_META 2
 
 int param_set(struct tag_u32 *req) {
     TAG_U32_UNPACK(req, -2, m, cmd_nb, op) {
@@ -113,21 +115,30 @@ int param_get(struct tag_u32 *req) {
      binary payload.
 */
 
-int map_param_ops(struct tag_u32 *req) {
-    const struct tag_u32_entry map[] = {
-        [ID_SET] = {"set", "f32", 0, param_set},
-        [ID_GET] = {"get", "f32", 0, param_get},
-    };
-    return HANDLE_TAG_U32_MAP(req, map);
-}
+/* The name of the map refers to the handler function. */
+#define DEF_MAP DEF_TAG_U32_CONST_MAP_HANDLE
+
+DEF_MAP(
+    map_param_meta,
+    {"type", "cmd"},
+    {"min",  "cmd"},
+    {"max",  "cmd"},
+    )
+
+DEF_MAP(
+    map_param_ops,
+    [ID_SET]  = {"set",  "cmd", param_set, 1},
+    [ID_GET]  = {"get",  "cmd", param_get},
+    [ID_META] = {"meta", "map", map_param_meta}
+    )
 
 int map_param_entry(struct tag_u32 *req, void *no_ctx,
-                  struct tag_u32_entry *entry) {
+                    struct tag_u32_entry *entry) {
     TAG_U32_UNPACK(req, 0, m, cmd_nb) {
         if (m->cmd_nb >= ARRAY_SIZE(param_meta)) return -1;
         const struct tag_u32_entry e = {
             .name = param_meta[m->cmd_nb].name,
-            .type = "map",
+            .type = "param",
         };
         *entry = e;
         return 0;
@@ -138,17 +149,33 @@ int map_param(struct tag_u32 *req) {
     return handle_tag_u32_map_dynamic(req, map_param_ops, map_param_entry, NULL);
 }
 
-/* root map */
-int map_root(struct tag_u32 *req) {
-    const struct tag_u32_entry map[] = {
-        [ID_PARAM] = {"param", "map", 0, map_param},
-    };
-    return HANDLE_TAG_U32_MAP(req, map);
-}
+/* (1) The existence of this node implies that there is a type called
+ *     "param" that is a map type, i.e. it supports the map
+ *     control API to expose substructure.
+ *
+ * (2) The type of the "param" node itself is "interface".  At this
+ *     point, such a node type does not require an API to be exposed
+ *     below this node. */
+DEF_MAP(
+    map_type,
+    {"param" /*(1)*/, "interface"/*(2)*/ },
+    )
+
+DEF_MAP(
+    map_root,
+    [ID_PARAM] = {"param", "map", map_param},
+    [ID_TYPE]  = {"type",  "map", map_type},
+    )
 
 /* Protocol handler entry point. */
 int handle_tag_u32(struct tag_u32 *req) {
-    return map_root(req);
+    int rv = map_root(req);
+    if (rv) {
+        /* Always send a reply when there is a from address. */
+        LOG("map_root() returned %d\n", rv);
+        send_reply_tag_u32_status_cstring(req, 1, "bad_ref");
+    }
+    return 0;
 }
 
 #endif
