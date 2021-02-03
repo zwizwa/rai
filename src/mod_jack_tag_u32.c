@@ -127,7 +127,7 @@ DEF_MAP(
 
 DEF_MAP(
     map_param_ops,
-    [ID_SET]  = {"set",  "cmd", param_set, 1},
+    [ID_SET]  = {"set",  "cmd", param_set},
     [ID_GET]  = {"get",  "cmd", param_get},
     [ID_META] = {"meta", "map", map_param_meta}
     )
