@@ -129,7 +129,7 @@ DEF_MAP(
     map_param_ops,
     [ID_SET]  = {"set",  "cmd", param_set},
     [ID_GET]  = {"get",  "cmd", param_get},
-    [ID_META] = {"meta", "map", map_param_meta}
+    [ID_META] = {"meta", "param_meta", map_param_meta},
     )
 
 int map_param_entry(struct tag_u32 *req, void *no_ctx,
@@ -149,16 +149,16 @@ int map_param(struct tag_u32 *req) {
     return handle_tag_u32_map_dynamic(req, map_param_ops, map_param_entry, NULL);
 }
 
-/* (1) The existence of this node implies that there is a type called
- *     "param" that is a map type, i.e. it supports the map
- *     control API to expose substructure.
+/* (1) The existence of this node implies that nodes can use the type
+ *     "param", which indicates that the node has map substructure.
  *
- * (2) The type of the "param" node itself is "interface".  At this
+ * (2) The type of the "param" node itself is "sub".  At this
  *     point, such a node type does not require an API to be exposed
  *     below this node. */
 DEF_MAP(
     map_type,
-    {"param" /*(1)*/, "interface"/*(2)*/ },
+    {"param" /*(1)*/, "sub"/*(2)*/ },
+    {"param_meta",    "sub"},
     )
 
 DEF_MAP(
