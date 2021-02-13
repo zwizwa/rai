@@ -149,16 +149,25 @@ int map_param(struct tag_u32 *req) {
     return handle_tag_u32_map_dynamic(req, map_param_ops, map_param_entry, NULL);
 }
 
-/* (1) The existence of this node implies that nodes can use the type
- *     "param", which indicates that the node has map substructure.
- *
- * (2) The type of the "param" node itself is "sub".  At this
- *     point, such a node type does not require an API to be exposed
- *     below this node. */
+
+/* This map describes types: every name listed in this map can be used
+   in the type field of another node.
+
+   Currenlty only one type of type (kind?) is supported: "sub".
+
+   When "param" or "param_meta" are used as types in other nodes, it
+   means that they behave as "map" nodes, but guarantee that the
+   substructure is the same if the type name is the same.
+
+   This is used by the host side indexing mechanism to perform common
+   subexpression elimination on the tree structure, i.e. allow some of
+   the "class structure" to be recovered by encoding the tree as a
+   graph. */
+
 DEF_MAP(
     map_type,
-    {"param" /*(1)*/, "sub"/*(2)*/ },
-    {"param_meta",    "sub"},
+    {"param",      "sub"},
+    {"param_meta", "sub"},
     )
 
 DEF_MAP(
