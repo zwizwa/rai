@@ -25,7 +25,6 @@
 
 #include <strings.h>
 #pragma GCC diagnostic ignored "-Wunused-variable"
-#define PARAM_READER_LOOP reader_loop
 #include "../src/main_jack.c"
 
 struct param_meta {
@@ -44,8 +43,8 @@ proc_for_param(PARAM_META)
 int handle_tag_u32(struct tag_u32*);
 
 // Pick one of two implementations.
-//#include "mod_jack_tag_u32_packet_bridge.c"
-#include "mod_jack_tag_u32_stream.c"
+//#include "mod_tag_u32_packet_bridge.c"
+#include "mod_tag_u32_stream.c"
 
 #include <string.h>
 #include <stdarg.h>

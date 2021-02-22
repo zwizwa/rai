@@ -190,7 +190,7 @@ void create_ports(jack_nframes_t sr) {
 
 
 
-static void param_set2(const char *var, float val1, float val2) {
+void param_set2(const char *var, float val1, float val2) {
     if (voice.nb) {
         if (!strcmp("note", var)) {
             float freq = val1;
@@ -292,15 +292,9 @@ void init_processor() {
 
 }
 
-#ifndef PARAM_READER_LOOP
-#define PARAM_READER_LOOP param_reader_loop
-#else
-void PARAM_READER_LOOP(param_set1_t param_set1, param_set2_t param_set2);
-#endif
+int tag_u32_loop();
 
-int
-main (int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     init_jack();
     init_processor();
     go();
@@ -315,7 +309,7 @@ main (int argc, char *argv[])
     }
     else {
         LOG("Starting param reader on stdin.\n");
-        PARAM_READER_LOOP(&param_set1, &param_set2);
+        tag_u32_loop();
     }
 
 
