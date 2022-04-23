@@ -3731,3 +3731,12 @@ Date: Mon Jun 22 23:51:12 EDT 2020
 - summarize johannes' remarks
 - fix the float const bug
 - support high word fixed point multiply
+
+
+
+Entry: revisit
+Date: Fri Jan  7 08:24:51 EST 2022
+
+- create semantics for iterator forms
+- intermediate buffers
+- triangle processor (causal chunk buffers)
