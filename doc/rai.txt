@@ -3740,3 +3740,37 @@ Date: Fri Jan  7 08:24:51 EST 2022
 - create semantics for iterator forms
 - intermediate buffers
 - triangle processor (causal chunk buffers)
+
+
+
+
+Entry: Re-explain
+Date: Fri May 27 07:21:08 EDT 2022
+
+EDIT: See explanation in 20141202-133516
+
+I don't understand it any more though, but this rings a bell:
+
+"This is done in order to make it simpler to construct state
+associated to causal sequence processors."
+
+The way I think about this now is that this is a "path view".  When
+you have nested structures that eventually resolve to scalar values,
+it is always possible to switch to "path view" or "coordinate view",
+which is essentially a zipper over the data structure.
+
+The important bit here is that these are the same thing, in that they
+are related by a code transformation.
+
+IIRC in RAI there is a tension beteween:
+- keeping track of private state (typically indexed by loop indices)
+- eliminating inermediates
+
+Meanwhile I did design something else that does handle state properly
+by hiding it in a monad.
+
+
+
+The "lifting" is implicit, by including a computating in a context,
+which is essentially a loop.
+
