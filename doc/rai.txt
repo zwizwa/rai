@@ -3774,3 +3774,47 @@ by hiding it in a monad.
 The "lifting" is implicit, by including a computating in a context,
 which is essentially a loop.
 
+
+
+
+Entry: The lifting
+Date: Mon Jun 20 05:18:46 PM CEST 2022
+
+Reason was to make state lifting explicit.  This isn't necessary.  Can
+just as well do it on a different level:
+
+(s,i) -> (s,o)
+
+->
+
+(C s, C i) -> (C s, C o)
+
+I think one of the things that i was focusing on was to automatically
+vectorize things without needing to annotate, but that's not really
+necessary.
+
+It's mostly for "multiple voices".
+
+E.g. control -> many voices -> mixer.
+On the outside this looks like a scalar and that's the whole idea.
+
+There are probably ways around this just keeping explicit functions
+and combinators.
+
+Instead of
+
+(lambda (f)
+  (mix i
+    (vco (+ f (* x i)))))
+
+It would be something like
+
+mix $ \i -> vco (f + (x * i))
+
+Then do this not just for scalars, but also for threaded state as
+mentioned above.
+
+The 'mix' becomes a higher order function instead of a special form.
+
+So there is no difference really between RAI and Seq.  Just different
+combinators.
