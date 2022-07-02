@@ -3818,3 +3818,102 @@ The 'mix' becomes a higher order function instead of a special form.
 
 So there is no difference really between RAI and Seq.  Just different
 combinators.
+
+Basically, all the multiplicity is on the inside, but is still visible
+in the state signature.
+
+((s,i) -> (s,o)) -> ((C s, i) -> (C s, o))
+
+The idea was then that s is hidden.
+
+In Seq it is a monad.  The state hiding is implemented in closeMem,
+but the ability to do so comes from:
+
+  update  :: r S -> r S -> m ()  -- Drive a register input
+
+In Seq this relias on variable introduction as well:
+
+  signal  :: SType -> m (r S)    -- Undriven signal
+
+The idea is to create a state variable, apply a processor, collect the
+state variable, and then bide state input and output, hiding this
+inside the monad.
+
+I don't remember if it is necessary to expose this imperative
+structure.  Probably possible to hide all of this, and if an external
+interface needs an explicit output binding mechanism, to just
+implement it there.
+
+So it's probably possible to split all of this: keep the data flow
+separate, and provide just the part that introduces state.  AND do it
+using triangular state!
+
+
+
+Entry: Triangular combinator
+Date: Sat Jun 25 10:56:11 AM CEST 2022
+
+The idea here is to capture real block processing, not just
+translation invariant algorithms.
+
+This boils down to triangular combinators:
+
+iter 0: ()
+iter 1: (o_0)
+...
+tier n: (o_0 .. o_n-1)
+
+The trick here is also to not separate state and output: a state
+output is just an output: it is the feedback combinator that will
+decide which in/out combo behaves as iteration state .
+
+One important bit here is that I want to separate the "new" output
+from the history, because they are really different.  Instead of using
+indexed types, it makes more sense to just parameterize the history
+separately
+
+h -> (i -> (s, o))
+
+then the next iteration is
+
+h' -> (i -> (s, o))
+
+where h' = (s,h)
+
+the type of the update equation reflects at which instance of the
+iteration we are: the type _changes_ during iteration
+
+is that useful?
+
+or should this increment be hidden?
+
+there's a granularity of modeling that needs to be chosen
+
+what is the advantage of making this explicit?
+
+in case the sequence of h,h',... is known at compile time, e.g. fixed
+iteration length, this could be used to unroll or specialize
+
+if the loop count is parameterized at run time and needs to remain a
+loop in the implementation, then this is not really necessary
+
+
+what about this: keep the core routine parameterized, but allow
+instantiation to pick between specialized or generic representation
+
+
+what can you actually do with a history that is a read-only vector?
+iterate over it: create quadratic algorithms.
+
+( part of a life long shift in perspective that DSP really is not
+about the individual computations, it is about the iteration patterns
+and information flow between scales: correlation, inner product,
+essentially... )
+
+again, what is the point?
+- capture "incremental context" algorithms (triangle matrices)
+- keep focusing on folds / reductions, e.g. inner products
+
+the idea is to separate these two: allow using reductions as part of
+update equations for computing the next step in incremental algorithms
+
