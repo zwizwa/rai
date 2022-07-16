@@ -3917,3 +3917,25 @@ again, what is the point?
 the idea is to separate these two: allow using reductions as part of
 update equations for computing the next step in incremental algorithms
 
+
+Entry: a new dsl
+Date: Sun Jul  3 05:13:18 PM CEST 2022
+
+1. the dataflow part (all operations) should be parameterizable. also
+thinking about running on different stubstrates etc...
+
+2. the dataflow part should support an arbitrary number of types
+
+3. the interest is mostly in combinators and state hiding etc..
+
+
+
+Entry: state machines
+Date: Sun Jul  3 09:56:54 PM CEST 2022
+
+How to "reverse" ?
+E.g. drums: preroll.
+It's really just the inverse (unstable) system.
+
+It's time to do Haskell again.
+
