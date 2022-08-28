@@ -82,7 +82,7 @@ echo
 
 echo "installing deps"
 
-( ./with-env.sh $RACO pkg install --deps search-auto rsound )
+# ( ./with-env.sh $RACO pkg install --deps search-auto rsound )
 ( cd ${PARENT_ABS} ; ./${PRJ_DIR}/with-env.sh  $RACO pkg install --link rai )
 
 
