@@ -2,7 +2,8 @@
 (require rai/compalg-lib
          rai/stream-lib
          rai/synth-lib
-         rai/test/test-lang)  ;; FIXME: remove after bootstrapping
+         ;; rai/test/test-lang  ;; FIXME: remove after bootstrapping
+         )
 
 ;; This file is an example of a computer algebra worksheet.  This is
 ;; essentially a target language module (see #lang above) with some

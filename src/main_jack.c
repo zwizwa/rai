@@ -120,10 +120,12 @@ void create_input(const char *name, void* base, int kind, int size) {
     static int p;
     if (p >= proc_size_param) ERROR("proc_size_param\n");
     LOG("\t%d: %s %d %d\n", p, name, kind, size);
-    if (NULL == (input_port[p] =
-                 jack_port_register(client, name, JACK_DEFAULT_AUDIO_TYPE,
-                                    JackPortIsInput, 0))) {
-        ERROR("no more JACK ports available\n");
+    if (p < proc_size_in) {
+        if (NULL == (input_port[p] =
+                     jack_port_register(client, name, JACK_DEFAULT_AUDIO_TYPE,
+                                        JackPortIsInput, 0))) {
+            ERROR("no more JACK ports available\n");
+        }
     }
     p++;
 }
