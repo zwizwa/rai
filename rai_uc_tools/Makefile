@@ -1,0 +1,28 @@
+# This uses the uc_tools build script (uc_tools/linux/build.sh)
+
+# The build rules are generated from the erl_tools redo tool
+# dependency graph.  See also erl_ducktape/src/rai.erl for glue
+# between Erlang code and RAI.
+
+# Note that uc_tools build system does not support a separate build
+# tree.  This was done intentionally as part of uc_tools design to
+# simplify building multiple architectures, but does require symlink
+# or copy into this build tree.  Typically uc_tools is only used for
+# *.h and mod_*.c files and no *.o files need to be produced in the
+# uc_tools tree, in which case the link can point to a read-only
+# directory such as the nix store.
+
+
+.PHONY: all clean
+all: doodle.jack.host.elf
+	ls -l doodle.jack.host.elf
+
+-include rules.mk
+
+
+clean:
+	rm -f *.d *.map *.o *.build *.a *.elf ../test/*.g.h
+
+mrproper: clean
+	rm -f *~
+
