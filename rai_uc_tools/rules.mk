@@ -20,8 +20,12 @@
 	../test/doodle.rkt \
 	../bin/stream2c.sh \
 
-	export GH=/i/exo/rai/test/doodle.g.h ; export RACKET=/i/exo/rai/with-env.sh\ racket ; export RKT=/i/exo/rai/test/doodle.rkt ; export STREAM2C=rai/bin/stream2c.sh ; $$STREAM2C $$RKT $$GH 2>&1  # FIXME: change rule to use bash_with_vars
-
+	@echo ../test/doodle.g.h ; if [ -f env.sh ] ; then . ./env.sh ; fi ; \
+	export GH=../test/doodle.g.h ; \
+	export RACKET=../racket.sh ; \
+	export RKT=../test/doodle.rkt ; \
+	export STREAM2C=../bin/stream2c.sh ; \
+	$$STREAM2C $$RKT $$GH 2>&1
 
 ./jack.host.ld: \
 	./jack.host.ld.sh \

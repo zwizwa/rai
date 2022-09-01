@@ -1,5 +1,5 @@
 #!/bin/bash
 # -*- sh-mode -*-
-CMD=$(basename $0)
+CMD=$(basename $0 .sh)
 exec $(dirname $0)/with-env.sh $CMD "$@"
 
